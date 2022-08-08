@@ -1,7 +1,7 @@
 #8/8/2022
 #server
 
-import socum
+import socket
 from threading import Thread
 
 #UserCount = int(input("Enter maximum number of users"))
@@ -10,7 +10,7 @@ UserOnline = 0
 
 HostName = socket.gethostname()
 
-IP = '69.69.69.69'
+IP = '192.168.1.138'
 Port = 5050
 
 s = socket.socket()
