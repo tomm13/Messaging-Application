@@ -1,6 +1,6 @@
 ##8/8/2022
-##attempts at always updating chat history in threads
-##v8
+##general optimisation 
+##v9
 
 import socket
 import time
@@ -26,7 +26,6 @@ def SendToServer():
         
         MessageInput.clear()
 
-
 def Update():
     try:
         Message = s.recv(1024).decode()
@@ -40,6 +39,7 @@ def AlwaysUpdate():
         Update()
 
 def Connect():
+    global Connected
     try:
         global Username
 
@@ -51,32 +51,30 @@ def Connect():
             Status.text_color = "yellow"
 
         else:
-            #Host = HostInput.value
-            #Port = int(PortInput.value, base=10)
+            try:
+                #Host = HostInput.value
+                #Port = int(PortInput.value, base=10)
 
-            Host = '192.168.1.138'
-            Port = 5050
+                Host = '192.168.1.138'
+                Port = 5050
+                
+                s.connect((Host, Port))
+
+                Status.value = "Connected"
+                Status.text_color = "green"
+
+                Connected = True
+
+                Chat()
             
-            s.connect((Host, Port))
+            except ConnectionRefusedError:
 
-            Status.value = "Connected"
-            Status.text_color = "green"
+                Connected = False
 
-            Connected = True
+                Status.value = "Connection Full"
+                Status.text_color = "yellow"
 
-            Chat()
-            
-    except ConnectionRefusedError:
-
-        Connected = False
-
-        Status.value = "Connection Full"
-        Status.text_color = "yellow"
-
-    except Exception as e:
-
-        print(str(e))
-        
+    except:        
         Connected = False
 
         Status.value = "Connection Failed"
@@ -95,9 +93,6 @@ def Chat():
     MessageInput = TextBox(Chatroom, align = "bottom")
     
     SendButton = PushButton(Chatroom, text = "Send", command = SendToServer, align = "bottom")
-
-    UpdateButton = PushButton(Chatroom, text = "Update", command = Update, align = "bottom")
-    #UpdateButton.disable()
     
     Chatroom.show()
 
@@ -130,5 +125,4 @@ main()
 
 
         
-
 
