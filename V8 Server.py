@@ -1,26 +1,4 @@
-#8/8/2022
-#server
-
-import socket
-from threading import Thread
-
-#UserCount = int(input("Enter maximum number of users"))
-UserCount = 2
-UserOnline = 0
-
-HostName = socket.gethostname()
-
-IP = '192.168.1.138'
-Port = 5050
-
-s = socket.socket()
-s.bind((IP, Port))
-print("[Server] Server Hosted with " + str(UserCount) + " space(s)")
-
-s.listen()
-
-global Clients
-Clients = []
+balls
 
 def Broadcast(Message):
     print("[Client]", Message)
