@@ -1,7 +1,7 @@
 #8/8/2022
 #server
 
-import socket
+import socum
 from threading import Thread
 
 #UserCount = int(input("Enter maximum number of users"))
