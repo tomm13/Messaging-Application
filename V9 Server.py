@@ -1,5 +1,5 @@
-##8/8/2022
-##V9 Server
+##9/8/2022
+##V10 Server
 
 import socket
 from threading import Thread
@@ -11,7 +11,7 @@ UserOnline = 0
 HostName = socket.gethostname()
 
 IP = '192.168.1.138'
-Port = 5050
+Port = 1234
 
 s = socket.socket()
 s.bind((IP, Port))
@@ -22,8 +22,11 @@ s.listen()
 global Clients
 Clients = []
 
+global Users
+Users = []
+
 def Broadcast(Message):
-    print("[Client]", Message)
+    print("[Client] " + Message)
     for Client in Clients:
         Client.send(Message.encode())
 
@@ -37,7 +40,12 @@ for i in range(UserCount):
     global ClientSocket
     ClientSocket, Address = s.accept()
     Clients.append(ClientSocket)
-    Broadcast("New connection made")
+
+    Username = ClientSocket.recv(1024).decode()
+    Users.append(Username)
+
+    Message = Username + " has connected"
+    Broadcast(Message)
 
     UserOnline += 1
     print("[Server] " + str(UserOnline) +
