@@ -1,5 +1,5 @@
 ##9/8/2022
-##Chat history does not duplicate last sent text
+##Chat history does not work for any follwing clients connected than the first 1
 ##V12 Client Beta
 
 import socket
