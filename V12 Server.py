@@ -1,6 +1,6 @@
 ##9/8/2022
 ##Server now chooses a port systematically given 1 port is taken
-##V11 Server
+##V12 Server Beta
 
 import socket
 from threading import Thread
@@ -39,8 +39,12 @@ def Broadcast(Message):
 
 def Listen(ClientSocket):
     while True:
-        Message = ClientSocket.recv(1024).decode()
-        if Message:
+        try:
+            Message = ClientSocket.recv(1024).decode()
+            if Message:
+                Broadcast(Message)
+        except:
+            Message = "Server has shut down"
             Broadcast(Message)
 
 for i in range(UserCount):
@@ -61,6 +65,7 @@ for i in range(UserCount):
 
     ListeningThread = Thread(target = Listen, args = [ClientSocket])
     ListeningThread.start()
+
 
 
 
