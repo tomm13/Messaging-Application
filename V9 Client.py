@@ -1,5 +1,5 @@
 ##9/8/2022
-##Broadcast username as opposed to "new connection made"
+##Chat history is now savable
 ##V10 Client
 
 import socket
@@ -16,13 +16,27 @@ Host = 0
 global Port
 Port = 0
 
+global ChatHistory
+ChatHistory = []
+
 Connected = False
+
+def SaveChatHistory():
+    File = open("ChatHistory.txt", "w")
+    for Chat in ChatHistory:
+        File.write(Chat)
+        File.write("\n")
+    File.close()
+            
+    Message = Username + " has saved the chat"
+    s.send(Message.encode())
 
 def SendToServer():
     Message = MessageInput.value
     if Message:
         Message = Username + ": " + Message
         s.send(Message.encode())
+        ChatHistory.append(Message)
         
         MessageInput.clear()
 
@@ -30,6 +44,7 @@ def AlwaysUpdate():
     while True:
         Message = s.recv(1024).decode()
         History.append(Message)
+        ChatHistory.append(Message)
 
 def Connect():
     global Connected
@@ -85,6 +100,8 @@ def Chat():
     MessageInput = TextBox(Chatroom, align = "bottom")
     
     SendButton = PushButton(Chatroom, text = "Send", command = SendToServer, align = "bottom")
+
+    HistoryButton = PushButton(Chatroom, text = "Save Chat History", command = SaveChatHistory, align = "bottom")
     
     Chatroom.show()
 
