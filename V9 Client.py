@@ -1,6 +1,6 @@
 ##9/8/2022
-##Attempts at always updating chat history in threads
-##V9 Client
+##Chat history is now savable
+##V10 Client
 
 import socket
 import time
@@ -16,34 +16,42 @@ Host = 0
 global Port
 Port = 0
 
+global ChatHistory
+ChatHistory = []
+
 Connected = False
+
+def SaveChatHistory():
+    File = open("ChatHistory.txt", "w")
+    for Chat in ChatHistory:
+        File.write(Chat)
+        File.write("\n")
+    File.close()
+            
+    Message = Username + " has saved the chat"
+    s.send(Message.encode())
 
 def SendToServer():
     Message = MessageInput.value
     if Message:
         Message = Username + ": " + Message
         s.send(Message.encode())
+        ChatHistory.append(Message)
         
         MessageInput.clear()
 
-def Update():
-    try:
-        Message = s.recv(1024).decode()
-        History.append(Message)
-
-    except:
-        History.append("[Update failed / No message found]")
-
 def AlwaysUpdate():
     while True:
-        Update()
+        Message = s.recv(1024).decode()
+        History.append(Message)
+        ChatHistory.append(Message)
 
 def Connect():
     global Connected
     try:
         global Username
 
-        #Username = "tomm"
+##        Username = "tomm"
         Username = str(UsernameInput.value)
 
         if Username == "" or Username == "Username":
@@ -52,23 +60,21 @@ def Connect():
 
         else:
             try:
-                Host = HostInput.value
-                Port = int(PortInput.value, base=10)
+##                Host = HostInput.value
+##                Port = int(PortInput.value, base=10)
 
-                #Host = '192.168.1.138'
-                #Port = 5050
+                Host = '192.168.1.138'
+                Port = 1234
                 
                 s.connect((Host, Port))
 
-                Status.value = "Connected"
-                Status.text_color = "green"
-
                 Connected = True
+
+                s.send(Username.encode())
 
                 Chat()
             
             except ConnectionRefusedError:
-
                 Connected = False
 
                 Status.value = "Connection Full"
@@ -87,14 +93,19 @@ def Chat():
     
     global History
     History = TextBox(Chatroom, text = "Welcome to this chat room", height = "fill", width = 200, multiline = True, scrollbar = True, align = "top")
+    
     History.text_size = 16
 
     global MessageInput
     MessageInput = TextBox(Chatroom, align = "bottom")
     
     SendButton = PushButton(Chatroom, text = "Send", command = SendToServer, align = "bottom")
+
+    HistoryButton = PushButton(Chatroom, text = "Save Chat History", command = SaveChatHistory, align = "bottom")
     
     Chatroom.show()
+
+    ConnectWindow.hide()
 
     ListeningThread = Thread(target = AlwaysUpdate)
     ListeningThread.start()
@@ -121,6 +132,7 @@ def main():
     ConnectWindow.display()
 
 main()
+
 
 
 
