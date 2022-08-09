@@ -1,6 +1,6 @@
 ##9/8/2022
-##Chat history is now savable
-##V10 Client
+##Chat history does not duplicate last sent text
+##V11 Client
 
 import socket
 import time
@@ -36,7 +36,6 @@ def SendToServer():
     if Message:
         Message = Username + ": " + Message
         s.send(Message.encode())
-        ChatHistory.append(Message)
         
         MessageInput.clear()
 
@@ -51,8 +50,8 @@ def Connect():
     try:
         global Username
 
-##        Username = "tomm"
-        Username = str(UsernameInput.value)
+        Username = "tomm"
+##        Username = str(UsernameInput.value)
 
         if Username == "" or Username == "Username":
             Status.value = "Invalid Username"
@@ -62,6 +61,8 @@ def Connect():
             try:
 ##                Host = HostInput.value
 ##                Port = int(PortInput.value, base=10)
+                HostInput.disable()
+                PortInput.disable()
 
 ##                HostInput.disable()
 ##                PortInput.disable()
