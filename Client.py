@@ -1,7 +1,6 @@
 ##9/8/2022
-
 ##Chat history does not duplicate last sent text
-##V11 Client
+##V12 Client Beta
 
 import socket
 import time
@@ -63,13 +62,10 @@ def Connect():
         else:
             try:
 ##                Host = HostInput.value
-##                Port = int(PortInput.value, base=10)
-  
-                HostInput.disable()
-                PortInput.disable()
-
                 Host = '192.168.1.138'
-                Port = 1234
+                
+                Port = int(PortInput.value, base=10)               
+##                Port = 1234
                 
                 s.connect((Host, Port))
 
@@ -91,6 +87,15 @@ def Connect():
         Status.value = "Connection Failed"
         Status.text_color = "red"
 
+def Leave():
+    Message = Username + " has disconnected"
+    s.send(Message.encode())
+
+    Settings.hide()
+    Chatroom.hide()
+    ConnectWindow.hide()
+    
+    s.close()
 def OpenSettings():
     global Settings
     Settings = Window(Chatroom, height = 300, width = 300, title = "Settings")
@@ -106,6 +111,9 @@ def OpenSettings():
 
     global SaveChat
     SaveChat = PushButton(Settings, text = "Save Chat History", command = SaveChatHistory)
+
+    global LeaveChat
+    LeaveChat = PushButton(Settings, text = "Leave Chat", command = Leave)
 
 def Chat():
     global Chatroom
@@ -141,12 +149,13 @@ def main():
     Status.text_size = 18
     Status.text_color = "red"
 
-    global PortInput, HostInput
+    global PortInput, HostInput, UsernameInput
     PortInput = TextBox(ConnectWindow, text = "Port", align = "bottom")
     HostInput = TextBox(ConnectWindow, text = "Host IP", align = "bottom")
-
-    global UsernameInput
     UsernameInput = TextBox(ConnectWindow, text = "Username", align = "bottom")
+
+    HostInput.disable()
+    UsernameInput.disable()
 
     AttemptConnect = PushButton(ConnectWindow, text = "Connect", command = Connect, align = "bottom")
     
@@ -158,4 +167,3 @@ main()
 
 
         
-
