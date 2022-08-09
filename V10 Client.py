@@ -62,6 +62,8 @@ def Connect():
             try:
 ##                Host = HostInput.value
 ##                Port = int(PortInput.value, base=10)
+                HostInput.disable()
+                PortInput.disable()
 
                 Host = '192.168.1.138'
                 Port = 1234
@@ -121,8 +123,8 @@ def main():
     Status.text_color = "red"
 
     global PortInput, HostInput
-    PortInput = TextBox(ConnectWindow, text = "Port (only be changed in code)", align = "bottom")
-    HostInput = TextBox(ConnectWindow, text = "Host IP (only be changed in code)", align = "bottom")
+    PortInput = TextBox(ConnectWindow, text = "Port", align = "bottom")
+    HostInput = TextBox(ConnectWindow, text = "Host IP", align = "bottom")
 
     global UsernameInput
     UsernameInput = TextBox(ConnectWindow, text = "Username", align = "bottom")
