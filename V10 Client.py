@@ -62,6 +62,7 @@ def Connect():
             try:
 ##                Host = HostInput.value
 ##                Port = int(PortInput.value, base=10)
+
 ##                HostInput.disable()
 ##                PortInput.disable()
 
