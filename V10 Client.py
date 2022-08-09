@@ -1,4 +1,5 @@
 ##9/8/2022
+
 ##Chat history does not duplicate last sent text
 ##V11 Client
 
@@ -47,6 +48,8 @@ def AlwaysUpdate():
 
 def Connect():
     global Connected
+    global Host
+    global Port
     try:
         global Username
 
@@ -61,11 +64,9 @@ def Connect():
             try:
 ##                Host = HostInput.value
 ##                Port = int(PortInput.value, base=10)
+  
                 HostInput.disable()
                 PortInput.disable()
-
-##                HostInput.disable()
-##                PortInput.disable()
 
                 Host = '192.168.1.138'
                 Port = 1234
@@ -90,6 +91,22 @@ def Connect():
         Status.value = "Connection Failed"
         Status.text_color = "red"
 
+def OpenSettings():
+    global Settings
+    Settings = Window(Chatroom, height = 300, width = 300, title = "Settings")
+    Settings.show()
+
+    global HostDisplay
+    HostDisplay = Text(Settings, text = str(Host))
+    HostDisplay.text_color = "white"
+    
+    global PortDisplay
+    PortDisplay = Text(Settings, text = str(Port))
+    PortDisplay.text_color = "white"
+
+    global SaveChat
+    SaveChat = PushButton(Settings, text = "Save Chat History", command = SaveChatHistory)
+
 def Chat():
     global Chatroom
     Chatroom = Window(ConnectWindow, height = 700, width = 600, title = "Chatroom")
@@ -105,7 +122,7 @@ def Chat():
     
     SendButton = PushButton(Chatroom, text = "Send", command = SendToServer, align = "bottom")
 
-    HistoryButton = PushButton(Chatroom, text = "Save Chat History", command = SaveChatHistory, align = "bottom")
+    SettingsButton = PushButton(Chatroom, text = "Settings", command = OpenSettings, align = "bottom")
     
     Chatroom.show()
 

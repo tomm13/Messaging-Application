@@ -1,4 +1,5 @@
 ##9/8/2022
+##Server now chooses a port systematically given 1 port is taken
 ##V11 Server
 
 import socket
@@ -11,11 +12,17 @@ UserOnline = 0
 HostName = socket.gethostname()
 
 IP = '192.168.1.138'
-Port = 1234
+Ports = [1234, 5023, 5050]
 
-s = socket.socket()
-s.bind((IP, Port))
-print("[Server] Server Hosted with " + str(UserCount) + " space(s)")
+for Port in Ports:
+    try:
+        s = socket.socket()
+        s.bind((IP, Port))
+        print("[Server] Server Hosted with " + str(UserCount) +
+              " space(s) on Port " + str(Port))
+        break
+    except OSError:
+        print("[Server] Port " + str(Port) + " not available")
 
 s.listen()
 
