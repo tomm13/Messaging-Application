@@ -1,6 +1,6 @@
 ##9/8/2022
-##Chat history is now savable
-##V10 Client
+##Chat history is now savable in settings
+##V11 Client
 
 import socket
 import time
@@ -36,7 +36,6 @@ def SendToServer():
     if Message:
         Message = Username + ": " + Message
         s.send(Message.encode())
-        ChatHistory.append(Message)
         
         MessageInput.clear()
 
@@ -48,11 +47,13 @@ def AlwaysUpdate():
 
 def Connect():
     global Connected
+    global Host
+    global Port
     try:
         global Username
 
-##        Username = "tomm"
-        Username = str(UsernameInput.value)
+        Username = "tomm"
+##        Username = str(UsernameInput.value)
 
         if Username == "" or Username == "Username":
             Status.value = "Invalid Username"
@@ -62,6 +63,8 @@ def Connect():
             try:
 ##                Host = HostInput.value
 ##                Port = int(PortInput.value, base=10)
+                HostInput.disable()
+                PortInput.disable()
 
                 Host = '192.168.1.138'
                 Port = 1234
@@ -86,6 +89,22 @@ def Connect():
         Status.value = "Connection Failed"
         Status.text_color = "red"
 
+def OpenSettings():
+    global Settings
+    Settings = Window(Chatroom, height = 300, width = 300, title = "Settings")
+    Settings.show()
+
+    global HostDisplay
+    HostDisplay = Text(Settings, text = str(Host))
+    HostDisplay.text_color = "white"
+    
+    global PortDisplay
+    PortDisplay = Text(Settings, text = str(Port))
+    PortDisplay.text_color = "white"
+
+    global SaveChat
+    SaveChat = PushButton(Settings, text = "Save Chat History", command = SaveChatHistory)
+
 def Chat():
     global Chatroom
     Chatroom = Window(ConnectWindow, height = 700, width = 600, title = "Chatroom")
@@ -101,7 +120,7 @@ def Chat():
     
     SendButton = PushButton(Chatroom, text = "Send", command = SendToServer, align = "bottom")
 
-    HistoryButton = PushButton(Chatroom, text = "Save Chat History", command = SaveChatHistory, align = "bottom")
+    SettingsButton = PushButton(Chatroom, text = "Settings", command = OpenSettings, align = "bottom")
     
     Chatroom.show()
 
@@ -121,8 +140,8 @@ def main():
     Status.text_color = "red"
 
     global PortInput, HostInput
-    PortInput = TextBox(ConnectWindow, text = "Port (only be changed in code)", align = "bottom")
-    HostInput = TextBox(ConnectWindow, text = "Host IP (only be changed in code)", align = "bottom")
+    PortInput = TextBox(ConnectWindow, text = "Port", align = "bottom")
+    HostInput = TextBox(ConnectWindow, text = "Host IP", align = "bottom")
 
     global UsernameInput
     UsernameInput = TextBox(ConnectWindow, text = "Username", align = "bottom")
