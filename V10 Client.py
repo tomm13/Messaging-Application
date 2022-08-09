@@ -1,5 +1,6 @@
 ##9/8/2022
-##Chat history is now savable in settings
+
+##Chat history does not duplicate last sent text
 ##V11 Client
 
 import socket
@@ -63,6 +64,7 @@ def Connect():
             try:
 ##                Host = HostInput.value
 ##                Port = int(PortInput.value, base=10)
+  
                 HostInput.disable()
                 PortInput.disable()
 
