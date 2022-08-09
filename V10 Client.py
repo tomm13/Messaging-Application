@@ -62,8 +62,9 @@ def Connect():
             try:
 ##                Host = HostInput.value
 ##                Port = int(PortInput.value, base=10)
-                HostInput.disable()
-                PortInput.disable()
+
+##                HostInput.disable()
+##                PortInput.disable()
 
                 Host = '192.168.1.138'
                 Port = 1234
