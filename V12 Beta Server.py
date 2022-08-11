@@ -1,19 +1,19 @@
-##10/8/2022
-##Make user define saving directory
-##V12 RC
+##11/8/2022
+##commands and overall improvements
+##V12 RC 2
 
 import socket
 from threading import Thread
+import time
 
 #UserCount = int(input("Enter maximum number of users"))
-UserCount = 1
+UserCount = 2
 UserOnline = 0
 
 HostName = socket.gethostname()
 
 IP = '192.168.1.138'
 Ports = [1234, 5023, 5050]
-
 Clients = []
 Users = []
 
@@ -28,14 +28,16 @@ def GeneratePort():
                   " space(s) on Port " + str(Port))
             break
         except OSError:
-            print("[Server] Port " + str(PortTest) + " not available")
+            print("[Server] Port " + str(PortTest) + " is not available")
 
 def Broadcast(Message):
+    time.sleep(0.1)
     print("[Client] " + Message)
     for Client in Clients:
         Client.send(Message.encode())
 
 def ServerBroadcast(Message):
+    time.sleep(0.1)
     Message = "[Server] " + Message
     print(Message)
     for Client in Clients:
@@ -43,6 +45,8 @@ def ServerBroadcast(Message):
 
 def Listen(ClientSocket):
     global UserOnline
+    global Clients
+    global Users
     while True:
         Message = ClientSocket.recv(1024).decode()
 
@@ -57,7 +61,6 @@ def Listen(ClientSocket):
             Command(Message)
 
 def Command(Message):
-    print("[Server] Command detected")
     if Message == "/space":
         ServerBroadcast(str(UserCount))
     elif Message == "/online":
