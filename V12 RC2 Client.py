@@ -1,8 +1,8 @@
-##11/8/2022
-##UI fixes, dark mode, etc
-##V12 RC 2
+##12/8/2022
+##UI improvements to settings menu, global chat color, rgb with hsv, full inputs, optimised for windows (2)
+##V12 RC 3
 
-import tkinter
+import random
 import socket
 import time
 from threading import Thread
@@ -12,10 +12,10 @@ s = socket.socket()
 
 Host = '192.168.1.138'
 Port = 0000
-
 Username = "tomm"
+Color = "rainbow"
 
-ColorsList = ["red", "green", "yellow", "blue", "purple"]
+ColorsList = ["red", "green", "yellow", "blue", "purple", "coral", "black", "white", "pimk", "brown", "grey", "rainbow"]
 ChatHistory = []
 
 Connected = False
@@ -24,17 +24,88 @@ SettingsOpened = False
 ConnectWindowOpened = False
 ChatroomOpened = False
 
-DarkMode = True
+DarkMode = False
+StopRainbowThread = False
         
 Location = " - "
 
+def Rainbow():
+    R = 255
+    G = 0
+    B = 0
+    Rate = 0.0025
+    while True:
+        if StopRainbowThread == False:
+            while not G == 255 and StopRainbowThread == False:
+                G += 1
+
+                RGB = (R, G, B)
+
+                History.text_color = RGB
+                time.sleep(Rate)
+
+            while not R == 0 and StopRainbowThread == False:
+                R -= 1
+
+                RGB = (R, G, B)
+
+                History.text_color = RGB
+                time.sleep(Rate)
+
+            while not B == 255 and StopRainbowThread == False:
+                B += 1
+
+                RGB = (R, G, B)
+
+                History.text_color = RGB
+                time.sleep(Rate)
+            while not G == 0 and StopRainbowThread == False:
+                G -= 1
+
+                RGB = (R, G, B)
+
+                History.text_color = RGB
+                time.sleep(Rate)
+
+            while not R == 255 and StopRainbowThread == False:
+                R += 1
+
+                RGB = (R, G, B)
+
+                History.text_color = RGB
+                time.sleep(Rate)
+
+            while not B == 0 and StopRainbowThread == False:
+                B -= 1
+
+                RGB = (R, G, B)
+
+                History.text_color = RGB
+                time.sleep(Rate)
+        else:
+            History.append("[Device] Rainbow deactivated")
+            History.text_color = Color
+            break
+
 def ChangeColor():
     global Color
+    global StopRainbowThread
     if (ColorInput.value).casefold() in ColorsList:
-        Color = ColorInput.value
-        History.text_color = Color
-        History.append("[Device] Color Changing Successful.")
-        
+        if (ColorInput.value).casefold() == "rainbow":
+            StopRainbowThread = False
+            
+            global RainbowThread
+            RainbowThread = Thread(target = Rainbow)
+            RainbowThread.start()
+            
+            global Color
+            Color = "rainbow"
+            History.append("[Device] Rainbow activated")
+            
+        else:
+            StopRainbowThread = True
+            Color = ColorInput.value
+            History.text_color = Color
     else:
         History.append("[Device] Color Changing Unsuccessful. Try another Color.")
 
@@ -42,12 +113,16 @@ def ChangeColor():
 
 def SwitchTheme():
     global DarkMode
+    global Color
     if ConnectWindowOpened == True:
         if DarkMode == True:
+            
+##Turns dark mode off
+            
             Chatroom.bg = "white"
             Chatroom.text_color = "black"
 
-##Add Buttons from Settings to prevent Darkmode changes
+##Add elements from Settings to prevent Darkmode changes
 
             SaveChat.text_color = "black"
             DarkmodeToggle.text_color = "black"
@@ -56,13 +131,23 @@ def SwitchTheme():
             DarkMode = False
             
         else:
-            Chatroom.bg = None
+            
+##Turns dark mode on
+            
+            Chatroom.bg = (40, 40, 40)
             Chatroom.text_color = "white"
 
             DarkMode = True
 
-##Add Buttons from ChatWindow to prevent Darkmode changes
+##Add elements from ChatWindow to prevent Darkmode changes
+            
+        if not Color.casefold() == "rainbow":
+            History.text_color = Color
 
+        SendButton.bg = "white"
+        LeaveChat.bg = "white"
+        SettingsButton.bg = "white"
+            
         SendButton.text_color = "black"
         LeaveChat.text_color = "black"
         SettingsButton.text_color = "black"
@@ -94,9 +179,11 @@ def SaveChatHistory():
 def SendToServer():
     Message = MessageInput.value
     if Message:
-        s.send(Message.encode())
- 
-        MessageInput.clear()
+        if Message == "/leave":
+            Leave()
+        else:
+            s.send(Message.encode())
+            MessageInput.clear()
 
 def AlwaysUpdate():
     while True:
@@ -109,10 +196,8 @@ def Connect():
     global Username
     global Color
     global Host, Port
-    
 ##    Username = str(UsernameInput.value)
 ##    Host = HostInput.value
-    
     Color = (ColorInput.value).casefold()
 
     if Color in ColorsList:
@@ -158,7 +243,7 @@ def Connect():
                    
 def Leave():
     global Conencted
-    Message = "has disconnected"
+    Message = "/leave"
     s.send(Message.encode())
 
     if SettingsOpened == True:
@@ -184,18 +269,18 @@ def OpenSettings():
     SettingsOpened = True
 
     global DetailsTitle
-    DetailsTitle = TextBox(Settings, text = "Details and File Save Location", width = "fill", align = "top")
+    DetailsTitle = TextBox(Settings, text = "Details:", width = "fill", align = "top")
     DetailsTitle.text_size = 20
     DetailsTitle.disable()
 
     global TopHeader
-    TopHeader = Box(Settings, width = "fill", height = 50, align = "top")
+    TopHeader = Box(Settings, width = "fill", height = 30, align = "top")
 
     global BottomBox
     BottomBox = Box(Settings, width = "fill", height = "fill", align = "bottom")
 
     global MiddleBox
-    MiddleBox = Box(Settings, width = "fill", height = 140, align = "bottom")
+    MiddleBox = Box(Settings, width = "fill", height = 100, align = "bottom")
 
     global LeftBox
     LeftBox = Box(Settings, width = "fill", height = "fill", align = "left")
@@ -204,21 +289,18 @@ def OpenSettings():
     RightBox = Box(Settings, width = "fill", height = "fill", align = "right")
 
     global MiddleHeader
-    MiddleHeader = Box(MiddleBox, width = "fill", height = 50)
+    MiddleHeader = Box(MiddleBox, width = "fill", height = 30)
 
     global SettingsTitle
-    SettingsTitle = TextBox(MiddleBox, text = "Configurables", width = "fill")
+    SettingsTitle = TextBox(MiddleBox, text = "Configurables:", width = "fill")
     SettingsTitle.text_size = 20
     SettingsTitle.disable()
-
-    global BottomHeader
-    BottomHeader = Box(MiddleBox, width = "fill", height = 50)
     
     global UsernameDisplay
     UsernameDisplay = TextBox(LeftBox, text = ("Username: " + Username), width = "fill")
     UsernameDisplay.text_size = 16
     UsernameDisplay.disable()
-    
+
     global HostDisplay
     HostDisplay = TextBox(LeftBox, text = ("Host IP: " + str(Host)), width = "fill")
     HostDisplay.text_size = 16
@@ -228,43 +310,57 @@ def OpenSettings():
     PortDisplay = TextBox(LeftBox, text = ("Port: " + str(Port)), width = "fill")
     PortDisplay.text_size = 16
     PortDisplay.disable()
-    
-    global SaveLocation
-    SaveLocation = TextBox(RightBox, text = ("Save Chat History in: " + Location), width = "fill")
-    SaveLocation.text_size = 16
-    SaveLocation.disable()
 
-    global ChangeLocation
-    ChangeLocation = TextBox(RightBox, text = "Change Location", width = "fill")
-    ChangeLocation.text_size = 16
-    ChangeLocation.text_color = "white"
-    
-    global SaveChat
-    SaveChat = PushButton(RightBox, text = "Save Chat History", command = SaveChatHistory)
-    SaveChat.text_color = "black"
+    global DarkmodeBox
+    DarkmodeBox = Box(BottomBox, width = "fill", height = 50, align = "top")
 
     global DarkmodeText
-    DarkmodeText = TextBox(BottomBox, text = ("Dark Mode on: " + str(DarkMode)), width = "fill")
+    DarkmodeText = TextBox(DarkmodeBox, text = ("Dark Mode on: " + str(DarkMode)), width = "fill", align = "left")
     DarkmodeText.text_size = 16
     DarkmodeText.disable()
 
     global DarkmodeToggle
-    DarkmodeToggle = PushButton(BottomBox, text = "Switch Theme", command = SwitchTheme)
+    DarkmodeToggle = PushButton(DarkmodeBox, text = "Switch Theme", command = SwitchTheme, width = "fill", align = "right")
     DarkmodeToggle.text_color = "black"
+
+    global ColorBox
+    ColorBox = Box(BottomBox, width = "fill", height = 100, align = "top")
 
     global ColorText, Color
     Color = Color[0].upper() + Color[1:].lower()
-    ColorText = TextBox(BottomBox, text = ("Chat Color: " + Color), width = "fill")
+    ColorText = TextBox(ColorBox, text = ("Chat Color: " + Color), width = "fill")
     ColorText.text_size = 16
     ColorText.disable()
 
     global ColorInput
-    ColorInput = TextBox(BottomBox, text = "Change Color", width = "fill")
+    ColorInput = TextBox(ColorBox, text = "Change Color", width = "fill", align = "left")
     ColorInput.text_size = 16
     ColorInput.text_color = "white"
 
     global ChangeColorButton
-    ChangeColorButton = PushButton(BottomBox, text = "Change Color", command = ChangeColor)
+    ChangeColorButton = PushButton(ColorBox, text = "Change Color", command = ChangeColor, width = "fill", align = "right")
+    ChangeColorButton.text_color = "black"
+
+    global SavingBox
+    SavingBox = Box(BottomBox, width = "fill", height = 100, align = "top")
+
+    global SaveLocation
+    SaveLocation = TextBox(SavingBox, text = ("Save Chat History in: " + Location), width = "fill")
+    SaveLocation.text_size = 16
+    SaveLocation.disable()
+
+    global ChangeLocation
+    ChangeLocation = TextBox(SavingBox, text = "Change Location", width = "fill", align = "left")
+    ChangeLocation.text_size = 16
+    ChangeLocation.text_color = "white"
+
+    global SaveChat
+    SaveChat = PushButton(SavingBox, text = "Save Chat History", command = SaveChatHistory, width = "fill", align = "right")
+    SaveChat.text_color = "black"
+
+##default light mode
+    SaveChat.text_color = "black"
+    DarkmodeToggle.text_color = "black"
     ChangeColorButton.text_color = "black"
 
     Settings.show()
@@ -286,7 +382,6 @@ def Chat():
     global History
     History = TextBox(Chatroom, text = "[Device] Welcome to this chat room", height = "fill", width = "fill", multiline = True, scrollbar = True, align = "top")
     History.text_size = 16
-    History.text_color = Color
     History.disable()
 
     global ButtonBox
@@ -307,6 +402,17 @@ def Chat():
     global MessageInput
     MessageInput = TextBox(ButtonBox, height = "fill", width = "fill")
     MessageInput.text_size = 24
+    
+##doesnt make this light mode 10/10
+    Chatroom.bg = "white"
+    Chatroom.text_color = "black"
+
+    if (ColorInput.value).casefold() == "rainbow":
+        global RainbowThread
+        RainbowThread = Thread(target = Rainbow)
+        RainbowThread.start()
+    else:
+        History.text_color = Color
     
     Chatroom.show()
 
@@ -349,6 +455,7 @@ def main():
 
     HostInput.disable()
     UsernameInput.disable()
+##    ColorInput.disable()
 
     ConnectWindow.display()
 
