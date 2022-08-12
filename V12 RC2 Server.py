@@ -1,13 +1,13 @@
-##11/8/2022
-##commands and overall improvements
-##V12 RC 2
+##12/8/2022
+##attempt at making server more independent
+##V12 RC 3
 
 import socket
 from threading import Thread
 import time
 
 #UserCount = int(input("Enter maximum number of users"))
-UserCount = 2
+UserCount = 1000
 UserOnline = 0
 
 HostName = socket.gethostname()
@@ -43,22 +43,36 @@ def ServerBroadcast(Message):
     for Client in Clients:
         Client.send(Message.encode())
 
-def Listen(ClientSocket):
-    global UserOnline
-    global Clients
-    global Users
-    while True:
-        Message = ClientSocket.recv(1024).decode()
+def RemoveUser(ClientSocket, Username):
+    global UserOnline, Clients, Users
+    Clients.remove(ClientSocket)
+    Users.remove(Username)
+    UserOnline -= 1
 
+    Broadcast((Username + " has disconnected"))
+
+def Listen(ClientSocket):
+    global UserOnline, Clients, Users
+    while True:
         Index = Clients.index(ClientSocket)
         Username = Users[Index]
 
-        if Message:
+        try:
+            Message = ClientSocket.recv(1024).decode()
             UnifiedMessage = Username + ": " + Message
-            Broadcast(UnifiedMessage)
 
-        if Message[0] == "/":
-            Command(Message)
+            if Message:
+                Broadcast(UnifiedMessage)
+                if Message[0] == "/":
+                    if Message == "/leave":
+                        RemoveUser(ClientSocket, Username)
+                        break
+                    else:
+                        Command(Message)
+
+        except ConnectionResetError:
+            RemoveUser(ClientSocket, Username)
+            break
 
 def Command(Message):
     if Message == "/space":
@@ -66,8 +80,15 @@ def Command(Message):
     elif Message == "/online":
         ServerBroadcast(str(UserOnline))
     elif Message == "/users":
-        for User in Users:
-            ServerBroadcast((User + "\n"))
+        if len(Users) == 1:
+            ServerBroadcast(Users[0])
+        else:
+            for User in Users:
+                if User == Users[(len(Users) - 1)]:
+                    ServerBroadcast((User))
+                    break
+                ServerBroadcast((User + ", "))
+
     else:
         ServerBroadcast("Unknown Command")
 
