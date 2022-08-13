@@ -1,6 +1,6 @@
-##12/8/2022
-##UI improvements to settings menu, global chat color, rgb with hsv, full inputs, optimised for windows (2)
-##V12 RC 3
+##13/8/2022
+##RSA with Full inputs and gui
+##V12 RC 6
 
 import random
 import socket
@@ -29,6 +29,11 @@ StopRainbowThread = False
         
 Location = " - "
 
+PrivateKey = ""
+
+def ShowPrivateKey():
+    SettingsKeyDisplay.hide_text = False
+        
 def Rainbow():
     R = 255
     G = 0
@@ -185,9 +190,24 @@ def SendToServer():
             s.send(Message.encode())
             MessageInput.clear()
 
+def RSADecrypt(Message):
+    Message = Message.split()
+    RSADecryptedMessage = []
+    
+    for Letter in Message:
+        Letter = int(Letter, base = 10)
+        Index = pow(Letter, d, N)
+        RSADecryptedLetter = chr(Index)
+        RSADecryptedMessage.append(RSADecryptedLetter)
+
+    Message = str("".join(RSADecryptedMessage))
+    return Message
+      
 def AlwaysUpdate():
     while True:
         Message = s.recv(1024).decode()
+        Message = RSADecrypt(Message)
+        
         History.append(Message)
         ChatHistory.append(Message)
 
@@ -196,51 +216,69 @@ def Connect():
     global Username
     global Color
     global Host, Port
-##    Username = str(UsernameInput.value)
-##    Host = HostInput.value
+    global d, N
+    global PrivateKey
+    
+    Username = str(UsernameInput.value)
+    Host = HostInput.value
     Color = (ColorInput.value).casefold()
+    
+    PrivateKey = str(KeyInput.value)
+    PrivateKey = PrivateKey.split(", ")
 
-    if Color in ColorsList:
-        if not Username == "" or Username == "Username":
-            try:        
-                Port = int(PortInput.value, base=10)               
-              
-                s.connect((Host, Port))
-                s.send(Username.encode())
+    try:
+        if PrivateKey[0] and PrivateKey[1]:
+            d = int(PrivateKey[0], base = 10)
+            N = int(PrivateKey[1], base = 10)
+            if Color in ColorsList:
+                if not Username == "" or Username == "Username":
+                    try:        
+                        Port = int(PortInput.value, base = 10)               
+                      
+                        s.connect((Host, Port))
+                        s.send(Username.encode())
 
-                Connected = True
+                        Connected = True
 
-                Status.value = "Connection Success"
-                Status.text_color = "green"
+                        Status.value = "Connection Success"
+                        Status.text_color = "green"
 
-                Chat()
-            
-            except ConnectionRefusedError:
-                Connected = False
+                        Chat()
+                    
+                    except ConnectionRefusedError:
+                        Connected = False
 
-                Status.value = "Connection Full"
-                Status.text_color = "yellow"
-                
-            except OSError:
-                Connected = False
-                
-                Status.value = "Restart Client"
-                Status.text_color = "red"
+                        Status.value = "Connection Full"
+                        Status.text_color = "yellow"
+                        
+                    except OSError:
+                        Connected = False
+                        
+                        Status.value = "Restart Client"
+                        Status.text_color = "red"
 
-            except BrokenPipeError:
-                Connected = False
+                    except BrokenPipeError:
+                        Connected = False
 
-                Chatroom.hide()
+                        Chatroom.hide()
 
-                Status.value = "Broken Pipe"
-                Status.text_color = "red"
+                        Status.value = "Broken Pipe"
+                        Status.text_color = "red"
+                else:
+                    Status.value = "Invalid Username"
+                    Status.text_color = "yellow"
+            else:
+                Status.value = "Invalid Key"
+                Status.text_color = "yellow"    
         else:
-            Status.value = "Invalid Username"
+            Status.value = "Invalid Colour"
             Status.text_color = "yellow"
-    else:
-        Status.value = "Invalid Color"
+    except IndexError:
+        Status.value = "Input Error"
         Status.text_color = "yellow"
-                   
+
+    PrivateKey = ", ".join(PrivateKey)
+                    
 def Leave():
     global Conencted
     Message = "/leave"
@@ -312,7 +350,7 @@ def OpenSettings():
     PortDisplay.disable()
 
     global DarkmodeBox
-    DarkmodeBox = Box(BottomBox, width = "fill", height = 50, align = "top")
+    DarkmodeBox = Box(BottomBox, width = "fill", height = 70, align = "top")
 
     global DarkmodeText
     DarkmodeText = TextBox(DarkmodeBox, text = ("Dark Mode on: " + str(DarkMode)), width = "fill", align = "left")
@@ -358,7 +396,25 @@ def OpenSettings():
     SaveChat = PushButton(SavingBox, text = "Save Chat History", command = SaveChatHistory, width = "fill", align = "right")
     SaveChat.text_color = "black"
 
-##default light mode
+    global KeyBox
+    KeyBox = Box(BottomBox, width = "fill", height = 100, align = "top")
+
+    global KeyDetails
+    KeyDetails = TextBox(KeyBox, text = "Private Key Details:", width = "fill")
+    KeyDetails.text_size = 16
+    KeyDetails.text_color = "white"
+    KeyDetails.disable()
+
+    global SettingsKeyDisplay
+    SettingsKeyDisplay = TextBox(KeyBox, text = PrivateKey, hide_text = True, width = "fill", align = "left")
+    SettingsKeyDisplay.text_size = 16
+    SettingsKeyDisplay.text_color = "white"    
+
+    global ShowKey
+    ShowKey = PushButton(KeyBox, text = "Show Private Key", command = ShowPrivateKey)
+    ShowKey.text_color = "black"
+
+
     SaveChat.text_color = "black"
     DarkmodeToggle.text_color = "black"
     ChangeColorButton.text_color = "black"
@@ -403,7 +459,7 @@ def Chat():
     MessageInput = TextBox(ButtonBox, height = "fill", width = "fill")
     MessageInput.text_size = 24
     
-##doesnt make this light mode 10/10
+
     Chatroom.bg = "white"
     Chatroom.text_color = "black"
 
@@ -422,7 +478,7 @@ def Chat():
    
 def main():    
     global ConnectWindow, ConnectWindowOpened
-    ConnectWindow = App(title = "Connect To Server", height = 230, width = 500)
+    ConnectWindow = App(title = "Connect To Server", height = 250, width = 550)
     ConnectWindow.font = "San Francisco Bold"
     ConnectWindowOpened = True
     
@@ -434,13 +490,13 @@ def main():
 
     global Status
     Status = Text(VerifyBox, text = "Not Connected")
-    Status.text_size = 28
+    Status.text_size = 30
     Status.text_color = "white"
 
     global AttemptConnect
     AttemptConnect = PushButton(VerifyBox, text = "Connect", command = Connect)
 
-    global UsernameInput, ColorInput, HostInput, PortInput
+    global UsernameInput, ColorInput, HostInput, PortInput, KeyInput
     UsernameInput = TextBox(InputBox, text = "Username", width = "fill")
     UsernameInput.text_size = 16
 
@@ -453,15 +509,9 @@ def main():
     PortInput = TextBox(InputBox, text = "Port", width = "fill")
     PortInput.text_size = 16
 
-    HostInput.disable()
-    UsernameInput.disable()
-##    ColorInput.disable()
+    KeyInput = TextBox(InputBox, text = "Private Key", width = "fill")
+    KeyInput.text_size = 16
 
     ConnectWindow.display()
 
 main()
-
-
-
-
-       
