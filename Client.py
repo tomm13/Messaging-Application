@@ -1,5 +1,5 @@
 ##13/8/2022
-##RSA with Full inputs and gui
+##RSA Fully working, Improved settings gui
 ##V12 RC 6
 
 import random
@@ -17,8 +17,6 @@ Color = "rainbow"
 
 ColorsList = ["red", "green", "yellow", "blue", "purple", "coral", "black", "white", "pimk", "brown", "grey", "rainbow"]
 ChatHistory = []
-
-Connected = False
 
 SettingsOpened = False
 ConnectWindowOpened = False
@@ -212,7 +210,6 @@ def AlwaysUpdate():
         ChatHistory.append(Message)
 
 def Connect():
-    global Connected
     global Username
     global Color
     global Host, Port
@@ -238,28 +235,20 @@ def Connect():
                         s.connect((Host, Port))
                         s.send(Username.encode())
 
-                        Connected = True
-
                         Status.value = "Connection Success"
                         Status.text_color = "green"
 
                         Chat()
                     
                     except ConnectionRefusedError:
-                        Connected = False
-
                         Status.value = "Connection Full"
                         Status.text_color = "yellow"
                         
                     except OSError:
-                        Connected = False
-                        
                         Status.value = "Restart Client"
                         Status.text_color = "red"
 
                     except BrokenPipeError:
-                        Connected = False
-
                         Chatroom.hide()
 
                         Status.value = "Broken Pipe"
@@ -295,8 +284,6 @@ def Leave():
         ListeningThread.join()
 
     s.close()
-
-    Connected = False
     
     print("Closing Client...")
     quit()
@@ -411,7 +398,7 @@ def OpenSettings():
     SettingsKeyDisplay.text_color = "white"    
 
     global ShowKey
-    ShowKey = PushButton(KeyBox, text = "Show Private Key", command = ShowPrivateKey)
+    ShowKey = PushButton(KeyBox, text = "Show Private Key", command = ShowPrivateKey, width = "fill", align = "right")
     ShowKey.text_color = "black"
 
 
