@@ -10,18 +10,20 @@ import random
 #UserCount = int(input("Enter maximum number of users"))
 UserCount = 1000
 UserOnline = 0
+SpaceRemaining = UserCount
 
-HostName = socket.gethostname()
+#HostName = socket.gethostname()
+#IP = socket.gethostbyname(HostName)
 
 IP = '192.168.1.138'
 Ports = [1234, 5023, 5050]
 Clients = []
 Users = []
 
-def GetKeys():
+def GetKey():
     global Minimum, Maximum
     Minimum = 10
-    Maximum = 100
+    Maximum = 350
     Primes = []
     PrimeCandidates = []
     for Number in range(Minimum, Maximum):
@@ -72,7 +74,7 @@ def GetKeys():
             eFactors.remove(1)
 
         if len(eFactors) == 1 and eFactors[0] not in PhiNFactors and eFactors[0] not in NFactors:
-            print("[Server] Public Key =", (e, N))
+            #print("[Server] Public Key =", (e, N))
             break
 
     for k in range(1, 2 * Maximum):
@@ -84,7 +86,7 @@ def GetKeys():
 
     print("[Private] Private Key =", (d, N))
 
-    main()
+    Connect()
 
 def RSAEncrypt(Message):
     RSAEncryptedMessage = []
@@ -133,8 +135,6 @@ def RemoveUser(ClientSocket, Username):
     Users.remove(Username)
     UserOnline -= 1
 
-    Broadcast((Username + " has disconnected"))
-
 def Listen(ClientSocket):
     global UserOnline, Clients, Users
     while True:
@@ -172,11 +172,13 @@ def Command(Message):
                     ServerBroadcast((User))
                     break
                 ServerBroadcast((User + ", "))
+    elif Message == "/spaceleft":
+        ServerBroadcast(str(SpaceRemaining))
     else:
         ServerBroadcast("Unknown Command")
 
-def main():
-    global UserOnline
+def Connect():
+    global UserOnline, SpaceRemaining
     GeneratePort()
     s.listen()
     for i in range(UserCount):
@@ -191,8 +193,15 @@ def main():
         Broadcast(Message)
 
         UserOnline += 1
+        SpaceRemaining -= 1
 
         ListeningThread = Thread(target = Listen, args = [ClientSocket])
         ListeningThread.start()
 
-GetKeys()
+GetKey()
+
+
+
+
+
+
