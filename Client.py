@@ -1,6 +1,6 @@
-##13/8/2022
-##RSA Fully working, Improved settings gui
-##V12 RC 6
+##14/8/2022
+##RSA Fully working, Improved Rainbow loops
+##V12 RC 7
 
 import random
 import socket
@@ -23,126 +23,142 @@ ConnectWindowOpened = False
 ChatroomOpened = False
 
 DarkMode = False
-StopRainbowThread = False
+StopRainbow = False
         
 Location = " - "
-
 PrivateKey = ""
 
-def ShowPrivateKey():
-    SettingsKeyDisplay.hide_text = False
-        
-def Rainbow():
+def InfiniteRainbow(Element):
     R = 255
     G = 0
     B = 0
     Rate = 0.0025
     while True:
-        if StopRainbowThread == False:
-            while not G == 255 and StopRainbowThread == False:
+        while not G == 255:
+            G += 1
+
+            RGB = (R, G, B)
+
+            Element.text_color = RGB
+            time.sleep(Rate)
+
+        while not R == 0:
+            R -= 1
+
+            RGB = (R, G, B)
+
+            Element.text_color = RGB
+            time.sleep(Rate)
+
+        while not B == 255:
+            B += 1
+
+            RGB = (R, G, B)
+
+            Element.text_color = RGB
+            time.sleep(Rate)
+        while not G == 0:
+            G -= 1
+
+            RGB = (R, G, B)
+
+            Element.text_color = RGB
+            time.sleep(Rate)
+
+        while not R == 255:
+            R += 1
+
+            RGB = (R, G, B)
+
+            Element.text_color = RGB
+            time.sleep(Rate)
+
+        while not B == 0:
+            B -= 1
+
+            RGB = (R, G, B)
+
+            Element.text_color = RGB
+            time.sleep(Rate)
+
+def Rainbow(Element):
+    R = 255
+    G = 0
+    B = 0
+    Rate = 0.0025
+    while True:
+        if StopRainbow == False:
+            while not G == 255 and StopRainbow == False:
                 G += 1
 
                 RGB = (R, G, B)
 
-                History.text_color = RGB
+                Element.text_color = RGB
                 time.sleep(Rate)
 
-            while not R == 0 and StopRainbowThread == False:
+            while not R == 0 and StopRainbow == False:
                 R -= 1
 
                 RGB = (R, G, B)
 
-                History.text_color = RGB
+                Element.text_color = RGB
                 time.sleep(Rate)
 
-            while not B == 255 and StopRainbowThread == False:
+            while not B == 255 and StopRainbow == False:
                 B += 1
 
                 RGB = (R, G, B)
 
-                History.text_color = RGB
+                Element.text_color = RGB
                 time.sleep(Rate)
-            while not G == 0 and StopRainbowThread == False:
+            while not G == 0 and StopRainbow == False:
                 G -= 1
 
                 RGB = (R, G, B)
 
-                History.text_color = RGB
+                Element.text_color = RGB
                 time.sleep(Rate)
 
-            while not R == 255 and StopRainbowThread == False:
+            while not R == 255 and StopRainbow == False:
                 R += 1
 
                 RGB = (R, G, B)
 
-                History.text_color = RGB
+                Element.text_color = RGB
                 time.sleep(Rate)
 
-            while not B == 0 and StopRainbowThread == False:
+            while not B == 0 and StopRainbow == False:
                 B -= 1
 
                 RGB = (R, G, B)
 
-                History.text_color = RGB
+                Element.text_color = RGB
                 time.sleep(Rate)
         else:
             History.append("[Device] Rainbow deactivated")
             History.text_color = Color
+                
             break
-
-def ChangeColor():
-    global Color
-    global StopRainbowThread
-    if (ColorInput.value).casefold() in ColorsList:
-        if (ColorInput.value).casefold() == "rainbow":
-            StopRainbowThread = False
-            
-            global RainbowThread
-            RainbowThread = Thread(target = Rainbow)
-            RainbowThread.start()
-            
-            global Color
-            Color = "rainbow"
-            History.append("[Device] Rainbow activated")
-            
-        else:
-            StopRainbowThread = True
-            Color = ColorInput.value
-            History.text_color = Color
-    else:
-        History.append("[Device] Color Changing Unsuccessful. Try another Color.")
-
-    Settings.hide()
 
 def SwitchTheme():
     global DarkMode
     global Color
     if ConnectWindowOpened == True:
-        if DarkMode == True:
-            
-##Turns dark mode off
-            
+        if DarkMode == True:      
             Chatroom.bg = "white"
             Chatroom.text_color = "black"
-
-##Add elements from Settings to prevent Darkmode changes
 
             SaveChat.text_color = "black"
             DarkmodeToggle.text_color = "black"
             ChangeColorButton.text_color = "black"
 
             DarkMode = False
-            
+
         else:
-            
-##Turns dark mode on
-            
             Chatroom.bg = (40, 40, 40)
             Chatroom.text_color = "white"
 
             DarkMode = True
-
-##Add elements from ChatWindow to prevent Darkmode changes
             
         if not Color.casefold() == "rainbow":
             History.text_color = Color
@@ -156,6 +172,29 @@ def SwitchTheme():
         SettingsButton.text_color = "black"
 
         Settings.hide()
+
+def ChangeColor():
+    global Color
+    global StopRainbow
+    if (SettingsColorInput.value).casefold() in ColorsList:
+        if (SettingsColorInput.value).casefold() == "rainbow":
+            StopRainbow = False
+            
+            RainbowHistoryThread = Thread(target = Rainbow, args = (History,))
+            RainbowHistoryThread.start()
+                       
+            Color = "rainbow"
+            History.append("[Device] Rainbow activated")            
+        else:
+            StopRainbow = True
+            
+            Color = SettingsColorInput.value
+            History.text_color = Color
+            History.append("[Device] Color Changing Successful.")
+    else:
+        History.append("[Device] Color Changing Unsuccessful. Try another Color.")
+
+    Settings.hide()
             
 def SaveChatHistory():
     global Location
@@ -179,14 +218,8 @@ def SaveChatHistory():
     ChangeLocation.clear()
     Settings.hide()
 
-def SendToServer():
-    Message = MessageInput.value
-    if Message:
-        if Message == "/leave":
-            Leave()
-        else:
-            s.send(Message.encode())
-            MessageInput.clear()
+def ShowPrivateKey():
+    SettingsKeyDisplay.hide_text = False
 
 def RSADecrypt(Message):
     Message = Message.split()
@@ -209,65 +242,15 @@ def AlwaysUpdate():
         History.append(Message)
         ChatHistory.append(Message)
 
-def Connect():
-    global Username
-    global Color
-    global Host, Port
-    global d, N
-    global PrivateKey
-    
-    Username = str(UsernameInput.value)
-    Host = HostInput.value
-    Color = (ColorInput.value).casefold()
-    
-    PrivateKey = str(KeyInput.value)
-    PrivateKey = PrivateKey.split(", ")
-
-    try:
-        if PrivateKey[0] and PrivateKey[1]:
-            d = int(PrivateKey[0], base = 10)
-            N = int(PrivateKey[1], base = 10)
-            if Color in ColorsList:
-                if not Username == "" or Username == "Username":
-                    try:        
-                        Port = int(PortInput.value, base = 10)               
-                      
-                        s.connect((Host, Port))
-                        s.send(Username.encode())
-
-                        Status.value = "Connection Success"
-                        Status.text_color = "green"
-
-                        Chat()
-                    
-                    except ConnectionRefusedError:
-                        Status.value = "Connection Full"
-                        Status.text_color = "yellow"
-                        
-                    except OSError:
-                        Status.value = "Restart Client"
-                        Status.text_color = "red"
-
-                    except BrokenPipeError:
-                        Chatroom.hide()
-
-                        Status.value = "Broken Pipe"
-                        Status.text_color = "red"
-                else:
-                    Status.value = "Invalid Username"
-                    Status.text_color = "yellow"
-            else:
-                Status.value = "Invalid Key"
-                Status.text_color = "yellow"    
+def SendToServer():
+    Message = MessageInput.value
+    if Message:
+        if Message == "/leave":
+            Leave()
         else:
-            Status.value = "Invalid Colour"
-            Status.text_color = "yellow"
-    except IndexError:
-        Status.value = "Input Error"
-        Status.text_color = "yellow"
+            s.send(Message.encode())
+            MessageInput.clear()
 
-    PrivateKey = ", ".join(PrivateKey)
-                    
 def Leave():
     global Conencted
     Message = "/leave"
@@ -287,6 +270,65 @@ def Leave():
     
     print("Closing Client...")
     quit()
+
+def Connect():
+    global Username
+    global Color
+    global Host, Port
+    global d, N
+    global PrivateKey
+    
+    Username = str(UsernameInput.value)
+    Host = HostInput.value
+    Color = (ColorInput.value).casefold()
+    
+    PrivateKey = str(KeyInput.value)
+    PrivateKey = PrivateKey.split(", ")
+
+    try:
+        if PrivateKey[0] and PrivateKey[1]:
+            d = int(PrivateKey[0], base = 10)
+            N = int(PrivateKey[1], base = 10)
+     
+            PrivateKey = ", ".join(PrivateKey)
+            if Color in ColorsList:
+                if not Username == "" or Username == "Username":
+                    try:        
+                        Port = int(PortInput.value, base = 10)               
+                      
+                        s.connect((Host, Port))
+                        s.send(Username.encode())
+
+                        Status.value = "Connection Success"
+                        Status.text_color = "lightblue"
+
+                        OpenChat()
+                    
+                    except ConnectionRefusedError:
+                        Status.value = "Connection Full"
+                        Status.text_color = "yellow"
+                        
+                    except OSError:
+                        Status.value = "Restart Client"
+                        Status.text_color = "red"
+
+                    except BrokenPipeError:
+                        Chatroom.hide()
+
+                        Status.value = "Broken Pipe"
+                        Status.text_color = "red"
+                else:
+                    Status.value = "Invalid Username"
+                    Status.text_color = "yellow"
+            else:
+                Status.value = "Invalid Color"
+                Status.text_color = "yellow"    
+        else:
+            Status.value = "Invalid Key"
+            Status.text_color = "yellow"
+    except IndexError:
+        Status.value = "Input Error"
+        Status.text_color = "yellow"                   
     
 def OpenSettings():
     global Settings, SettingsOpened
@@ -357,10 +399,10 @@ def OpenSettings():
     ColorText.text_size = 16
     ColorText.disable()
 
-    global ColorInput
-    ColorInput = TextBox(ColorBox, text = "Change Color", width = "fill", align = "left")
-    ColorInput.text_size = 16
-    ColorInput.text_color = "white"
+    global SettingsColorInput
+    SettingsColorInput = TextBox(ColorBox, text = "Change Color", width = "fill", align = "left")
+    SettingsColorInput.text_size = 16
+    SettingsColorInput.text_color = "white"
 
     global ChangeColorButton
     ChangeColorButton = PushButton(ColorBox, text = "Change Color", command = ChangeColor, width = "fill", align = "right")
@@ -401,34 +443,37 @@ def OpenSettings():
     ShowKey = PushButton(KeyBox, text = "Show Private Key", command = ShowPrivateKey, width = "fill", align = "right")
     ShowKey.text_color = "black"
 
-
     SaveChat.text_color = "black"
     DarkmodeToggle.text_color = "black"
     ChangeColorButton.text_color = "black"
 
     Settings.show()
 
-def Chat():
+def OpenChat():
     global Chatroom, ChatroomOpened
-    Chatroom = Window(ConnectWindow, height = 700, width = 600, title = "Chatroom")
+    Chatroom = Window(ConnectWindow, height = 720, width = 1080, title = "Chatroom")
     Chatroom.font = "San Francisco Bold"
+    Chatroom.bg = "white"
+    Chatroom.text_color = "black"
     ChatroomOpened = True
 
     global Header
     Header = Box(Chatroom, width = "fill", height = 40, align = "top")
 
+    global ButtonBox
+    ButtonBox = Box(Chatroom, width = "fill", align = "bottom")
+
+    global UserBox
+    UserBox = Box(Chatroom, width = 200, height = "fill", align = "left")
+
     global UsernameDisplayHeader
     UsernameDisplayHeader = Text(Header, text = (Username), align = "left")
-    UsernameDisplayHeader.text_color = "white"
-    UsernameDisplayHeader.text_size = 26
+    UsernameDisplayHeader.text_size = 40
     
     global History
     History = TextBox(Chatroom, text = "[Device] Welcome to this chat room", height = "fill", width = "fill", multiline = True, scrollbar = True, align = "top")
-    History.text_size = 16
+    History.text_size = 24
     History.disable()
-
-    global ButtonBox
-    ButtonBox = Box(Chatroom, width = "fill", align = "bottom")
 
     global SendButton
     SendButton = PushButton(ButtonBox, text = "Send", command = SendToServer, align = "right")
@@ -445,25 +490,25 @@ def Chat():
     global MessageInput
     MessageInput = TextBox(ButtonBox, height = "fill", width = "fill")
     MessageInput.text_size = 24
+
+##Threads start here
     
-
-    Chatroom.bg = "white"
-    Chatroom.text_color = "black"
-
-    if (ColorInput.value).casefold() == "rainbow":
-        global RainbowThread
-        RainbowThread = Thread(target = Rainbow)
-        RainbowThread.start()
-    else:
-        History.text_color = Color
-    
-    Chatroom.show()
-
     global ListeningThread
     ListeningThread = Thread(target = AlwaysUpdate)
     ListeningThread.start()
+
+    RainbowHeaderThread = Thread(target = InfiniteRainbow, args = (UsernameDisplayHeader,))
+    RainbowHeaderThread.start()
+
+    if Color == "rainbow":
+        RainbowHistoryThread = Thread(target = Rainbow, args = (History,))                        
+        RainbowHistoryThread.start()
+    else:
+        History.text_color = Color
+
+    Chatroom.show()
    
-def main():    
+def OpenConnectWindow():    
     global ConnectWindow, ConnectWindowOpened
     ConnectWindow = App(title = "Connect To Server", height = 250, width = 550)
     ConnectWindow.font = "San Francisco Bold"
@@ -501,4 +546,4 @@ def main():
 
     ConnectWindow.display()
 
-main()
+OpenConnectWindow()
