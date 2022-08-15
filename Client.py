@@ -1,6 +1,6 @@
-##14/8/2022
-##RSA Fully working, Improved Rainbow loops
-##V12 RC 7
+##15/8/2022
+##Testing the User online list
+##V12 RC 9
 
 import random
 import socket
@@ -15,7 +15,7 @@ Port = 0000
 Username = "tomm"
 Color = "rainbow"
 
-ColorsList = ["red", "green", "yellow", "blue", "purple", "coral", "black", "white", "pimk", "brown", "grey", "rainbow"]
+ColorsList = ["red", "green", "yellow", "blue", "lightblue", "purple", "coral", "black", "white", "pimk", "brown", "grey", "rainbow"]
 ChatHistory = []
 
 SettingsOpened = False
@@ -135,21 +135,29 @@ def Rainbow(Element):
                 Element.text_color = RGB
                 time.sleep(Rate)
         else:
-            History.append("[Device] Rainbow deactivated")
             History.text_color = Color
+
+            if DarkMode == True:
+                MessageInput.text_color = "white"
+                UserList.text_color = "white"
                 
+            else:
+                MessageInput.text_color = "black"
+                UserList.text_color = "black"
+     
             break
 
 def SwitchTheme():
     global DarkMode
     global Color
-    if ConnectWindowOpened == True:
+    if ChatroomOpened == True:
         if DarkMode == True:      
             Chatroom.bg = "white"
-            Chatroom.text_color = "black"
+            Chatroom.text_color = "black"                        
+            MessageInput.text_color = "black"
 
             SaveChat.text_color = "black"
-            DarkmodeToggle.text_color = "black"
+            DarkModeToggle.text_color = "black"
             ChangeColorButton.text_color = "black"
 
             DarkMode = False
@@ -157,6 +165,7 @@ def SwitchTheme():
         else:
             Chatroom.bg = (40, 40, 40)
             Chatroom.text_color = "white"
+            MessageInput.text_color = "white"
 
             DarkMode = True
             
@@ -164,12 +173,12 @@ def SwitchTheme():
             History.text_color = Color
 
         SendButton.bg = "white"
-        LeaveChat.bg = "white"
         SettingsButton.bg = "white"
-            
+        ShowInfoButton.bg = "white"
+
         SendButton.text_color = "black"
-        LeaveChat.text_color = "black"
         SettingsButton.text_color = "black"
+        ShowInfoButton.text_color = "black"
 
         Settings.hide()
 
@@ -182,20 +191,28 @@ def ChangeColor():
             
             RainbowHistoryThread = Thread(target = Rainbow, args = (History,))
             RainbowHistoryThread.start()
+            RainbowMessageInputThread = Thread(target = Rainbow, args = (MessageInput,))
+            RainbowMessageInputThread.start()
+            RainbowUserListThread = Thread(target = Rainbow, args = (UserList,))
+            RainbowUserListThread.start()
                        
             Color = "rainbow"
-            History.append("[Device] Rainbow activated")            
-        else:
-            StopRainbow = True
+            History.append("[Device] Rainbow activated")
             
+        else:            
+            StopRainbow = True
+    
             Color = SettingsColorInput.value
             History.text_color = Color
+
+            History.append("[Device] Rainbow Disabled.")
             History.append("[Device] Color Changing Successful.")
+            
     else:
         History.append("[Device] Color Changing Unsuccessful. Try another Color.")
 
     Settings.hide()
-            
+             
 def SaveChatHistory():
     global Location
     Location = ChangeLocation.value
@@ -233,14 +250,33 @@ def RSADecrypt(Message):
 
     Message = str("".join(RSADecryptedMessage))
     return Message
+
       
 def AlwaysUpdate():
     while True:
-        Message = s.recv(1024).decode()
-        Message = RSADecrypt(Message)
-        
-        History.append(Message)
-        ChatHistory.append(Message)
+        try:
+            Message = s.recv(1024).decode()
+            Message = RSADecrypt(Message)
+            
+            if Message[0:4] == "/add":
+                Message = Message[5:]
+                Message = Message.split()
+                for User in Message:
+                    UserList.append(User)
+
+                History.append("[Device] Users List has updated sucessfully")
+
+            elif Message[0:7] == "/remove":
+                Message = Message[8:]
+                UserList.remove(User)
+
+            else:         
+                History.append(Message)
+                ChatHistory.append(Message)
+                
+        except:
+            print("The Server has shut down.")
+            break
 
 def SendToServer():
     Message = MessageInput.value
@@ -252,9 +288,7 @@ def SendToServer():
             MessageInput.clear()
 
 def Leave():
-    global Conencted
-    Message = "/leave"
-    s.send(Message.encode())
+    s.send(("/leave").encode())
 
     if SettingsOpened == True:
         Settings.hide()
@@ -267,9 +301,6 @@ def Leave():
         ListeningThread.join()
 
     s.close()
-    
-    print("Closing Client...")
-    quit()
 
 def Connect():
     global Username
@@ -292,7 +323,7 @@ def Connect():
      
             PrivateKey = ", ".join(PrivateKey)
             if Color in ColorsList:
-                if not Username == "" or Username == "Username":
+                if not Username == "" or Username == "Username" or " " in Username:
                     try:        
                         Port = int(PortInput.value, base = 10)               
                       
@@ -328,72 +359,81 @@ def Connect():
             Status.text_color = "yellow"
     except IndexError:
         Status.value = "Input Error"
-        Status.text_color = "yellow"                   
-    
-def OpenSettings():
-    global Settings, SettingsOpened
-    Settings = Window(Chatroom, height = 690, width = 500, title = "Settings")
-    SettingsOpened = True
+        Status.text_color = "yellow"
 
-    global DetailsTitle
+def OpenInfo():
+    Info = Window(Chatroom, width = 600, height = 480, title = "Information")
+
+    InfoText = TextBox(Info, text = "About This Code:", width = "fill")
+    InfoText.text_size = 20
+    InfoText.text_color = "white"
+    InfoText.disable()
+
+    TopHeader = Box(Info, width = "fill", height = 30, align = "top")
+
+    WarningText = TextBox(Info, text = ">If your Client begins to flicker, The Server has stopped all connections.", width = "fill")
+    WarningText.text_size = 16
+    WarningText.text_color = "white"
+    WarningText.disable()
+
+    LeaveText = TextBox(Info, text = ">The Connection automatically closes when you close the Chat Window.", width = "fill")
+    LeaveText.text_size = 16
+    LeaveText.text_color = "white"
+    LeaveText.disable()
+
+    RainbowText = TextBox(Info, text = ">It's highly recommended to not input an Animated Color in succession.", width = "fill")
+    RainbowText.text_size = 16
+    RainbowText.text_color = "white"
+    RainbowText.disable()
+
+def OpenSettings():
+    global Settings, SettingsOpened, Color
+    Settings = Window(Chatroom, width = 480, height = 650, title = "Settings")
+
     DetailsTitle = TextBox(Settings, text = "Details:", width = "fill", align = "top")
     DetailsTitle.text_size = 20
     DetailsTitle.disable()
 
-    global TopHeader
     TopHeader = Box(Settings, width = "fill", height = 30, align = "top")
 
-    global BottomBox
     BottomBox = Box(Settings, width = "fill", height = "fill", align = "bottom")
 
-    global MiddleBox
     MiddleBox = Box(Settings, width = "fill", height = 100, align = "bottom")
 
-    global LeftBox
     LeftBox = Box(Settings, width = "fill", height = "fill", align = "left")
 
-    global RightBox
     RightBox = Box(Settings, width = "fill", height = "fill", align = "right")
 
-    global MiddleHeader
     MiddleHeader = Box(MiddleBox, width = "fill", height = 30)
 
-    global SettingsTitle
-    SettingsTitle = TextBox(MiddleBox, text = "Configurables:", width = "fill")
+    SettingsTitle = TextBox(MiddleBox, text = "Advanced:", width = "fill")
     SettingsTitle.text_size = 20
     SettingsTitle.disable()
     
-    global UsernameDisplay
     UsernameDisplay = TextBox(LeftBox, text = ("Username: " + Username), width = "fill")
     UsernameDisplay.text_size = 16
     UsernameDisplay.disable()
 
-    global HostDisplay
     HostDisplay = TextBox(LeftBox, text = ("Host IP: " + str(Host)), width = "fill")
     HostDisplay.text_size = 16
     HostDisplay.disable()
     
-    global PortDisplay
     PortDisplay = TextBox(LeftBox, text = ("Port: " + str(Port)), width = "fill")
     PortDisplay.text_size = 16
     PortDisplay.disable()
 
-    global DarkmodeBox
     DarkmodeBox = Box(BottomBox, width = "fill", height = 70, align = "top")
 
-    global DarkmodeText
     DarkmodeText = TextBox(DarkmodeBox, text = ("Dark Mode on: " + str(DarkMode)), width = "fill", align = "left")
     DarkmodeText.text_size = 16
     DarkmodeText.disable()
+    
+    global DarkModeToggle
+    DarkModeToggle = PushButton(DarkmodeBox, text = "Switch Theme", command = SwitchTheme, width = "fill", align = "right")
+    DarkModeToggle.text_color = "black"
 
-    global DarkmodeToggle
-    DarkmodeToggle = PushButton(DarkmodeBox, text = "Switch Theme", command = SwitchTheme, width = "fill", align = "right")
-    DarkmodeToggle.text_color = "black"
-
-    global ColorBox
     ColorBox = Box(BottomBox, width = "fill", height = 100, align = "top")
 
-    global ColorText, Color
     Color = Color[0].upper() + Color[1:].lower()
     ColorText = TextBox(ColorBox, text = ("Chat Color: " + Color), width = "fill")
     ColorText.text_size = 16
@@ -403,15 +443,13 @@ def OpenSettings():
     SettingsColorInput = TextBox(ColorBox, text = "Change Color", width = "fill", align = "left")
     SettingsColorInput.text_size = 16
     SettingsColorInput.text_color = "white"
-
+    
     global ChangeColorButton
     ChangeColorButton = PushButton(ColorBox, text = "Change Color", command = ChangeColor, width = "fill", align = "right")
     ChangeColorButton.text_color = "black"
 
-    global SavingBox
     SavingBox = Box(BottomBox, width = "fill", height = 100, align = "top")
 
-    global SaveLocation
     SaveLocation = TextBox(SavingBox, text = ("Save Chat History in: " + Location), width = "fill")
     SaveLocation.text_size = 16
     SaveLocation.disable()
@@ -420,15 +458,13 @@ def OpenSettings():
     ChangeLocation = TextBox(SavingBox, text = "Change Location", width = "fill", align = "left")
     ChangeLocation.text_size = 16
     ChangeLocation.text_color = "white"
-
+    
     global SaveChat
     SaveChat = PushButton(SavingBox, text = "Save Chat History", command = SaveChatHistory, width = "fill", align = "right")
     SaveChat.text_color = "black"
 
-    global KeyBox
     KeyBox = Box(BottomBox, width = "fill", height = 100, align = "top")
 
-    global KeyDetails
     KeyDetails = TextBox(KeyBox, text = "Private Key Details:", width = "fill")
     KeyDetails.text_size = 16
     KeyDetails.text_color = "white"
@@ -439,49 +475,51 @@ def OpenSettings():
     SettingsKeyDisplay.text_size = 16
     SettingsKeyDisplay.text_color = "white"    
 
-    global ShowKey
     ShowKey = PushButton(KeyBox, text = "Show Private Key", command = ShowPrivateKey, width = "fill", align = "right")
     ShowKey.text_color = "black"
 
     SaveChat.text_color = "black"
-    DarkmodeToggle.text_color = "black"
+    DarkModeToggle.text_color = "black"
     ChangeColorButton.text_color = "black"
 
+    SettingsOpened = True
     Settings.show()
 
 def OpenChat():
-    global Chatroom, ChatroomOpened
-    Chatroom = Window(ConnectWindow, height = 720, width = 1080, title = "Chatroom")
+    global Chatroom, ChatroomOpened, ConnectWindowOpened
+    Chatroom = Window(ConnectWindow, width = 900, height = 500, title = "Chatroom")
+    Chatroom.when_closed = Leave
     Chatroom.font = "San Francisco Bold"
     Chatroom.bg = "white"
     Chatroom.text_color = "black"
     ChatroomOpened = True
-
-    global Header
+    
     Header = Box(Chatroom, width = "fill", height = 40, align = "top")
 
-    global ButtonBox
     ButtonBox = Box(Chatroom, width = "fill", align = "bottom")
 
-    global UserBox
     UserBox = Box(Chatroom, width = 200, height = "fill", align = "left")
 
+    global UserList
+    UserList = ListBox(UserBox, items = ["Users Online:"], height = "fill")
+    UserList.text_size = 18
+
     global UsernameDisplayHeader
-    UsernameDisplayHeader = Text(Header, text = (Username), align = "left")
-    UsernameDisplayHeader.text_size = 40
+    UsernameDisplayHeader = Text(Header, text = ("Welcome, " + Username), align = "left")
+    UsernameDisplayHeader.text_size = 30
     
     global History
-    History = TextBox(Chatroom, text = "[Device] Welcome to this chat room", height = "fill", width = "fill", multiline = True, scrollbar = True, align = "top")
-    History.text_size = 24
+    History = TextBox(Chatroom, text = "[Device] Starting Client", height = "fill", width = "fill", multiline = True, scrollbar = True, align = "top")
+    History.text_size = 16
     History.disable()
 
     global SendButton
     SendButton = PushButton(ButtonBox, text = "Send", command = SendToServer, align = "right")
     SendButton.text_color = "black"
 
-    global LeaveChat
-    LeaveChat = PushButton(ButtonBox, text = "Leave", command = Leave, align = "left")
-    LeaveChat.text_color = "black"
+    global ShowInfoButton
+    ShowInfoButton = PushButton(ButtonBox, text = "Info", command = OpenInfo, align = "left")
+    ShowInfoButton.text_color = "black"
         
     global SettingsButton
     SettingsButton = PushButton(ButtonBox, text = "Settings", command = OpenSettings, align = "left")
@@ -503,9 +541,19 @@ def OpenChat():
     if Color == "rainbow":
         RainbowHistoryThread = Thread(target = Rainbow, args = (History,))                        
         RainbowHistoryThread.start()
+        RainbowMessageInputThread = Thread(target = Rainbow, args = (MessageInput,))
+        RainbowMessageInputThread.start()
+        RainbowUserListThread = Thread(target = Rainbow, args = (UserList,))
+        RainbowUserListThread.start()
+        
     else:
         History.text_color = Color
-
+        MessageInput.text_color = "black"
+        UserList.text_color = "black"
+        
+    ChatroomOpened = True
+    ConnectWindowOpened = False
+    ConnectWindow.hide()
     Chatroom.show()
    
 def OpenConnectWindow():    
@@ -514,36 +562,60 @@ def OpenConnectWindow():
     ConnectWindow.font = "San Francisco Bold"
     ConnectWindowOpened = True
     
-    global InputBox
     InputBox = Box(ConnectWindow, width = "fill", align = "left")
+    
+    Padding = Box(ConnectWindow, width = 16, height = "fill", align = "right")
 
-    global VerifyBox
     VerifyBox = Box(ConnectWindow, width = "fill", align = "right")
 
     global Status
     Status = Text(VerifyBox, text = "Not Connected")
-    Status.text_size = 30
+    Status.text_size = 34
     Status.text_color = "white"
+
+    Blocker = Box(VerifyBox, width = "fill", height = 20)
 
     global AttemptConnect
     AttemptConnect = PushButton(VerifyBox, text = "Connect", command = Connect)
+    AttemptConnect.text_size = 16
+
+    UsernameBlocker = Box(InputBox, width = 15, height = 150, align = "right")
+    UsernameInputBox = Box(InputBox, width = 275, height = 30)
+
+    ColorBlocker = Box(InputBox, width = 15, height = 120, align = "right")
+    ColorInputBox = Box(InputBox, width = 260, height = 30)
+
+    HostBlocker = Box(InputBox, width = 15, height = 90, align = "right")
+    HostInputBox = Box(InputBox, width = 245, height = 30)
+
+    PortBlocker = Box(InputBox, width = 15, height = 60, align = "right")
+    PortInputBox = Box(InputBox, width = 230, height = 30)
+
+    KeyBlocker = Box(InputBox, width = 15, height = 30, align = "right")
+    KeyInputBox = Box(InputBox, width = 215, height = 30)
 
     global UsernameInput, ColorInput, HostInput, PortInput, KeyInput
-    UsernameInput = TextBox(InputBox, text = "Username", width = "fill")
+    UsernameInput = TextBox(UsernameInputBox, text = "Username", width = "fill")
     UsernameInput.text_size = 16
+    UsernameInput.text_color = "lightblue"
 
-    ColorInput = TextBox(InputBox, text = "Chat Color", width = "fill")
+    ColorInput = TextBox(ColorInputBox, text = "Chat Color", width = "fill")
     ColorInput.text_size = 16
+    ColorInput.text_color = "lightblue"
     
-    HostInput = TextBox(InputBox, text = "Host IP", width = "fill")
+    HostInput = TextBox(HostInputBox, text = "Host IP", width = "fill")
     HostInput.text_size = 16
+    HostInput.text_color = "lightblue"
     
-    PortInput = TextBox(InputBox, text = "Port", width = "fill")
+    PortInput = TextBox(PortInputBox, text = "Port", width = "fill")
     PortInput.text_size = 16
+    PortInput.text_color = "lightblue"
 
-    KeyInput = TextBox(InputBox, text = "Private Key", width = "fill")
+    KeyInput = TextBox(KeyInputBox, text = "Private Key", width = "fill")
     KeyInput.text_size = 16
+    KeyInput.text_color = "lightblue"
 
+    ConnectWindowOpened = True
     ConnectWindow.display()
 
 OpenConnectWindow()
