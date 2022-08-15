@@ -1,21 +1,21 @@
 ##15/8/2022
-##V12
+##V13 RC2 
 
 import socket
 from threading import Thread
 import time
 import random
 
+s = socket.socket()
+
 #UserCount = int(input("Enter maximum number of users"))
 UserCount = 1000
 UserOnline = 0
 SpaceRemaining = UserCount
 
-#HostName = socket.gethostname()
-#IP = socket.gethostbyname(HostName)
+IP = "192.168.1.138"
+Port = 0000
 
-IP = '192.168.1.138'
-Ports = [1234, 5023, 5050]
 Clients = []
 Users = []
 
@@ -99,14 +99,13 @@ def RSAEncrypt(Message):
     return Message
 
 def GeneratePort():
-    for PortTest in Ports:
+    for PortTest in range(49125, 65535):
         try:
-            global s, IP, Port
-            s = socket.socket()
+            global Port
             s.bind((IP, PortTest))
             Port = PortTest
             print("[Server] Server Hosted with " + str(UserCount) +
-                  " space(s) on Port " + str(Port))
+                  " space(s) on " + str(IP) + " with Port " + str(Port))
             break
         except OSError:
             pass
