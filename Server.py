@@ -1,6 +1,6 @@
-##14/8/2022
-##New command
-##V12 RC 7
+##15/8/2022
+##Working On Useronline list
+##V12 RC 9
 
 import socket
 from threading import Thread
@@ -110,7 +110,7 @@ def GeneratePort():
                   " space(s) on Port " + str(Port))
             break
         except OSError:
-            print("[Server] Port " + str(PortTest) + " is not available")
+            pass
 
 def Broadcast(Message):
     time.sleep(0.1)
@@ -131,8 +131,14 @@ def ServerBroadcast(Message):
 
 def RemoveUser(ClientSocket, Username):
     global UserOnline, Clients, Users
+    LeavingUser = Username
     Clients.remove(ClientSocket)
     Users.remove(Username)
+
+    UsersList = "/remove " + LeavingUser
+    Broadcast(UsersList)
+
+    Broadcast((LeavingUser + " has disconnected"))
     UserOnline -= 1
 
 def Listen(ClientSocket):
@@ -189,6 +195,9 @@ def Connect():
         Username = ClientSocket.recv(1024).decode()
         Users.append(Username)
 
+        UsersList = "/add " + " ".join(Users)
+        Broadcast(UsersList)
+
         Message = Username + " has connected"
         Broadcast(Message)
 
@@ -199,9 +208,3 @@ def Connect():
         ListeningThread.start()
 
 GetKey()
-
-
-
-
-
-
