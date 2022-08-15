@@ -1,5 +1,5 @@
 ##15/8/2022
-##V12 Full
+##V13 RC1
 
 import random
 import socket
@@ -163,7 +163,7 @@ def SwitchTheme():
             DarkMode = False
 
         else:
-            Chatroom.bg = (40, 40, 40)
+            Chatroom.bg = (70, 70, 70)
             Chatroom.text_color = "white"
             MessageInput.text_color = "white"
 
@@ -363,7 +363,7 @@ def Connect():
         Status.text_color = "yellow"
 
 def OpenInfo():
-    Info = Window(Chatroom, width = 600, height = 480, title = "Information")
+    Info = Window(Chatroom, width = 800, height = 380, title = "Information")
 
     InfoText = TextBox(Info, text = "About This Code:", width = "fill")
     InfoText.text_size = 20
@@ -443,7 +443,7 @@ def OpenSettings():
     global SettingsColorInput
     SettingsColorInput = TextBox(ColorBox, text = "Change Color", width = "fill", align = "left")
     SettingsColorInput.text_size = 16
-    SettingsColorInput.text_color = "white"
+    SettingsColorInput.text_color = "black"
     
     global ChangeColorButton
     ChangeColorButton = PushButton(ColorBox, text = "Change Color", command = ChangeColor, width = "fill", align = "right")
@@ -458,7 +458,7 @@ def OpenSettings():
     global ChangeLocation
     ChangeLocation = TextBox(SavingBox, text = "Change Location", width = "fill", align = "left")
     ChangeLocation.text_size = 16
-    ChangeLocation.text_color = "white"
+    ChangeLocation.text_color = "black"
     
     global SaveChat
     SaveChat = PushButton(SavingBox, text = "Save Chat History", command = SaveChatHistory, width = "fill", align = "right")
@@ -474,7 +474,7 @@ def OpenSettings():
     global SettingsKeyDisplay
     SettingsKeyDisplay = TextBox(KeyBox, text = PrivateKey, hide_text = True, width = "fill", align = "left")
     SettingsKeyDisplay.text_size = 16
-    SettingsKeyDisplay.text_color = "white"    
+    SettingsKeyDisplay.text_color = "black"    
 
     ShowKey = PushButton(KeyBox, text = "Show Private Key", command = ShowPrivateKey, width = "fill", align = "right")
     ShowKey.text_color = "black"
@@ -559,7 +559,8 @@ def OpenChat():
    
 def OpenConnectWindow():    
     global ConnectWindow, ConnectWindowOpened
-    ConnectWindow = App(title = "Connect To Server", height = 250, width = 550)
+    ConnectWindow = App(title = "Connect To Server", height = 275, width = 800)
+    ConnectWindow.bg = (70, 70, 70)
     ConnectWindow.font = "San Francisco Bold"
     ConnectWindowOpened = True
     
@@ -567,12 +568,12 @@ def OpenConnectWindow():
     
     Padding = Box(ConnectWindow, width = 16, height = "fill", align = "right")
 
-    VerifyBox = Box(ConnectWindow, width = "fill", align = "right")
+    VerifyBox = Box(ConnectWindow, width = 400, height = 150, align = "right")
 
     global Status
     Status = Text(VerifyBox, text = "Not Connected")
     Status.text_size = 34
-    Status.text_color = "white"
+    Status.text_color = "red"
 
     Blocker = Box(VerifyBox, width = "fill", height = 20)
 
@@ -599,22 +600,28 @@ def OpenConnectWindow():
     UsernameInput = TextBox(UsernameInputBox, text = "Username", width = "fill")
     UsernameInput.text_size = 16
     UsernameInput.text_color = "lightblue"
+    UsernameInput.bg = (40, 40, 40)
 
     ColorInput = TextBox(ColorInputBox, text = "Chat Color", width = "fill")
     ColorInput.text_size = 16
     ColorInput.text_color = "lightblue"
+    ColorInput.bg = (40, 40, 40)
+    
     
     HostInput = TextBox(HostInputBox, text = "Host IP", width = "fill")
     HostInput.text_size = 16
     HostInput.text_color = "lightblue"
+    HostInput.bg = (40, 40, 40)
     
     PortInput = TextBox(PortInputBox, text = "Port", width = "fill")
     PortInput.text_size = 16
     PortInput.text_color = "lightblue"
+    PortInput.bg = (40, 40, 40)
 
     KeyInput = TextBox(KeyInputBox, text = "Private Key", width = "fill")
     KeyInput.text_size = 16
     KeyInput.text_color = "lightblue"
+    KeyInput.bg = (40, 40, 40)
 
     ConnectWindowOpened = True
     ConnectWindow.display()
