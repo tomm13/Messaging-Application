@@ -80,10 +80,10 @@ def AnimateHeader(Message, Color):
         if B < 255:
             B += 1
 
-        UsernameDisplayHeader.text_color = (R, G, B)
+        DisplayHeader.text_color = (R, G, B)
         sleep(Rate)
 
-    UsernameDisplayHeader.value = Message
+    DisplayHeader.value = Message
 
     while not R == Color[0] or not G == Color[1] or not B == Color[2]:
         # Fades background from white to color
@@ -94,7 +94,7 @@ def AnimateHeader(Message, Color):
         if B > Color[2]:
             B -= 1
 
-        UsernameDisplayHeader.bg = (R, G, B)
+        DisplayHeader.bg = (R, G, B)
         sleep(Rate)
 
     sleep(1)
@@ -108,10 +108,10 @@ def AnimateHeader(Message, Color):
         if G < 255:
             G += 1
 
-        UsernameDisplayHeader.bg = (R, G, B)
+        DisplayHeader.bg = (R, G, B)
         sleep(Rate)
 
-    UsernameDisplayHeader.value = "Welcome " + Username
+    DisplayHeader.value = "Welcome " + Username
 
     while not R == 0 or not G == 0 or not B == 0:
         # Text fades from white to black
@@ -122,7 +122,7 @@ def AnimateHeader(Message, Color):
         if B > 0:
             B -= 1
 
-        UsernameDisplayHeader.text_color = (R, G, B)
+        DisplayHeader.text_color = (R, G, B)
         sleep(Rate)
 
 
@@ -253,26 +253,32 @@ def RSADecrypt(Message):
     Message = str("".join(RSADecryptedMessage))
     return Message
 
-
 def AlwaysUpdate():
+    Users = []
     while True:
         Message = s.recv(1024).decode()
         Message = RSADecrypt(Message)
 
         if Message[0:4] == "/add":
             Message = Message[5:]
+            Message = Message.split()
 
-            if Message == Username:
-                UserList.append((Message + " (self)"))
-            else:
-                UserList.append(Message)
+            UserList.clear()
+            UserList.append("Users Online:")
 
-            Message = Message + " has connected"
-            AnimateHeader(Message, (124, 252, 0))
+            for User in Message:
+                if User not in Users:
+                    UserList.append(User)
+                    Users.append(User)
+                    Message = User + " has connected"
+                    AnimateHeader(Message, (124, 252, 0))
+                else:
+                    UserList.append(User)
 
         elif Message[0:7] == "/remove":
             Message = Message[8:]
             UserList.remove(Message)
+            Users.remove(Message)
             Message = Message + " has disconnected"
             AnimateHeader(Message, (216, 36, 41))
 
@@ -370,21 +376,21 @@ def OpenChat():
 
     Header = Boxes(Chatroom, "fill", 40, "top")
     ButtonBox = Boxes(Chatroom, "fill", 40, "bottom")
-    UserBox = Boxes(Chatroom, 200, "fill", "left")
+    UserBox = Boxes(Chatroom, 150, "fill", "left")
 
     global UserList
     UserList = ListBox(UserBox, items=["Users Online:"], height="fill", scrollbar=True)
     UserList.bg = (215, 215, 215)
     UserList.text_size = 18
 
-    global UsernameDisplayHeader
-    UsernameDisplayHeader = Text(Header, text=("Welcome " + Username), width="fill")
-    UsernameDisplayHeader.text_size = 30
+    global DisplayHeader
+    DisplayHeader = Text(Header, text=("Welcome " + Username), width="fill")
+    DisplayHeader.text_size = 30
 
     global History
     History = TextBox(Chatroom, text="Hi!", height="fill", width="fill", multiline=True, scrollbar=True, align="top")
     History.text_color = Color
-    History.text_size = 16
+    History.text_size = 22
     History.disable()
 
     global SendButton
