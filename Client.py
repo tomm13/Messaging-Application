@@ -127,19 +127,19 @@ def AnimateHeader(Message, Color):
             sleep(Rate)
 
     else:
-        while not R == 40 or not G == 40 or not B == 40:
+        while not R == 70 or not G == 70 or not B == 70:
             # Text fades from any colour to black
-            if R > 40:
+            if R > 70:
                 R -= 1
-            if G > 40:
+            if G > 70:
                 G -= 1
-            if B > 40:
+            if B > 70:
                 B -= 1
-            if R < 40:
+            if R < 70:
                 R += 1
-            if G < 40:
+            if G < 70:
                 G += 1
-            if B < 40:
+            if B < 70:
                 B += 1
 
             DisplayHeader.text_color = (R, G, B)
@@ -167,19 +167,19 @@ def AnimateHeader(Message, Color):
 
         sleep(1)
 
-        while not R == 40 or not G == 40 or not B == 40:
+        while not R == 70 or not G == 70 or not B == 70:
             # Fades background from color to black
-            if R > 40:
+            if R > 70:
                 R -= 1
-            if B > 40:
+            if B > 70:
                 B -= 1
-            if G > 40:
+            if G > 70:
                 G -= 1
-            if R < 40:
+            if R < 70:
                 R += 1
-            if B < 40:
+            if B < 70:
                 B += 1
-            if G < 40:
+            if G < 70:
                 G += 1
 
             DisplayHeader.bg = (R, G, B)
@@ -266,26 +266,66 @@ def InfiniteRainbow(Element):
 
 def SwitchTheme():
     global DarkMode
+    Rate = 0.00125
     if DarkMode == True:
-        Chatroom.bg = "white"
-        UserList.bg = (215, 215, 215)
+        while DarkMode == True:
+            R = 0
+            G = 0
+            B = 0
 
-        Chatroom.text_color = "black"
-        MessageInput.text_color = "black"
+            while not (R, G, B) == (215, 215, 215):
+                R += 1
+                G += 1
+                B += 1
 
-        DarkMode = False
+                DisplayHeader.bg = (R, G, B)
+                History.bg = (R, G, B)
+                MessageInput.bg = (R, G, B)
+                UserList.bg = (R, G, B)
+                sleep(Rate)
+
+            while not (R, G, B) == (255, 255, 255):
+                R += 1
+                G += 1
+                B += 1
+
+                DisplayHeader.bg = (R, G, B)
+                History.bg = (R, G, B)
+                MessageInput.bg = (R, G, B)
+                sleep(Rate)
+
+            DarkMode = False
 
     else:
-        Chatroom.bg = (70, 70, 70)
-        UserList.bg = (40, 40, 40)
+        while DarkMode == False:
+            R = 255
+            G = 255
+            B = 255
 
-        Chatroom.text_color = "white"
-        MessageInput.text_color = "white"
+            while not (R, G, B) == (70, 70, 70):
+                R -= 1
+                G -= 1
+                B -= 1
 
-        DarkMode = True
+                MessageInput.bg = (R, G, B)
+                History.bg = (R, G, B)
+                DisplayHeader.bg = (R, G, B)
+                UserList.bg = (R, G, B)
+                sleep(Rate)
 
-    SendButton.bg = "white"
-    SendButton.text_color = "black"
+            while not (R, G, B) == (40, 40, 40):
+                R -= 1
+                G -= 1
+                B -= 1
+
+                UserList.bg = (R, G, B)
+                sleep(Rate)
+
+            DarkMode = True
+
+    UserList.text_color = Color
+    History.text_color = Color
+    MessageInput.text_color = Color
 
 def SaveChatHistory():
     global Location
@@ -304,7 +344,6 @@ def SaveChatHistory():
     else:
         Location = " - "
         History.append("[Device] Saving Unsuccessful")
-
 
 def RSADecrypt(Message):
     Message = Message.split()
@@ -352,14 +391,16 @@ def AlwaysUpdate():
             Message = Message[9:]
             AnimateHeader(Message, (173, 216, 230))
 
-        elif Message == "/dark":
+        elif Message == "/theme":
             SwitchTheme()
             sleep(0.1)
-            AnimateHeader("Dark Mode Turned On", (124, 252, 0))
+            if DarkMode == True:
+                AnimateHeader("Dark Mode Turned On", (173, 216, 230))
+            else:
+                AnimateHeader("Light Mode Turned On", (173, 216, 230))
 
         else:
             History.append(Message)
-
 
 def SendToServer():
     Message = MessageInput.value
@@ -369,7 +410,6 @@ def SendToServer():
         else:
             s.send(Message.encode())
             MessageInput.clear()
-
 
 def Leave():
     s.send(("/leave").encode())
@@ -382,7 +422,6 @@ def Leave():
         ListeningThread.join()
 
     s.close()
-
 
 def Connect():
     global Username
@@ -451,6 +490,7 @@ def OpenChat():
 
     global UserList
     UserList = ListBox(UserBox, items=["Users Online:"], height="fill", scrollbar=True)
+    UserList.text_color = Color
     UserList.bg = (215, 215, 215)
     UserList.text_size = 18
 
@@ -466,10 +506,12 @@ def OpenChat():
 
     global SendButton
     SendButton = PushButton(ButtonBox, text="Send", command=SendToServer, align="right")
-    SendButton.text_color = "black"
+    SendButton.text_color = (0, 0, 0)
+    SendButton.bg = (255, 255, 255)
 
     global MessageInput
     MessageInput = TextBox(ButtonBox, height="fill", width="fill")
+    MessageInput.text_color = Color
     MessageInput.text_size = 24
 
     ##Threads start here
