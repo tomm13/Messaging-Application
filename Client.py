@@ -1,5 +1,5 @@
-##15/8/2022
-##V13 RC2
+##30/8/2022
+##V13 Beta
 
 import socket
 from time import sleep
@@ -71,60 +71,133 @@ def AnimateHeader(Message, Color):
     B = 0
     Rate = 0.00125
 
-    while not R == 255 or not G == 255 or not B == 255:
-        # Text fades from any colour to white
-        if R < 255:
-            R += 1
-        if G < 255:
-            G += 1
-        if B < 255:
-            B += 1
+    if DarkMode == False:
+        while not R == 255 or not G == 255 or not B == 255:
+            # Text fades from any colour to white
+            if R < 255:
+                R += 1
+            if G < 255:
+                G += 1
+            if B < 255:
+                B += 1
 
-        DisplayHeader.text_color = (R, G, B)
-        sleep(Rate)
+            DisplayHeader.text_color = (R, G, B)
+            sleep(Rate)
 
-    DisplayHeader.value = Message
+        DisplayHeader.value = Message
 
-    while not R == Color[0] or not G == Color[1] or not B == Color[2]:
-        # Fades background from white to color
-        if R > Color[0]:
-            R -= 1
-        if G > Color[1]:
-            G -= 1
-        if B > Color[2]:
-            B -= 1
+        while not R == Color[0] or not G == Color[1] or not B == Color[2]:
+            # Fades background from white to color
+            if R > Color[0]:
+                R -= 1
+            if G > Color[1]:
+                G -= 1
+            if B > Color[2]:
+                B -= 1
 
-        DisplayHeader.bg = (R, G, B)
-        sleep(Rate)
+            DisplayHeader.bg = (R, G, B)
+            sleep(Rate)
 
-    sleep(1)
+        sleep(1)
 
-    while not R == 255 or not G == 255 or not B == 255:
-        # Fades background from color to white
-        if R < 255:
-            R += 1
-        if B < 255:
-            B += 1
-        if G < 255:
-            G += 1
+        while not R == 255 or not G == 255 or not B == 255:
+            # Fades background from color to white
+            if R < 255:
+                R += 1
+            if B < 255:
+                B += 1
+            if G < 255:
+                G += 1
 
-        DisplayHeader.bg = (R, G, B)
-        sleep(Rate)
+            DisplayHeader.bg = (R, G, B)
+            sleep(Rate)
 
-    DisplayHeader.value = "Welcome " + Username
+        DisplayHeader.value = "Welcome " + Username
 
-    while not R == 0 or not G == 0 or not B == 0:
-        # Text fades from white to black
-        if R > 0:
-            R -= 1
-        if G > 0:
-            G -= 1
-        if B > 0:
-            B -= 1
+        while not R == 0 or not G == 0 or not B == 0:
+            # Text fades from white to black
+            if R > 0:
+                R -= 1
+            if G > 0:
+                G -= 1
+            if B > 0:
+                B -= 1
 
-        DisplayHeader.text_color = (R, G, B)
-        sleep(Rate)
+            DisplayHeader.text_color = (R, G, B)
+            sleep(Rate)
 
+    else:
+        while not R == 40 or not G == 40 or not B == 40:
+            # Text fades from any colour to black
+            if R > 40:
+                R -= 1
+            if G > 40:
+                G -= 1
+            if B > 40:
+                B -= 1
+            if R < 40:
+                R += 1
+            if G < 40:
+                G += 1
+            if B < 40:
+                B += 1
+
+            DisplayHeader.text_color = (R, G, B)
+            sleep(Rate)
+
+        DisplayHeader.value = Message
+
+        while not R == Color[0] or not G == Color[1] or not B == Color[2]:
+            # Fades background from black to color
+            if R < Color[0]:
+                R += 1
+            if G < Color[1]:
+                G += 1
+            if B < Color[2]:
+                B += 1
+            if R > Color[0]:
+                R -= 1
+            if G > Color[1]:
+                G -= 1
+            if B > Color[2]:
+                B -= 1
+
+            DisplayHeader.bg = (R, G, B)
+            sleep(Rate)
+
+        sleep(1)
+
+        while not R == 40 or not G == 40 or not B == 40:
+            # Fades background from color to black
+            if R > 40:
+                R -= 1
+            if B > 40:
+                B -= 1
+            if G > 40:
+                G -= 1
+            if R < 40:
+                R += 1
+            if B < 40:
+                B += 1
+            if G < 40:
+                G += 1
+
+            DisplayHeader.bg = (R, G, B)
+            sleep(Rate)
+
+        DisplayHeader.value = "Welcome " + Username
+
+        while not R == 255 or not G == 255 or not B == 255:
+            # Text fades from black to white
+            if R < 255:
+                R += 1
+            if G < 255:
+                G += 1
+            if B < 255:
+                B += 1
+
+            DisplayHeader.text_color = (R, G, B)
+            sleep(Rate)
 
 def InfiniteRainbow(Element):
     R = 255
@@ -193,33 +266,26 @@ def InfiniteRainbow(Element):
 
 def SwitchTheme():
     global DarkMode
-    global Color
-    if ChatroomOpened == True:
-        if DarkMode == True:
-            Chatroom.bg = "white"
-            UserList.bg = (215, 215, 215)
+    if DarkMode == True:
+        Chatroom.bg = "white"
+        UserList.bg = (215, 215, 215)
 
-            Chatroom.text_color = "black"
-            MessageInput.text_color = "black"
+        Chatroom.text_color = "black"
+        MessageInput.text_color = "black"
 
-            DarkMode = False
+        DarkMode = False
 
-        else:
-            Chatroom.bg = (70, 70, 70)
-            UserList.bg = (40, 40, 40)
+    else:
+        Chatroom.bg = (70, 70, 70)
+        UserList.bg = (40, 40, 40)
 
-            Chatroom.text_color = "white"
-            MessageInput.text_color = "white"
+        Chatroom.text_color = "white"
+        MessageInput.text_color = "white"
 
-            DarkMode = True
+        DarkMode = True
 
-        if not Color.casefold() == "rainbow":
-            History.text_color = Color
-
-        SendButton.bg = "white"
-
-        SendButton.text_color = "black"
-
+    SendButton.bg = "white"
+    SendButton.text_color = "black"
 
 def SaveChatHistory():
     global Location
@@ -285,6 +351,11 @@ def AlwaysUpdate():
         elif Message[0:8] == "/display":
             Message = Message[9:]
             AnimateHeader(Message, (173, 216, 230))
+
+        elif Message == "/dark":
+            SwitchTheme()
+            sleep(0.1)
+            AnimateHeader("Dark Mode Turned On", (124, 252, 0))
 
         else:
             History.append(Message)
