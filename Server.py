@@ -1,5 +1,5 @@
 ##15/8/2022
-##V13 RC2 Server
+##V13 RC2 
 
 import socket
 from threading import Thread
@@ -13,9 +13,7 @@ UserCount = 1000
 UserOnline = 0
 SpaceRemaining = UserCount
 
-HostName = socket.gethostname()
-IP = socket.gethostbyname(HostName)
-#IP = '192.168.1.123'
+IP = "192.168.1.138"
 Port = 0000
 
 Clients = []
@@ -106,19 +104,11 @@ def GeneratePort():
             global Port
             s.bind((IP, PortTest))
             Port = PortTest
-            print("[Server] Server Hosted on " + str(IP) + " with Port " + str(Port))
+            print("[Server] Server Hosted with " + str(UserCount) +
+                  " space(s) on " + str(IP) + " with Port " + str(Port))
             break
         except OSError:
             pass
-
-def DisplayBroadcast(Message):
-    time.sleep(0.1)
-    Message = "/display " + Message
-    print("[Display] " + Message)
-
-    Message = RSAEncrypt(Message)
-    for Client in Clients:
-        Client.send(Message.encode())
 
 def Broadcast(Message):
     time.sleep(0.1)
@@ -137,23 +127,16 @@ def ServerBroadcast(Message):
     for Client in Clients:
         Client.send(Message.encode())
 
-def PrivateBroadcast(Message, ClientSocket):
-    time.sleep(0.1)
-    Message = "/display " + Message
-    print("[Private] " + Message)
-
-    Message = RSAEncrypt(Message)
-    ClientSocket.send(Message.encode())
-
 def RemoveUser(ClientSocket, Username):
     global UserOnline, Clients, Users
     LeavingUser = Username
     Clients.remove(ClientSocket)
     Users.remove(Username)
 
-    Message = "/remove " + LeavingUser
-    Broadcast(Message)
+    UsersList = "/remove " + LeavingUser
+    Broadcast(UsersList)
 
+    Broadcast((LeavingUser + " has disconnected"))
     UserOnline -= 1
 
 def Listen(ClientSocket):
@@ -167,38 +150,36 @@ def Listen(ClientSocket):
             UnifiedMessage = Username + ": " + Message
 
             if Message:
+                Broadcast(UnifiedMessage)
                 if Message[0] == "/":
                     if Message == "/leave":
                         RemoveUser(ClientSocket, Username)
                         break
                     else:
-                        Command(Message, ClientSocket)
-                else:
-                    Broadcast(UnifiedMessage)
+                        Command(Message)
 
         except ConnectionResetError:
             RemoveUser(ClientSocket, Username)
             break
 
-def Command(Message, ClientSocket):
+def Command(Message):
     if Message == "/space":
-        PrivateBroadcast(str(UserCount), ClientSocket)
+        ServerBroadcast(str(UserCount))
     elif Message == "/online":
-        PrivateBroadcast(str(UserOnline), ClientSocket)
+        ServerBroadcast(str(UserOnline))
     elif Message == "/users":
         if len(Users) == 1:
-            PrivateBroadcast(str(Users[0]), ClientSocket)
+            ServerBroadcast(Users[0])
         else:
             for User in Users:
-                PrivateBroadcast(str(User), ClientSocket)
-                time.sleep(3)
-
+                if User == Users[(len(Users) - 1)]:
+                    ServerBroadcast((User))
+                    break
+                ServerBroadcast((User + ", "))
     elif Message == "/spaceleft":
-        PrivateBroadcast(str(SpaceRemaining), ClientSocket)
-    elif Message == "/ip":
-        PrivateBroadcast(str(IP), ClientSocket)
+        ServerBroadcast(str(SpaceRemaining))
     else:
-        PrivateBroadcast("Unknown Command", ClientSocket)
+        ServerBroadcast("Unknown Command")
 
 def Connect():
     global UserOnline, SpaceRemaining
@@ -212,7 +193,10 @@ def Connect():
         Username = ClientSocket.recv(1024).decode()
         Users.append(Username)
 
-        Message = "/add " + " ".join(Users)
+        UsersList = "/add " + " ".join(Users)
+        Broadcast(UsersList)
+
+        Message = Username + " has connected"
         Broadcast(Message)
 
         UserOnline += 1
