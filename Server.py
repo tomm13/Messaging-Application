@@ -1,5 +1,5 @@
-##15/8/2022
-##V13 RC2 Server
+##30/8/2022
+##V13 Beta
 
 import socket
 from threading import Thread
@@ -111,16 +111,8 @@ def GeneratePort():
         except OSError:
             pass
 
-def DisplayBroadcast(Message):
-    time.sleep(0.1)
-    Message = "/display " + Message
-    print("[Display] " + Message)
-
-    Message = RSAEncrypt(Message)
-    for Client in Clients:
-        Client.send(Message.encode())
-
 def Broadcast(Message):
+    #Sends a Public Message to all Connected Clients, not for Animating Purposes
     time.sleep(0.1)
     print("[Client] " + Message)
 
@@ -128,19 +120,19 @@ def Broadcast(Message):
     for Client in Clients:
         Client.send(Message.encode())
 
-def ServerBroadcast(Message):
+def PrivateBroadcast(Message, ClientSocket):
+    #Sends a Private Message to 1 Specfic Client, not for Animating Purposes.
     time.sleep(0.1)
-    Message = "[Server] " + Message
-    print(Message)
+    print("[Private] " + Message)
 
     Message = RSAEncrypt(Message)
-    for Client in Clients:
-        Client.send(Message.encode())
+    ClientSocket.send(Message.encode())
 
-def PrivateBroadcast(Message, ClientSocket):
+def PrivateCommand(Message, ClientSocket):
+    #Sends "/display", which tells 1 specific Client to Animate it's banner
     time.sleep(0.1)
     Message = "/display " + Message
-    print("[Private] " + Message)
+    print("[Private Display] " + Message)
 
     Message = RSAEncrypt(Message)
     ClientSocket.send(Message.encode())
@@ -182,23 +174,29 @@ def Listen(ClientSocket):
 
 def Command(Message, ClientSocket):
     if Message == "/space":
-        PrivateBroadcast(str(UserCount), ClientSocket)
+        PrivateCommand(str(UserCount), ClientSocket)
     elif Message == "/online":
-        PrivateBroadcast(str(UserOnline), ClientSocket)
+        PrivateCommand(str(UserOnline), ClientSocket)
     elif Message == "/users":
         if len(Users) == 1:
-            PrivateBroadcast(str(Users[0]), ClientSocket)
+            PrivateCommand(str(Users[0]), ClientSocket)
         else:
             for User in Users:
-                PrivateBroadcast(str(User), ClientSocket)
+                PrivateCommand(str(User), ClientSocket)
                 time.sleep(3)
 
     elif Message == "/spaceleft":
-        PrivateBroadcast(str(SpaceRemaining), ClientSocket)
+        PrivateCommand(str(SpaceRemaining), ClientSocket)
     elif Message == "/ip":
-        PrivateBroadcast(str(IP), ClientSocket)
+        PrivateCommand(str(IP), ClientSocket)
+    elif Message == "/port":
+        PrivateCommand(str(Port), ClientSocket)
+    elif Message == "/key":
+        PrivateCommand(str((d, N)), ClientSocket)
+    elif Message == "/dark":
+        PrivateBroadcast("/dark", ClientSocket)
     else:
-        PrivateBroadcast("Unknown Command", ClientSocket)
+        PrivateCommand("Unknown Command", ClientSocket)
 
 def Connect():
     global UserOnline, SpaceRemaining
@@ -212,7 +210,7 @@ def Connect():
         Username = ClientSocket.recv(1024).decode()
         Users.append(Username)
 
-        Message = "/add " + Username
+        Message = "/add " + " ".join(Users)
         Broadcast(Message)
 
         UserOnline += 1
