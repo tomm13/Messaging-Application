@@ -15,7 +15,7 @@ SpaceRemaining = UserCount
 
 HostName = socket.gethostname()
 IP = socket.gethostbyname(HostName)
-#IP = '192.168.1.123'
+IP = '192.168.1.119'
 Port = 0000
 
 Clients = []
@@ -193,8 +193,8 @@ def Command(Message, ClientSocket):
         PrivateCommand(str(Port), ClientSocket)
     elif Message == "/key":
         PrivateCommand(str((d, N)), ClientSocket)
-    elif Message == "/dark":
-        PrivateBroadcast("/dark", ClientSocket)
+    elif Message == "/theme":
+        PrivateBroadcast("/theme", ClientSocket)
     else:
         PrivateCommand("Unknown Command", ClientSocket)
 
