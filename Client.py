@@ -19,6 +19,8 @@ DarkMode = False
 StopRainbow = False
 AnimationRunning = False
 
+Mod = False
+
 WaitTime = 0.75
 LinesSent = 1
 
@@ -87,7 +89,7 @@ class Animations:
         Color = NewColor
 
         if OldColor == NewTextColor:
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can't change to the same color", (173, 216, 230)])
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can't change to the same color", AnimationColor])
             AnimateThread.start()
             return
 
@@ -116,7 +118,7 @@ class Animations:
 
             sleep(Rate)
 
-        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You changed the text colour", (173, 216, 230)])
+        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You changed the text colour", AnimationColor])
         AnimateThread.start()
 
         AnimationRunning = False
@@ -357,10 +359,10 @@ class Animations:
         MessageInput.text_color = Color
 
         if DarkMode == True:
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned Dark Mode on", (173, 216, 230)])
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned Dark Mode on", AnimationColor])
             AnimateThread.start()
         else:
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned Light Mode on", (173, 216, 230)])
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned Light Mode on", AnimationColor])
             AnimateThread.start()
 
 def SaveChatHistory(Location):
@@ -371,11 +373,11 @@ def SaveChatHistory(Location):
             File.write("\n")
         File.close()
 
-        AnimateThread = Thread(target=Animations.AnimateHeader, args=["Your file has been saved", (173, 216, 230)])
+        AnimateThread = Thread(target=Animations.AnimateHeader, args=["Your file has been saved", AnimationColor])
         AnimateThread.start()
 
     else:
-        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can't save to this location", (173, 216, 230)])
+        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can't save to this location", AnimationColor])
         AnimateThread.start()
 
 def RSADecrypt(Message):
@@ -392,9 +394,14 @@ def RSADecrypt(Message):
     return Message
 
 def AlwaysUpdate():
-    global LinesSent
+    global LinesSent, Mod, AnimationColor
     Users = []
     while True:
+        if Mod == True:
+            AnimationColor = (218, 165, 32)
+        else:
+            AnimationColor = (173, 216, 230)
+
         Message = s.recv(1024).decode()
         Message = RSADecrypt(Message)
 
@@ -425,12 +432,17 @@ def AlwaysUpdate():
 
         elif Message[0:8] == "/display":
             Message = Message[9:]
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=[Message, (173, 216, 230)])
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=[Message, AnimationColor])
             AnimateThread.start()
 
         elif Message == "/theme":
             AnimateThread = Thread(target=Animations.SwitchTheme, args=[""])
             AnimateThread.start()
+
+        elif Message == "/mod":
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You have been assigned as a Mod!", (218, 165, 32)])
+            AnimateThread.start()
+            Mod = True
 
         elif Message[0:6] == "/color":
             Color = Message[7:]
@@ -458,7 +470,7 @@ def SendToServer():
             Leave()
         else:
             if len(Message) + len(Username) + 2 >= 80:
-                AnimateThread = Thread(target=Animations.AnimateHeader, args=["Your message is too long.", (173, 216, 230)])
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["Your message is too long.", AnimationColor])
                 AnimateThread.start()
 
             else:
@@ -493,10 +505,10 @@ def Connect():
 
     #Override Inputs. Disable these for Proper functionality.
     Host = '192.168.1.138'
-    PortInput.value = 49126
-    Color = "black"
+    PortInput.value = 49125
+    Color = "lightblue"
     Username = "tomm"
-    PrivateKey = ["1373", "7199"]
+    PrivateKey = ["19421", "24617"]
 
     try:
         if PrivateKey[0] and PrivateKey[1]:
