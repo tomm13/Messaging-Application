@@ -4,7 +4,10 @@ import platform
 import socket
 from time import sleep
 from threading import Thread
+
+import colorutils
 from guizero import *
+from colorutils import Color
 
 s = socket.socket()
 
@@ -16,6 +19,8 @@ ChatroomOpened = False
 DarkMode = False
 StopRainbow = False
 AnimationRunning = False
+
+WaitTime = 0.75
 
 Location = " - "
 PrivateKey = ""
@@ -73,11 +78,54 @@ class Animations:
         self.Message = Message
         self.Color = Color
 
+    def FadeToColor(NewColor):
+        global AnimationRunning
+        global Color
+
+        OldColor = colorutils.Color(web=Color)
+        NewTextColor = colorutils.Color(web=NewColor)
+        Color = NewColor
+
+        if OldColor == NewTextColor:
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can't change to the Same Color", (173, 216, 230)])
+            AnimateThread.start()
+            return
+
+        while AnimationRunning == True:
+            sleep(WaitTime)
+        AnimationRunning = True
+
+        (R, G, B) = OldColor.rgb
+
+        while not R == NewTextColor.red or not G == NewTextColor.green or not B == NewTextColor.blue:
+            if R > NewTextColor.red:
+                R -= 1
+            if G > NewTextColor.green:
+                G -= 1
+            if B > NewTextColor.blue:
+                B -= 1
+            if R < NewTextColor.red:
+                R += 1
+            if G < NewTextColor.green:
+                G += 1
+            if B < NewTextColor.blue:
+                B += 1
+
+            History.text_color = (R, G, B)
+            MessageInput.text_color = (R, G, B)
+
+            sleep(Rate)
+
+        AnimateThread = Thread(target=Animations.AnimateHeader, args=["Colour Changed", (173, 216, 230)])
+        AnimateThread.start()
+
+        AnimationRunning = False
+
     def AnimateHeader(Message, Color):
         global AnimationRunning
 
         while AnimationRunning == True:
-            sleep(1)
+            sleep(WaitTime)
         AnimationRunning = True
 
         if DarkMode == False:
@@ -223,7 +271,7 @@ class Animations:
         global AnimationRunning
 
         while AnimationRunning == True:
-            sleep(1)
+            sleep(WaitTime)
         AnimationRunning = True
 
         if DarkMode == True:
@@ -308,6 +356,13 @@ class Animations:
         History.text_color = Color
         MessageInput.text_color = Color
 
+        if DarkMode == True:
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["Dark Mode Turned On", (173, 216, 230)])
+            AnimateThread.start()
+        else:
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["Light Mode Turned On", (173, 216, 230)])
+            AnimateThread.start()
+
 def SaveChatHistory():
     global Location
 
@@ -378,13 +433,11 @@ def AlwaysUpdate():
         elif Message == "/theme":
             AnimateThread = Thread(target=Animations.SwitchTheme, args=[""])
             AnimateThread.start()
-            sleep(0.1)
-            if DarkMode == True:
-                AnimateThread = Thread(target=Animations.AnimateHeader, args=["Light Mode Turned On", (173, 216, 230)])
-                AnimateThread.start()
-            else:
-                AnimateThread = Thread(target=Animations.AnimateHeader, args=["Dark Mode Turned On", (173, 216, 230)])
-                AnimateThread.start()
+
+        elif Message[0:6] == "/color":
+            Message = Message[7:]
+            AnimateThread = Thread(target=Animations.FadeToColor, args=[Message])
+            AnimateThread.start()
 
         else:
             ChatHistory.append(Message)
@@ -427,10 +480,10 @@ def Connect():
 
     #Override Inputs. Disable these for Proper functionality.
     Host = '192.168.1.138'
-    PortInput.value = 3389
+    PortInput.value = 49125
     Color = "lightblue"
     Username = "tomm"
-    PrivateKey = ["7347", "11269"]
+    PrivateKey = ["29659", "44923"]
 
     try:
         if PrivateKey[0] and PrivateKey[1]:
