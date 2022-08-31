@@ -116,7 +116,7 @@ class Animations:
 
             sleep(Rate)
 
-        AnimateThread = Thread(target=Animations.AnimateHeader, args=["Colour Changed", (173, 216, 230)])
+        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You changed the Text Colour", (173, 216, 230)])
         AnimateThread.start()
 
         AnimationRunning = False
@@ -357,29 +357,26 @@ class Animations:
         MessageInput.text_color = Color
 
         if DarkMode == True:
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["Dark Mode Turned On", (173, 216, 230)])
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned Dark Mode on", (173, 216, 230)])
             AnimateThread.start()
         else:
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["Light Mode Turned On", (173, 216, 230)])
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned Light Mode on", (173, 216, 230)])
             AnimateThread.start()
 
-def SaveChatHistory():
-    global Location
-
-    if Location and not Location == "Change Location":
+def SaveChatHistory(Location):
+    if Location and not " " in Location:
         File = open(Location, "w")
         for Chat in ChatHistory:
             File.write(Chat)
             File.write("\n")
         File.close()
 
-        History.append(("[Device] Saved Chat History in: " + Location))
-        Message = "has saved the chat"
-        s.send(Message.encode())
+        AnimateThread = Thread(target=Animations.AnimateHeader, args=["Your File has been saved", (173, 216, 230)])
+        AnimateThread.start()
 
     else:
-        Location = " - "
-        History.append("[Device] Saving Unsuccessful")
+        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can't save to this Location", (173, 216, 230)])
+        AnimateThread.start()
 
 def RSADecrypt(Message):
     Message = Message.split()
@@ -435,9 +432,14 @@ def AlwaysUpdate():
             AnimateThread.start()
 
         elif Message[0:6] == "/color":
-            Message = Message[7:]
-            AnimateThread = Thread(target=Animations.FadeToColor, args=[Message])
+            Color = Message[7:]
+            AnimateThread = Thread(target=Animations.FadeToColor, args=[Color])
             AnimateThread.start()
+
+        elif Message[0:5] == "/save":
+            Location = Message[6:]
+            SaveChatThread = Thread(target=SaveChatHistory, args=[Location])
+            SaveChatThread.start()
 
         else:
             ChatHistory.append(Message)
@@ -480,10 +482,10 @@ def Connect():
 
     #Override Inputs. Disable these for Proper functionality.
     Host = '192.168.1.138'
-    PortInput.value = 49125
-    Color = "lightblue"
+    PortInput.value = 49126
+    Color = "black"
     Username = "tomm"
-    PrivateKey = ["29659", "44923"]
+    PrivateKey = ["1373", "7199"]
 
     try:
         if PrivateKey[0] and PrivateKey[1]:
