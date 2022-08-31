@@ -15,7 +15,7 @@ SpaceRemaining = UserCount
 Hostname = socket.gethostname()
 IP = socket.gethostbyname(Hostname)
 #IP = ''
-Port = 49125
+Port = 49126
 
 Clients = []
 Users = []
@@ -192,9 +192,10 @@ def Command(Message, ClientSocket):
         PrivateBroadcast("/theme", ClientSocket)
     elif Message[0:6] == "/color":
         PrivateBroadcast(Message, ClientSocket)
+    elif Message[0:5] == "/save":
+        PrivateBroadcast(Message, ClientSocket)
     else:
         PrivateCommand("Unknown Command", ClientSocket)
-
 
 def Connect():
     global UserOnline, SpaceRemaining
