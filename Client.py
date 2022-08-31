@@ -67,304 +67,246 @@ class Texts(Text):
         self.text_size = text_size
         self.text_color = text_color
 
-def AnimateHeader(Message, Color):
-    global AnimationRunning
+class Animations:
+    # Stores all Animations
+    def __init__(self, Message, Color):
+        self.Message = Message
+        self.Color = Color
 
-    while AnimationRunning == True:
-        sleep(1)
-    AnimationRunning = True
+    def AnimateHeader(Message, Color):
+        global AnimationRunning
 
-    if DarkMode == False:
-        R = 0
-        G = 0
-        B = 0
+        while AnimationRunning == True:
+            sleep(1)
+        AnimationRunning = True
 
-        while not R == 255 or not G == 255 or not B == 255:
-            # Text fades from any colour to white
-            if R < 255:
-                R += 1
-            if G < 255:
-                G += 1
-            if B < 255:
-                B += 1
-
-            DisplayHeader.text_color = (R, G, B)
-            sleep(Rate)
-
-        DisplayHeader.value = Message
-
-        while not R == Color[0] or not G == Color[1] or not B == Color[2]:
-            # Fades background from white to color
-            if R > Color[0]:
-                R -= 1
-            if G > Color[1]:
-                G -= 1
-            if B > Color[2]:
-                B -= 1
-
-            DisplayHeader.bg = (R, G, B)
-            sleep(Rate)
-
-        sleep(1)
-
-        while not R == 255 or not G == 255 or not B == 255:
-            # Fades background from color to white
-            if R < 255:
-                R += 1
-            if B < 255:
-                B += 1
-            if G < 255:
-                G += 1
-
-            DisplayHeader.bg = (R, G, B)
-            sleep(Rate)
-
-        DisplayHeader.value = "Welcome " + Username
-
-        while not R == 0 or not G == 0 or not B == 0:
-            # Text fades from white to black
-            if R > 0:
-                R -= 1
-            if G > 0:
-                G -= 1
-            if B > 0:
-                B -= 1
-
-            DisplayHeader.text_color = (R, G, B)
-            sleep(Rate)
-
-    else:
-        R = 255
-        G = 255
-        B = 255
-
-        while not R == 70 or not G == 70 or not B == 70:
-            # Text fades from any colour to black
-            if R > 70:
-                R -= 1
-            if G > 70:
-                G -= 1
-            if B > 70:
-                B -= 1
-            if R < 70:
-                R += 1
-            if G < 70:
-                G += 1
-            if B < 70:
-                B += 1
-
-            DisplayHeader.text_color = (R, G, B)
-            sleep(Rate)
-
-        DisplayHeader.value = Message
-
-        while not R == Color[0] or not G == Color[1] or not B == Color[2]:
-            # Fades background from black to color
-            if R < Color[0]:
-                R += 1
-            if G < Color[1]:
-                G += 1
-            if B < Color[2]:
-                B += 1
-            if R > Color[0]:
-                R -= 1
-            if G > Color[1]:
-                G -= 1
-            if B > Color[2]:
-                B -= 1
-
-            DisplayHeader.bg = (R, G, B)
-            sleep(Rate)
-
-        sleep(1)
-
-        while not R == 70 or not G == 70 or not B == 70:
-            # Fades background from color to black
-            if R > 70:
-                R -= 1
-            if B > 70:
-                B -= 1
-            if G > 70:
-                G -= 1
-            if R < 70:
-                R += 1
-            if B < 70:
-                B += 1
-            if G < 70:
-                G += 1
-
-            DisplayHeader.bg = (R, G, B)
-            sleep(Rate)
-
-        DisplayHeader.value = "Welcome " + Username
-
-        while not R == 255 or not G == 255 or not B == 255:
-            # Text fades from black to white
-            if R < 255:
-                R += 1
-            if G < 255:
-                G += 1
-            if B < 255:
-                B += 1
-
-            DisplayHeader.text_color = (R, G, B)
-            sleep(Rate)
-
-    AnimationRunning = False
-
-def InfiniteRainbow(Element):
-    R = 255
-    G = 0
-    B = 0
-
-    while True:
-        if StopRainbow == False:
-            while not G == 255:
-                G += 1
-
-                RGB = (R, G, B)
-
-                Element.text_color = RGB
-                sleep(Rate)
-
-            while not R == 0:
-                R -= 1
-
-                RGB = (R, G, B)
-
-                Element.text_color = RGB
-                sleep(Rate)
-
-            while not B == 255:
-                B += 1
-
-                RGB = (R, G, B)
-
-                Element.text_color = RGB
-                sleep(Rate)
-            while not G == 0:
-                G -= 1
-
-                RGB = (R, G, B)
-
-                Element.text_color = RGB
-                sleep(Rate)
-
-            while not R == 255:
-                R += 1
-
-                RGB = (R, G, B)
-
-                Element.text_color = RGB
-                sleep(Rate)
-
-            while not B == 0:
-                B -= 1
-
-                RGB = (R, G, B)
-
-                Element.text_color = RGB
-                sleep(Rate)
-        else:
-            while not G == 255 and not B == 255:
-                G += 1
-                B += 1
-
-                RGB = (R, G, B)
-                Element.text_color = RGB
-                sleep(Rate)
-
-            break
-
-def SwitchTheme():
-    global DarkMode
-    global AnimationRunning
-
-    while AnimationRunning == True:
-        sleep(1)
-    AnimationRunning = True
-
-    if DarkMode == True:
-        while DarkMode == True:
-            #To turn Dark Mode off
-            R = 255
-            G = 255
-            B = 255
-
-            while not (R, G, B) == (0, 0, 0):
-                #Text Fades to Black
-                R -= 1
-                G -= 1
-                B -= 1
-
-                UserList.text_color = (R, G, B)
-                DisplayHeader.text_color = (R, G, B)
-
-            while not (R, G, B) == (215, 215, 215):
-                #All backgrounds fade from black to white
-                R += 1
-                G += 1
-                B += 1
-
-                DisplayHeader.bg = (R, G, B)
-                History.bg = (R, G, B)
-                MessageInput.bg = (R, G, B)
-                UserList.bg = (R, G, B)
-                sleep(Rate)
-
-            while not (R, G, B) == (255, 255, 255):
-                R += 1
-                G += 1
-                B += 1
-
-                DisplayHeader.bg = (R, G, B)
-                History.bg = (R, G, B)
-                MessageInput.bg = (R, G, B)
-                sleep(Rate)
-
-            DarkMode = False
-
-    else:
-        while DarkMode == False:
-            #To turn Dark Mode on
+        if DarkMode == False:
             R = 0
             G = 0
             B = 0
 
-            while not (R, G, B) == (255, 255, 255):
-                #Text Fades to White
-                R += 1
-                G += 1
-                B += 1
+            while not R == 255 or not G == 255 or not B == 255:
+                # Text fades from any colour to white
+                if R < 255:
+                    R += 1
+                if G < 255:
+                    G += 1
+                if B < 255:
+                    B += 1
 
-                UserList.text_color = (R, G, B)
                 DisplayHeader.text_color = (R, G, B)
+                sleep(Rate)
 
-            while not (R, G, B) == (70, 70, 70):
-                #All Background fade to grey
-                R -= 1
-                G -= 1
-                B -= 1
+            DisplayHeader.value = Message
 
-                MessageInput.bg = (R, G, B)
-                History.bg = (R, G, B)
+            while not R == Color[0] or not G == Color[1] or not B == Color[2]:
+                # Fades background from white to color
+                if R > Color[0]:
+                    R -= 1
+                if G > Color[1]:
+                    G -= 1
+                if B > Color[2]:
+                    B -= 1
+
                 DisplayHeader.bg = (R, G, B)
-                UserList.bg = (R, G, B)
                 sleep(Rate)
 
-            while not (R, G, B) == (40, 40, 40):
-                R -= 1
-                G -= 1
-                B -= 1
+            sleep(1)
 
-                UserList.bg = (R, G, B)
+            while not R == 255 or not G == 255 or not B == 255:
+                # Fades background from color to white
+                if R < 255:
+                    R += 1
+                if B < 255:
+                    B += 1
+                if G < 255:
+                    G += 1
+
+                DisplayHeader.bg = (R, G, B)
                 sleep(Rate)
 
-            DarkMode = True
+            DisplayHeader.value = "Welcome " + Username
 
-    AnimationRunning = False
-    History.text_color = Color
-    MessageInput.text_color = Color
+            while not R == 0 or not G == 0 or not B == 0:
+                # Text fades from white to black
+                if R > 0:
+                    R -= 1
+                if G > 0:
+                    G -= 1
+                if B > 0:
+                    B -= 1
+
+                DisplayHeader.text_color = (R, G, B)
+                sleep(Rate)
+
+        else:
+            R = 255
+            G = 255
+            B = 255
+
+            while not R == 70 or not G == 70 or not B == 70:
+                # Text fades from any colour to black
+                if R > 70:
+                    R -= 1
+                if G > 70:
+                    G -= 1
+                if B > 70:
+                    B -= 1
+                if R < 70:
+                    R += 1
+                if G < 70:
+                    G += 1
+                if B < 70:
+                    B += 1
+
+                DisplayHeader.text_color = (R, G, B)
+                sleep(Rate)
+
+            DisplayHeader.value = Message
+
+            while not R == Color[0] or not G == Color[1] or not B == Color[2]:
+                # Fades background from black to color
+                if R < Color[0]:
+                    R += 1
+                if G < Color[1]:
+                    G += 1
+                if B < Color[2]:
+                    B += 1
+                if R > Color[0]:
+                    R -= 1
+                if G > Color[1]:
+                    G -= 1
+                if B > Color[2]:
+                    B -= 1
+
+                DisplayHeader.bg = (R, G, B)
+                sleep(Rate)
+
+            sleep(1)
+
+            while not R == 70 or not G == 70 or not B == 70:
+                # Fades background from color to black
+                if R > 70:
+                    R -= 1
+                if B > 70:
+                    B -= 1
+                if G > 70:
+                    G -= 1
+                if R < 70:
+                    R += 1
+                if B < 70:
+                    B += 1
+                if G < 70:
+                    G += 1
+
+                DisplayHeader.bg = (R, G, B)
+                sleep(Rate)
+
+            DisplayHeader.value = "Welcome " + Username
+
+            while not R == 255 or not G == 255 or not B == 255:
+                # Text fades from black to white
+                if R < 255:
+                    R += 1
+                if G < 255:
+                    G += 1
+                if B < 255:
+                    B += 1
+
+                DisplayHeader.text_color = (R, G, B)
+                sleep(Rate)
+
+        AnimationRunning = False
+
+    def SwitchTheme(self):
+        global DarkMode
+        global AnimationRunning
+
+        while AnimationRunning == True:
+            sleep(1)
+        AnimationRunning = True
+
+        if DarkMode == True:
+            while DarkMode == True:
+                #To turn Dark Mode off
+                R = 255
+                G = 255
+                B = 255
+
+                while not (R, G, B) == (0, 0, 0):
+                    #Text Fades to Black
+                    R -= 1
+                    G -= 1
+                    B -= 1
+
+                    UserList.text_color = (R, G, B)
+                    DisplayHeader.text_color = (R, G, B)
+
+                while not (R, G, B) == (215, 215, 215):
+                    #All backgrounds fade from black to white
+                    R += 1
+                    G += 1
+                    B += 1
+
+                    DisplayHeader.bg = (R, G, B)
+                    History.bg = (R, G, B)
+                    MessageInput.bg = (R, G, B)
+                    UserList.bg = (R, G, B)
+                    sleep(Rate)
+
+                while not (R, G, B) == (255, 255, 255):
+                    R += 1
+                    G += 1
+                    B += 1
+
+                    DisplayHeader.bg = (R, G, B)
+                    History.bg = (R, G, B)
+                    MessageInput.bg = (R, G, B)
+                    sleep(Rate)
+
+                DarkMode = False
+
+        else:
+            while DarkMode == False:
+                #To turn Dark Mode on
+                R = 0
+                G = 0
+                B = 0
+
+                while not (R, G, B) == (255, 255, 255):
+                    #Text Fades to White
+                    R += 1
+                    G += 1
+                    B += 1
+
+                    UserList.text_color = (R, G, B)
+                    DisplayHeader.text_color = (R, G, B)
+
+                while not (R, G, B) == (70, 70, 70):
+                    #All Background fade to grey
+                    R -= 1
+                    G -= 1
+                    B -= 1
+
+                    MessageInput.bg = (R, G, B)
+                    History.bg = (R, G, B)
+                    DisplayHeader.bg = (R, G, B)
+                    UserList.bg = (R, G, B)
+                    sleep(Rate)
+
+                while not (R, G, B) == (40, 40, 40):
+                    R -= 1
+                    G -= 1
+                    B -= 1
+
+                    UserList.bg = (R, G, B)
+                    sleep(Rate)
+
+                DarkMode = True
+
+        AnimationRunning = False
+        History.text_color = Color
+        MessageInput.text_color = Color
 
 def SaveChatHistory():
     global Location
@@ -415,7 +357,7 @@ def AlwaysUpdate():
                     UserList.append(User)
                     Users.append(User)
                     Message = User + " has connected"
-                    AnimateThread = Thread(target=AnimateHeader, args=[Message, (124, 252, 0)])
+                    AnimateThread = Thread(target=Animations.AnimateHeader, args=[Message, (124, 252, 0)])
                     AnimateThread.start()
                 else:
                     UserList.append(User)
@@ -425,23 +367,23 @@ def AlwaysUpdate():
             UserList.remove(Message)
             Users.remove(Message)
             Message = Message + " has disconnected"
-            AnimateThread = Thread(target=AnimateHeader, args=[Message, (216, 36, 41)])
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=[Message, (216, 36, 41)])
             AnimateThread.start()
 
         elif Message[0:8] == "/display":
             Message = Message[9:]
-            AnimateThread = Thread(target=AnimateHeader, args=[Message, (173, 216, 230)])
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=[Message, (173, 216, 230)])
             AnimateThread.start()
 
         elif Message == "/theme":
-            AnimateThread = Thread(target=SwitchTheme)
+            AnimateThread = Thread(target=Animations.SwitchTheme, args=[""])
             AnimateThread.start()
             sleep(0.1)
             if DarkMode == True:
-                AnimateThread = Thread(target=AnimateHeader, args=["Light Mode Turned On", (173, 216, 230)])
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["Light Mode Turned On", (173, 216, 230)])
                 AnimateThread.start()
             else:
-                AnimateThread = Thread(target=AnimateHeader, args=["Dark Mode Turned On", (173, 216, 230)])
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["Dark Mode Turned On", (173, 216, 230)])
                 AnimateThread.start()
 
         else:
