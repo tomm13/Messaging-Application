@@ -7,7 +7,6 @@ from threading import Thread
 
 import colorutils
 from guizero import *
-from colorutils import Color
 
 s = socket.socket()
 
@@ -21,6 +20,7 @@ StopRainbow = False
 AnimationRunning = False
 
 WaitTime = 0.75
+LinesSent = 1
 
 Location = " - "
 PrivateKey = ""
@@ -87,7 +87,7 @@ class Animations:
         Color = NewColor
 
         if OldColor == NewTextColor:
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can't change to the Same Color", (173, 216, 230)])
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can't change to the same color", (173, 216, 230)])
             AnimateThread.start()
             return
 
@@ -116,7 +116,7 @@ class Animations:
 
             sleep(Rate)
 
-        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You changed the Text Colour", (173, 216, 230)])
+        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You changed the text colour", (173, 216, 230)])
         AnimateThread.start()
 
         AnimationRunning = False
@@ -371,11 +371,11 @@ def SaveChatHistory(Location):
             File.write("\n")
         File.close()
 
-        AnimateThread = Thread(target=Animations.AnimateHeader, args=["Your File has been saved", (173, 216, 230)])
+        AnimateThread = Thread(target=Animations.AnimateHeader, args=["Your file has been saved", (173, 216, 230)])
         AnimateThread.start()
 
     else:
-        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can't save to this Location", (173, 216, 230)])
+        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can't save to this location", (173, 216, 230)])
         AnimateThread.start()
 
 def RSADecrypt(Message):
@@ -392,6 +392,7 @@ def RSADecrypt(Message):
     return Message
 
 def AlwaysUpdate():
+    global LinesSent
     Users = []
     while True:
         Message = s.recv(1024).decode()
@@ -442,6 +443,11 @@ def AlwaysUpdate():
             SaveChatThread.start()
 
         else:
+            LinesSent += 1
+            if LinesSent > 15:
+                History.clear()
+                LinesSent = 2
+
             ChatHistory.append(Message)
             History.append(Message)
 
@@ -451,8 +457,13 @@ def SendToServer():
         if Message == "/leave":
             Leave()
         else:
-            s.send(Message.encode())
-            MessageInput.clear()
+            if len(Message) + len(Username) + 2 >= 80:
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["Your message is too long.", (173, 216, 230)])
+                AnimateThread.start()
+
+            else:
+                s.send(Message.encode())
+                MessageInput.clear()
 
 def Leave():
     s.send(("/leave").encode())
@@ -582,7 +593,7 @@ def OpenChat():
 
     ##Threads start here
 
-    global ListeningThread, AnimationThread
+    global ListeningThread
     ListeningThread = Thread(target=AlwaysUpdate)
     ListeningThread.start()
 
