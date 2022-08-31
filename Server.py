@@ -14,7 +14,8 @@ SpaceRemaining = UserCount
 
 Hostname = socket.gethostname()
 IP = socket.gethostbyname(Hostname)
-Port = 3389
+#IP = ''
+Port = 49125
 
 Clients = []
 Users = []
@@ -114,25 +115,19 @@ def Broadcast(Message):
     for Client in Clients:
         Client.send(Message.encode())
 
-
 def PrivateBroadcast(Message, ClientSocket):
     # Sends a Private Message to 1 Specfic Client, not for Animating Purposes.
     time.sleep(0.1)
-    print("[Private] " + Message)
 
     Message = RSAEncrypt(Message)
     ClientSocket.send(Message.encode())
-
 
 def PrivateCommand(Message, ClientSocket):
     # Sends "/display", which tells 1 specific Client to Animate it's banner
     time.sleep(0.1)
     Message = "/display " + Message
-    print("[Private Display] " + Message)
-
     Message = RSAEncrypt(Message)
     ClientSocket.send(Message.encode())
-
 
 def RemoveUser(Username, ClientSocket):
     global UserOnline, Clients, Users
@@ -145,14 +140,13 @@ def RemoveUser(Username, ClientSocket):
 
     UserOnline -= 1
 
-
 def Listen(ClientSocket):
     global UserOnline, Clients, Users
     while True:
-        Index = Clients.index(ClientSocket)
-        Username = Users[Index]
-
         try:
+            Index = Clients.index(ClientSocket)
+            Username = Users[Index]
+
             Message = ClientSocket.recv(1024).decode()
             UnifiedMessage = Username + ": " + Message
 
@@ -166,7 +160,7 @@ def Listen(ClientSocket):
                 else:
                     Broadcast(UnifiedMessage)
 
-        except ConnectionResetError:
+        except:
             RemoveUser(Username, ClientSocket)
             break
 
@@ -181,18 +175,23 @@ def Command(Message, ClientSocket):
         else:
             for User in Users:
                 PrivateCommand(str(User), ClientSocket)
-                time.sleep(3)
+                time.sleep(0.1)
 
     elif Message == "/spaceleft":
         PrivateCommand(str(SpaceRemaining), ClientSocket)
     elif Message == "/ip":
-        PrivateCommand(str(IP), ClientSocket)
+        if not IP == "":
+            PrivateCommand(str(IP), ClientSocket)
+        else:
+            PrivateCommand("35.242.179.43", ClientSocket)
     elif Message == "/port":
         PrivateCommand(str(Port), ClientSocket)
     elif Message == "/key":
         PrivateCommand(str((d, N)), ClientSocket)
     elif Message == "/theme":
         PrivateBroadcast("/theme", ClientSocket)
+    elif Message[0:6] == "/color":
+        PrivateBroadcast(Message, ClientSocket)
     else:
         PrivateCommand("Unknown Command", ClientSocket)
 
