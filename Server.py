@@ -1,4 +1,4 @@
-##30/8/2022
+##31/8/2022
 ##V13 Beta
 
 import socket
@@ -8,15 +8,13 @@ import random
 
 s = socket.socket()
 
-#UserCount = int(input("Enter maximum number of users"))
 UserCount = 1000
 UserOnline = 0
 SpaceRemaining = UserCount
 
-HostName = socket.gethostname()
-IP = socket.gethostbyname(HostName)
-IP = '192.168.1.119'
-Port = 0000
+Hostname = socket.gethostname()
+IP = socket.gethostbyname(Hostname)
+Port = 3389
 
 Clients = []
 Users = []
@@ -75,11 +73,11 @@ def GetKey():
             eFactors.remove(1)
 
         if len(eFactors) == 1 and eFactors[0] not in PhiNFactors and eFactors[0] not in NFactors:
-            #print("[Server] Public Key =", (e, N))
+            # print("[Server] Public Key =", (e, N))
             break
 
     for k in range(1, 2 * Maximum):
-        if (k * PhiN + 1 ) % e == 0:
+        if (k * PhiN + 1) % e == 0:
             if not (k * PhiN + 1) // e == e:
                 global d
                 d = (k * PhiN + 1) // e
@@ -88,6 +86,7 @@ def GetKey():
     print("[Private] Private Key =", (d, N))
 
     Connect()
+
 
 def RSAEncrypt(Message):
     RSAEncryptedMessage = []
@@ -100,19 +99,14 @@ def RSAEncrypt(Message):
     Message = str("".join(RSAEncryptedMessage))
     return Message
 
+
 def GeneratePort():
-    for PortTest in range(49125, 65535):
-        try:
-            global Port
-            s.bind((IP, PortTest))
-            Port = PortTest
-            print("[Server] Server Hosted on " + str(IP) + " with Port " + str(Port))
-            break
-        except OSError:
-            pass
+    s.bind((IP, Port))
+    print("[Server] Server Hosted on " + str(IP) + " with Port " + str(Port))
+
 
 def Broadcast(Message):
-    #Sends a Public Message to all Connected Clients, not for Animating Purposes
+    # Sends a Public Message to all Connected Clients, not for Animating Purposes
     time.sleep(0.1)
     print("[Client] " + Message)
 
@@ -120,16 +114,18 @@ def Broadcast(Message):
     for Client in Clients:
         Client.send(Message.encode())
 
+
 def PrivateBroadcast(Message, ClientSocket):
-    #Sends a Private Message to 1 Specfic Client, not for Animating Purposes.
+    # Sends a Private Message to 1 Specfic Client, not for Animating Purposes.
     time.sleep(0.1)
     print("[Private] " + Message)
 
     Message = RSAEncrypt(Message)
     ClientSocket.send(Message.encode())
 
+
 def PrivateCommand(Message, ClientSocket):
-    #Sends "/display", which tells 1 specific Client to Animate it's banner
+    # Sends "/display", which tells 1 specific Client to Animate it's banner
     time.sleep(0.1)
     Message = "/display " + Message
     print("[Private Display] " + Message)
@@ -137,7 +133,8 @@ def PrivateCommand(Message, ClientSocket):
     Message = RSAEncrypt(Message)
     ClientSocket.send(Message.encode())
 
-def RemoveUser(ClientSocket, Username):
+
+def RemoveUser(Username, ClientSocket):
     global UserOnline, Clients, Users
     LeavingUser = Username
     Clients.remove(ClientSocket)
@@ -147,6 +144,7 @@ def RemoveUser(ClientSocket, Username):
     Broadcast(Message)
 
     UserOnline -= 1
+
 
 def Listen(ClientSocket):
     global UserOnline, Clients, Users
@@ -161,7 +159,7 @@ def Listen(ClientSocket):
             if Message:
                 if Message[0] == "/":
                     if Message == "/leave":
-                        RemoveUser(ClientSocket, Username)
+                        RemoveUser(Username, ClientSocket)
                         break
                     else:
                         Command(Message, ClientSocket)
@@ -169,7 +167,7 @@ def Listen(ClientSocket):
                     Broadcast(UnifiedMessage)
 
         except ConnectionResetError:
-            RemoveUser(ClientSocket, Username)
+            RemoveUser(Username, ClientSocket)
             break
 
 def Command(Message, ClientSocket):
@@ -198,25 +196,31 @@ def Command(Message, ClientSocket):
     else:
         PrivateCommand("Unknown Command", ClientSocket)
 
+
 def Connect():
     global UserOnline, SpaceRemaining
     GeneratePort()
     s.listen()
     for i in range(UserCount):
-        global ClientSocket
-        ClientSocket, Address = s.accept()
-        Clients.append(ClientSocket)
+        try:
+            global ClientSocket
+            ClientSocket, Address = s.accept()
+            Clients.append(ClientSocket)
 
-        Username = ClientSocket.recv(1024).decode()
-        Users.append(Username)
+            Username = ClientSocket.recv(1024).decode()
+            Users.append(Username)
 
-        Message = "/add " + " ".join(Users)
-        Broadcast(Message)
+            Message = "/add " + " ".join(Users)
+            Broadcast(Message)
 
-        UserOnline += 1
-        SpaceRemaining -= 1
+            UserOnline += 1
+            SpaceRemaining -= 1
 
-        ListeningThread = Thread(target = Listen, args = [ClientSocket])
-        ListeningThread.start()
+            ListeningThread = Thread(target=Listen, args=[ClientSocket])
+            ListeningThread.start()
+
+        except:
+            RemoveUser(Username, ClientSocket)
+            pass
 
 GetKey()
