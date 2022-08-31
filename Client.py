@@ -36,31 +36,36 @@ class Boxes(Box):
 
 class Buttons(PushButton):
     # This is for UI design. Allows easier creation of button instances.
-    def __init__(self, master, text, width, height, align, command):
-        super().__init__(master, text=text, width=width, height=height, align=align, command=command)
+    def __init__(self, master, text, command):
+        super().__init__(master, text=text, command=command)
         self.text = text
-        self.width = width
-        self.height = height
-        self.align = align
         self.command = command
 
 
 class Blockers(Box):
-    # This is for UI design. Generally used for Invisible Padding Boxes.
+    # This is for UI design. Generally used for Invisible Padding Boxes. Have no align.
     def __init__(self, master, width, height):
         super().__init__(master, width=width, height=height)
         self.width = width
         self.height = height
 
 
-class InputTextBoxes(TextBox):
-    # Allows for creation of User-input instances
+class TextBoxes(TextBox):
+    # Allows for creation of TextBoxes
     def __init__(self, master, text):
         super().__init__(master, text=text, width="fill")
         self.text = text
         self.text_size = 16
         self.text_color = "lightblue"
         self.bg = (40, 40, 40)
+
+class Texts(Text):
+    # Allows for creation of Text Objects
+    def __init__(self, master, text, text_size, text_color):
+        super().__init__(master, text=text)
+        self.text = text
+        self.text_size = text_size
+        self.text_color = text_color
 
 def AnimateHeader(Message, Color):
     global AnimationRunning
@@ -261,7 +266,7 @@ def InfiniteRainbow(Element):
                 Element.text_color = RGB
                 sleep(Rate)
         else:
-            while (not G == 255) and (not B == 255):
+            while not G == 255 and not B == 255:
                 G += 1
                 B += 1
 
@@ -270,7 +275,6 @@ def InfiniteRainbow(Element):
                 sleep(Rate)
 
             break
-
 
 def SwitchTheme():
     global DarkMode
@@ -423,7 +427,6 @@ def AlwaysUpdate():
             AnimateThread = Thread(target=AnimateHeader, args=[Message, (216, 36, 41)])
             AnimateThread.start()
 
-
         elif Message[0:8] == "/display":
             Message = Message[9:]
             AnimateThread = Thread(target=AnimateHeader, args=[Message, (173, 216, 230)])
@@ -434,13 +437,14 @@ def AlwaysUpdate():
             AnimateThread.start()
             sleep(0.1)
             if DarkMode == True:
-                AnimateThread = Thread(target=AnimateHeader, args=["Dark Mode Turned On", (173, 216, 230)])
+                AnimateThread = Thread(target=AnimateHeader, args=["Light Mode Turned On", (173, 216, 230)])
                 AnimateThread.start()
             else:
-                AnimateThread = Thread(target=AnimateHeader, args=["Light Mode Turned On", (173, 216, 230)])
+                AnimateThread = Thread(target=AnimateHeader, args=["Dark Mode Turned On", (173, 216, 230)])
                 AnimateThread.start()
 
         else:
+            ChatHistory.append(Message)
             History.append(Message)
 
 def SendToServer():
@@ -553,23 +557,24 @@ def OpenChat():
     UserList.text_size = 18
 
     global DisplayHeader
-    DisplayHeader = Text(Header, text=("Welcome " + Username), width="fill")
+    DisplayHeader = Texts(Header, ("Welcome " + Username), 30, (0, 0, 0))
     DisplayHeader.bg = (255, 255, 255)
-    DisplayHeader.text_size = 30
+    DisplayHeader.width = "fill"
 
     HistoryBlocker = Boxes(UserBox, 3, "fill", "left")
 
     global History
-    History = TextBox(UserBox, text="Hi!", width="fill", height="fill", multiline=True, align="left")
+    History = TextBox(UserBox, "Hi!", "fill", height="fill", multiline=True, align="left")
     History.text_color = Color
     History.bg = (255, 255, 255)
     History.text_size = 22
     History.disable()
 
     global SendButton
-    SendButton = PushButton(ButtonBox, text="Send", command=SendToServer, align="right")
+    SendButton = Buttons(ButtonBox, "Send", SendToServer)
     SendButton.text_color = (0, 0, 0)
     SendButton.bg = (255, 255, 255)
+    SendButton.align = "right"
 
     global MessageInput
     MessageInput = TextBox(ButtonBox, width="fill", height="fill", align="bottom")
@@ -589,7 +594,7 @@ def OpenChat():
     Chatroom.show()
 
 def OpenConnectWindow():
-    global ConnectWindow, ConnectWindowOpened
+    global ConnectWindow, ConnectWindowOpened, Status
 
     ConnectWindow = App(title="Connect To Server", height=275, width=800)
     ConnectWindow.bg = (70, 70, 70)
@@ -600,15 +605,12 @@ def OpenConnectWindow():
     RightPadding = Boxes(ConnectWindow, 16, "fill", "right")
     VerifyBox = Boxes(ConnectWindow, 400, 150, "right")
 
-    global Status
-    Status = Text(VerifyBox, text="Not Connected")
-    Status.text_size = 34
-    Status.text_color = "white"
+    Status = Texts(VerifyBox, "Not Connected", 34, (255, 255, 255))
 
     LeftBlocker = Boxes(InputBox, "fill", 60, "top")
     RightBlocker = Boxes(VerifyBox, "fill", 40, "top")
 
-    AttemptConnect = PushButton(VerifyBox, text="Connect", command=Connect)
+    AttemptConnect = Buttons(VerifyBox, text="Connect", command=Connect)
     AttemptConnect.text_size = 16
 
     global UsernameInput, ColorInput, HostInput, PortInput, KeyInput
@@ -623,11 +625,11 @@ def OpenConnectWindow():
     PortInputBox = Blockers(InputBox, 230, 30)
     KeyBlocker = Boxes(InputBox, 15, 30, "right")
     KeyInputBox = Blockers(InputBox, 215, 30)
-    UsernameInput = InputTextBoxes(UsernameInputBox, "Username")
-    ColorInput = InputTextBoxes(ColorInputBox, "Chat Color")
-    HostInput = InputTextBoxes(HostInputBox, "Host IP")
-    PortInput = InputTextBoxes(PortInputBox, "Port")
-    KeyInput = InputTextBoxes(KeyInputBox, "Private Key")
+    UsernameInput = TextBoxes(UsernameInputBox, "Username")
+    ColorInput = TextBoxes(ColorInputBox, "Chat Color")
+    HostInput = TextBoxes(HostInputBox, "Host IP")
+    PortInput = TextBoxes(PortInputBox, "Port")
+    KeyInput = TextBoxes(KeyInputBox, "Private Key")
 
     ConnectWindowOpened = True
     ConnectWindow.display()
