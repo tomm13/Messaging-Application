@@ -5,7 +5,6 @@ import socket
 from time import sleep
 from threading import Thread
 from guizero import *
-from platform import system
 
 s = socket.socket()
 
