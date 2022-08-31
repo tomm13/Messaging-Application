@@ -297,6 +297,7 @@ def SwitchTheme():
                 G -= 1
                 B -= 1
 
+                UserList.text_color = (R, G, B)
                 DisplayHeader.text_color = (R, G, B)
 
             while not (R, G, B) == (215, 215, 215):
@@ -336,6 +337,7 @@ def SwitchTheme():
                 G += 1
                 B += 1
 
+                UserList.text_color = (R, G, B)
                 DisplayHeader.text_color = (R, G, B)
 
             while not (R, G, B) == (70, 70, 70):
@@ -361,7 +363,6 @@ def SwitchTheme():
             DarkMode = True
 
     AnimationRunning = False
-    UserList.text_color = Color
     History.text_color = Color
     MessageInput.text_color = Color
 
@@ -552,7 +553,7 @@ def OpenChat():
 
     global UserList
     UserList = ListBox(UserBox, items=["Users Online:"], width=150, height="fill", align="left")
-    UserList.text_color = Color
+    UserList.text_color = (0, 0, 0)
     UserList.bg = (215, 215, 215)
     UserList.text_size = 18
 
