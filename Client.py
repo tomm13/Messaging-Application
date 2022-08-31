@@ -1,17 +1,13 @@
-##30/8/2022
+##31/8/2022
 ##V13 Beta
-
+import platform
 import socket
 from time import sleep
 from threading import Thread
 from guizero import *
+from platform import system
 
 s = socket.socket()
-
-Host = '192.168.1.138'
-Port = 0000
-Username = "tomm"
-Color = "rainbow"
 
 ChatHistory = []
 
@@ -20,12 +16,15 @@ ChatroomOpened = False
 
 DarkMode = False
 StopRainbow = False
-
-IdentifiedSelf = False
+AnimationRunning = False
 
 Location = " - "
 PrivateKey = ""
 
+if platform.system() == "Darwin":
+    Rate = 0.00025
+elif platform.system() == "Windows":
+    Rate = 0.00000
 
 class Boxes(Box):
     # This is for UI design. This allows creations of box instances.
@@ -47,8 +46,8 @@ class Buttons(PushButton):
         self.command = command
 
 
-class InputBoxes(Box):
-    # This is for UI design. This creates space for the User-input textboxes to fit in.
+class Blockers(Box):
+    # This is for UI design. Generally used for Invisible Padding Boxes.
     def __init__(self, master, width, height):
         super().__init__(master, width=width, height=height)
         self.width = width
@@ -64,14 +63,18 @@ class InputTextBoxes(TextBox):
         self.text_color = "lightblue"
         self.bg = (40, 40, 40)
 
-
 def AnimateHeader(Message, Color):
-    R = 0
-    G = 0
-    B = 0
-    Rate = 0.00125
+    global AnimationRunning
+
+    while AnimationRunning == True:
+        sleep(1)
+    AnimationRunning = True
 
     if DarkMode == False:
+        R = 0
+        G = 0
+        B = 0
+
         while not R == 255 or not G == 255 or not B == 255:
             # Text fades from any colour to white
             if R < 255:
@@ -127,6 +130,10 @@ def AnimateHeader(Message, Color):
             sleep(Rate)
 
     else:
+        R = 255
+        G = 255
+        B = 255
+
         while not R == 70 or not G == 70 or not B == 70:
             # Text fades from any colour to black
             if R > 70:
@@ -199,11 +206,13 @@ def AnimateHeader(Message, Color):
             DisplayHeader.text_color = (R, G, B)
             sleep(Rate)
 
+    AnimationRunning = False
+
 def InfiniteRainbow(Element):
     R = 255
     G = 0
     B = 0
-    Rate = 0.0025
+
     while True:
         if StopRainbow == False:
             while not G == 255:
@@ -266,14 +275,29 @@ def InfiniteRainbow(Element):
 
 def SwitchTheme():
     global DarkMode
-    Rate = 0.00125
+    global AnimationRunning
+
+    while AnimationRunning == True:
+        sleep(1)
+    AnimationRunning = True
+
     if DarkMode == True:
         while DarkMode == True:
-            R = 0
-            G = 0
-            B = 0
+            #To turn Dark Mode off
+            R = 255
+            G = 255
+            B = 255
+
+            while not (R, G, B) == (0, 0, 0):
+                #Text Fades to Black
+                R -= 1
+                G -= 1
+                B -= 1
+
+                DisplayHeader.text_color = (R, G, B)
 
             while not (R, G, B) == (215, 215, 215):
+                #All backgrounds fade from black to white
                 R += 1
                 G += 1
                 B += 1
@@ -298,11 +322,21 @@ def SwitchTheme():
 
     else:
         while DarkMode == False:
-            R = 255
-            G = 255
-            B = 255
+            #To turn Dark Mode on
+            R = 0
+            G = 0
+            B = 0
+
+            while not (R, G, B) == (255, 255, 255):
+                #Text Fades to White
+                R += 1
+                G += 1
+                B += 1
+
+                DisplayHeader.text_color = (R, G, B)
 
             while not (R, G, B) == (70, 70, 70):
+                #All Background fade to grey
                 R -= 1
                 G -= 1
                 B -= 1
@@ -323,6 +357,7 @@ def SwitchTheme():
 
             DarkMode = True
 
+    AnimationRunning = False
     UserList.text_color = Color
     History.text_color = Color
     MessageInput.text_color = Color
@@ -376,7 +411,8 @@ def AlwaysUpdate():
                     UserList.append(User)
                     Users.append(User)
                     Message = User + " has connected"
-                    AnimateHeader(Message, (124, 252, 0))
+                    AnimateThread = Thread(target=AnimateHeader, args=[Message, (124, 252, 0)])
+                    AnimateThread.start()
                 else:
                     UserList.append(User)
 
@@ -385,19 +421,25 @@ def AlwaysUpdate():
             UserList.remove(Message)
             Users.remove(Message)
             Message = Message + " has disconnected"
-            AnimateHeader(Message, (216, 36, 41))
+            AnimateThread = Thread(target=AnimateHeader, args=[Message, (216, 36, 41)])
+            AnimateThread.start()
+
 
         elif Message[0:8] == "/display":
             Message = Message[9:]
-            AnimateHeader(Message, (173, 216, 230))
+            AnimateThread = Thread(target=AnimateHeader, args=[Message, (173, 216, 230)])
+            AnimateThread.start()
 
         elif Message == "/theme":
-            SwitchTheme()
+            AnimateThread = Thread(target=SwitchTheme)
+            AnimateThread.start()
             sleep(0.1)
             if DarkMode == True:
-                AnimateHeader("Dark Mode Turned On", (173, 216, 230))
+                AnimateThread = Thread(target=AnimateHeader, args=["Dark Mode Turned On", (173, 216, 230)])
+                AnimateThread.start()
             else:
-                AnimateHeader("Light Mode Turned On", (173, 216, 230))
+                AnimateThread = Thread(target=AnimateHeader, args=["Light Mode Turned On", (173, 216, 230)])
+                AnimateThread.start()
 
         else:
             History.append(Message)
@@ -437,13 +479,20 @@ def Connect():
     PrivateKey = str(KeyInput.value)
     PrivateKey = PrivateKey.split(", ")
 
+    #Override Inputs. Disable these for Proper functionality.
+    Host = '192.168.1.138'
+    PortInput.value = 3389
+    Color = "lightblue"
+    Username = "tomm"
+    PrivateKey = ["7347", "11269"]
+
     try:
         if PrivateKey[0] and PrivateKey[1]:
             d = int(PrivateKey[0], base=10)
             N = int(PrivateKey[1], base=10)
 
             PrivateKey = ", ".join(PrivateKey)
-            if (not Username == "") and (not Username == "Username") and (not " " in Username):
+            if not Username == "" and not Username == "Username" and not " " in Username:
                 try:
                     Port = int(PortInput.value, base=10)
 
@@ -474,33 +523,47 @@ def Connect():
     except IndexError:
         Status.value = "Index Error"
 
-
 def OpenChat():
     global Chatroom, ChatroomOpened, ConnectWindowOpened
-    Chatroom = Window(ConnectWindow, width=900, height=500, title="Chatroom")
+    Chatroom = Window(ConnectWindow, width=1200, height=590, title="Chatroom")
     Chatroom.when_closed = Leave
     Chatroom.font = "San Francisco Bold"
-    Chatroom.bg = "white"
-    Chatroom.text_color = "black"
+    Chatroom.bg = (70, 70, 70)
     ChatroomOpened = True
 
-    Header = Boxes(Chatroom, "fill", 40, "top")
-    ButtonBox = Boxes(Chatroom, "fill", 40, "bottom")
-    UserBox = Boxes(Chatroom, 150, "fill", "left")
+    TopPadding = Boxes(Chatroom, "fill", 50, "top")
+    LeftPadding = Boxes(Chatroom, 50, "fill", "left")
+    RightPadding = Boxes(Chatroom, 50, "fill", "right")
+    BottomPadding = Boxes(Chatroom, "fill", 50, "bottom")
+
+    MainBox = Blockers(Chatroom, "fill", "fill")
+    MainBox.set_border(3, (173, 216, 230))
+
+    Header = Boxes(MainBox, "fill", 40, "top")
+
+    ButtonBlocker = Boxes(MainBox, "fill", 3, "bottom")
+    ButtonBox = Boxes(MainBox, "fill", 40, "bottom")
+
+    UserBlocker = Boxes(MainBox, "fill", 3, "top")
+    UserBox = Blockers(MainBox, "fill", "fill")
 
     global UserList
-    UserList = ListBox(UserBox, items=["Users Online:"], height="fill", scrollbar=True)
+    UserList = ListBox(UserBox, items=["Users Online:"], width=150, height="fill", align="left")
     UserList.text_color = Color
     UserList.bg = (215, 215, 215)
     UserList.text_size = 18
 
     global DisplayHeader
     DisplayHeader = Text(Header, text=("Welcome " + Username), width="fill")
+    DisplayHeader.bg = (255, 255, 255)
     DisplayHeader.text_size = 30
 
+    HistoryBlocker = Boxes(UserBox, 3, "fill", "left")
+
     global History
-    History = TextBox(Chatroom, text="Hi!", height="fill", width="fill", multiline=True, scrollbar=True, align="top")
+    History = TextBox(UserBox, text="Hi!", width="fill", height="fill", multiline=True, align="left")
     History.text_color = Color
+    History.bg = (255, 255, 255)
     History.text_size = 22
     History.disable()
 
@@ -510,13 +573,14 @@ def OpenChat():
     SendButton.bg = (255, 255, 255)
 
     global MessageInput
-    MessageInput = TextBox(ButtonBox, height="fill", width="fill")
+    MessageInput = TextBox(ButtonBox, width="fill", height="fill", align="bottom")
     MessageInput.text_color = Color
+    MessageInput.bg = (255, 255, 255)
     MessageInput.text_size = 24
 
     ##Threads start here
 
-    global ListeningThread, RainbowHeaderThread
+    global ListeningThread, AnimationThread
     ListeningThread = Thread(target=AlwaysUpdate)
     ListeningThread.start()
 
@@ -551,15 +615,15 @@ def OpenConnectWindow():
     global UsernameInput, ColorInput, HostInput, PortInput, KeyInput
 
     UsernameBlocker = Boxes(InputBox, 15, 150, "right")
-    UsernameInputBox = InputBoxes(InputBox, 275, 30)
+    UsernameInputBox = Blockers(InputBox, 275, 30)
     ColorBlocker = Boxes(InputBox, 15, 120, "right")
-    ColorInputBox = InputBoxes(InputBox, 260, 30)
+    ColorInputBox = Blockers(InputBox, 260, 30)
     HostBlocker = Boxes(InputBox, 15, 90, "right")
-    HostInputBox = InputBoxes(InputBox, 245, 30)
+    HostInputBox = Blockers(InputBox, 245, 30)
     PortBlocker = Boxes(InputBox, 15, 60, "right")
-    PortInputBox = InputBoxes(InputBox, 230, 30)
+    PortInputBox = Blockers(InputBox, 230, 30)
     KeyBlocker = Boxes(InputBox, 15, 30, "right")
-    KeyInputBox = InputBoxes(InputBox, 215, 30)
+    KeyInputBox = Blockers(InputBox, 215, 30)
     UsernameInput = InputTextBoxes(UsernameInputBox, "Username")
     ColorInput = InputTextBoxes(ColorInputBox, "Chat Color")
     HostInput = InputTextBoxes(HostInputBox, "Host IP")
