@@ -1,4 +1,4 @@
-##1/9/2022
+##2/9/2022
 ##V13 Beta
 import platform
 import socket
@@ -426,7 +426,7 @@ def RSADecrypt(Message):
     return Message
 
 def AlwaysUpdate():
-    global LinesSent, Mod, AnimationColor
+    global LinesSent, Mod, AnimationColor, Users
     Users = []
     while True:
         if Mod == True:
@@ -455,10 +455,13 @@ def AlwaysUpdate():
                     UserList.append(User)
 
         elif Message[0:7] == "/remove":
-            Message = Message[8:]
-            UserList.remove(Message)
-            Users.remove(Message)
-            Message = Message + " has disconnected"
+            if Message[8:] == Username:
+                Leave()
+                break
+            User = Message[8:]
+            UserList.remove(User)
+            Users.remove(User)
+            Message = User + " has disconnected"
             AnimateThread = Thread(target=Animations.AnimateHeader, args=[Message, (216, 36, 41)])
             AnimateThread.start()
 
@@ -474,8 +477,6 @@ def AlwaysUpdate():
         elif Message[0:4] == "/mod":
             if Message[5:] == Username and Mod == False:
                 Mod = True
-                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You have been assigned as a mod!", (240, 230, 140)])
-                AnimateThread.start()
                 if DarkMode == False:
                     AnimateThread = Thread(target=Animations.SwitchTheme, args=["", False])
                     AnimateThread.start()
@@ -521,16 +522,19 @@ def SendToServer():
                 MessageInput.clear()
 
 def Leave():
-    s.send(("/leave").encode())
+    s.send("/leave".encode())
 
     if ConnectWindowOpened == True:
         ConnectWindow.hide()
 
     if ChatroomOpened == True:
         Chatroom.hide()
-        ListeningThread.join()
 
     s.close()
+
+    print("You have disconencted.")
+
+    quit()
 
 def Connect():
     global Username
@@ -547,11 +551,11 @@ def Connect():
     PrivateKey = PrivateKey.split(", ")
 
     #Override Inputs. Disable these for Proper functionality.
-    Host = '192.168.1.119'
+    Host = '192.168.1.138'
     PortInput.value = 49125
     Color = "lightblue"
     Username = "tomm"
-    PrivateKey = ["9677", "12319"]
+    PrivateKey = ["19543", "34579"]
 
     try:
         if PrivateKey[0] and PrivateKey[1]:
