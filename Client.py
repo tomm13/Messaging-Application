@@ -101,15 +101,23 @@ class Animations:
 
         AnimationRunning = False
 
+        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You have changed the border color", (240, 230, 140)])
+        AnimateThread.start()
+
     def FadeToColor(NewColor):
         global AnimationRunning
         global Color
 
-        OldColor = colorutils.Color(web=Color)
+        OldTextColor = colorutils.Color(web=Color)
         NewTextColor = colorutils.Color(web=NewColor)
         Color = NewColor
 
-        if OldColor == NewTextColor:
+        if NewColor.casefold() == "khaki" and Mod == False:
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You don't have the power to use this color", AnimationColor])
+            AnimateThread.start()
+            return
+
+        if OldTextColor == NewTextColor:
             AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can't change to the same color", AnimationColor])
             AnimateThread.start()
             return
@@ -118,7 +126,7 @@ class Animations:
             sleep(WaitTime)
         AnimationRunning = True
 
-        (R, G, B) = OldColor.rgb
+        (R, G, B) = OldTextColor.rgb
 
         while not R == NewTextColor.red or not G == NewTextColor.green or not B == NewTextColor.blue:
             if R > NewTextColor.red:
@@ -139,7 +147,7 @@ class Animations:
 
             sleep(Rate)
 
-        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You changed the text colour", AnimationColor])
+        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You changed the text color", AnimationColor])
         AnimateThread.start()
 
         AnimationRunning = False
@@ -462,13 +470,16 @@ def AlwaysUpdate():
 
         elif Message[0:4] == "/mod":
             if Message[5:] == Username and Mod == False:
+                Mod = True
                 AnimateThread = Thread(target=Animations.AnimateHeader, args=["You have been assigned as a mod!", (240, 230, 140)])
                 AnimateThread.start()
                 AnimateThread = Thread(target=Animations.FadeToColor, args=["Khaki"])
                 AnimateThread.start()
                 AnimateThread = Thread(target=Animations.ModBorder, args=[""])
                 AnimateThread.start()
-                Mod = True
+                if DarkMode == False:
+                    AnimateThread = Thread(target=Animations.SwitchTheme, args=[""])
+                    AnimateThread.start()
 
             elif Mod == True:
                 AnimateThread = Thread(target=Animations.AnimateHeader, args=["You are already a mod", (240, 230, 140)])
@@ -547,29 +558,32 @@ def Connect():
 
             PrivateKey = ", ".join(PrivateKey)
             if not Username == "" and not Username == "Username" and not " " in Username:
-                try:
-                    Port = int(PortInput.value, base=10)
+                if not Color.casefold() == "khaki":
+                    try:
+                        Port = int(PortInput.value, base=10)
 
-                    s.connect((Host, Port))
-                    s.send(Username.encode())
+                        s.connect((Host, Port))
+                        s.send(Username.encode())
 
-                    Status.value = "Connection Success"
-                    Status.text_color = "lightblue"
+                        Status.value = "Connection Success"
+                        Status.text_color = "lightblue"
 
-                    OpenChat()
+                        OpenChat()
 
-                except ConnectionRefusedError:
-                    Status.value = "Connection Full"
+                    except ConnectionRefusedError:
+                        Status.value = "Connection Full"
 
-                except OSError:
-                    Status.value = "Restart Client"
-                    Status.text_color = "red"
+                    except OSError:
+                        Status.value = "Restart Client"
+                        Status.text_color = "red"
 
-                except BrokenPipeError:
-                    Chatroom.hide()
+                    except BrokenPipeError:
+                        Chatroom.hide()
 
-                    Status.value = "Broken Pipe"
-                    Status.text_color = "red"
+                        Status.value = "Broken Pipe"
+                        Status.text_color = "red"
+                else:
+                    Status.value = "Color Locked"
             else:
                 Status.value = "Invalid Username"
         else:
