@@ -426,7 +426,7 @@ def RSADecrypt(Message):
     return Message
 
 def AlwaysUpdate():
-    global LinesSent, Mod, AnimationColor, Users
+    global LinesSent, Mod, AnimationColor
     Users = []
     while True:
         if Mod == True:
