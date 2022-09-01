@@ -15,13 +15,14 @@ SpaceRemaining = UserCount
 
 Hostname = socket.gethostname()
 IP = socket.gethostbyname(Hostname)
-#IP = ''
+IP = '192.168.1.119'
 Port = 49125
 
 # Clients and Mods are lists of ClientSockets, whereas Users and ModUsers is a list of Usernames
 Clients = []
 Users = []
 Mods = []
+ModUsers = []
 
 def GetKey():
     global Minimum, Maximum
@@ -109,30 +110,37 @@ def ModSelection(Message, Username, ClientSocket):
         Username = Users[Index]
 
         if UserOnline == 1:
-            print("[Mod] Mod Assigned as there was only 1 user online.")
-            Mods.append(ClientSocket)
-            PrivateBroadcast(Message, ClientSocket)
-            ModOnline += 1
+            if not ModSocket in Mods:
+                print("[Mod] Mod Assigned to", Username, "as there was only 1 user online")
+                Mods.append(ClientSocket)
+                ModUsers.append(Username)
+                PrivateBroadcast(Message, ClientSocket)
+                ModOnline += 1
+            else:
+                PrivateCommand("You are already a mod", ClientSocket)
 
         elif ModOnline == 0:
-            print("[Mod] Mod Assigned as there were no mods online.")
-            Mods.append(ClientSocket)
-            PrivateBroadcast(Message, ClientSocket)
-            ModOnline += 1
+            if not ModSocket in Mods:
+                print("[Mod] Mod Assigned to", ModCandidate, "as there were no mods online")
+                Mods.append(ModSocket)
+                ModUsers.append(ModCandidate)
+                PrivateBroadcast(Message, ModSocket)
+                ModOnline += 1
+            else:
+                PrivateCommand("You are already a mod", ClientSocket)
 
         elif ClientSocket in Mods:
             if not ModSocket in Mods:
                 print("[Mod] Mod Assigned by", Username, "to", ModCandidate)
                 Mods.append(ModSocket)
+                ModUsers.append(Username)
                 PrivateBroadcast(Message, ModSocket)
                 ModOnline += 1
 
             else:
                 PrivateCommand("Your moderator candidate is already a mod", ClientSocket)
-
         else:
             PrivateCommand("You do not have the power to execute this action", ClientSocket)
-
     except:
         PrivateCommand("Your moderator candidate is not a valid user", ClientSocket)
 
@@ -175,19 +183,23 @@ def PrivateCommand(Message, ClientSocket):
     ClientSocket.send(Message.encode())
 
 def RemoveUser(Username, ClientSocket):
-    global UserOnline, Clients, Users, ModOnline
-    LeavingUser = Username
-    Clients.remove(ClientSocket)
-    Users.remove(Username)
+    try:
+        global UserOnline, Clients, Users, ModOnline
+        LeavingUser = Username
+        Clients.remove(ClientSocket)
+        Users.remove(Username)
 
-    if ClientSocket in Mods:
-        Mods.remove(ClientSocket)
-        ModOnline -= 1
+        if ClientSocket in Mods:
+            Mods.remove(ClientSocket)
+            ModUsers.remove(Username)
+            ModOnline -= 1
 
-    Message = "/remove " + LeavingUser
-    Broadcast(Message)
+        Message = "/remove " + LeavingUser
+        Broadcast(Message)
 
-    UserOnline -= 1
+        UserOnline -= 1
+    except:
+        "[Server] Failed to remove user"
 
 def Listen(ClientSocket):
     global UserOnline, Clients, Users
@@ -224,7 +236,13 @@ def Command(Message, Username, ClientSocket):
             for User in Users:
                 PrivateCommand(str(User), ClientSocket)
                 time.sleep(0.1)
-
+    elif Message == "/mods":
+        if len(ModUsers) == 1:
+            PrivateCommand(str(ModUsers[0]), ClientSocket)
+        else:
+            for ModUser in ModUsers:
+                PrivateCommand(str(ModUser), ClientSocket)
+                time.sleep(0.1)
     elif Message == "/spaceleft":
         PrivateCommand(str(SpaceRemaining), ClientSocket)
     elif Message == "/ip":
