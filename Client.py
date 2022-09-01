@@ -1,4 +1,4 @@
-##31/8/2022
+##1/9/2022
 ##V13 Beta
 import platform
 import socket
@@ -79,6 +79,27 @@ class Animations:
     def __init__(self, Message, Color):
         self.Message = Message
         self.Color = Color
+
+    def ModBorder(self):
+        global AnimationRunning
+
+        (R, G, B) = (173, 216, 230)
+
+        while AnimationRunning == True:
+            sleep(WaitTime)
+        AnimationRunning = True
+
+        while not (R, G, B) == (240, 230, 140):
+            if R < 240:
+                R += 1
+            if G < 230:
+                G += 1
+            if B > 140:
+                B -= 1
+
+            MainBox.set_border(3, (R, G, B))
+
+        AnimationRunning = False
 
     def FadeToColor(NewColor):
         global AnimationRunning
@@ -445,6 +466,8 @@ def AlwaysUpdate():
                 AnimateThread.start()
                 AnimateThread = Thread(target=Animations.FadeToColor, args=["Khaki"])
                 AnimateThread.start()
+                AnimateThread = Thread(target=Animations.ModBorder, args=[""])
+                AnimateThread.start()
                 Mod = True
 
             elif Mod == True:
@@ -567,6 +590,7 @@ def OpenChat():
     RightPadding = Boxes(Chatroom, 50, "fill", "right")
     BottomPadding = Boxes(Chatroom, "fill", 50, "bottom")
 
+    global MainBox
     MainBox = Blockers(Chatroom, "fill", "fill")
     MainBox.set_border(3, (173, 216, 230))
 
