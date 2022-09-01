@@ -1,4 +1,4 @@
-##31/8/2022
+##1/9/2022
 ##V13 Beta
 
 import socket
@@ -10,15 +10,18 @@ s = socket.socket()
 
 UserCount = 1000
 UserOnline = 0
+ModOnline = 0
 SpaceRemaining = UserCount
 
 Hostname = socket.gethostname()
 IP = socket.gethostbyname(Hostname)
 #IP = ''
-Port = 49126
+Port = 49125
 
+# Clients and Mods are lists of ClientSockets, whereas Users and ModUsers is a list of Usernames
 Clients = []
 Users = []
+Mods = []
 
 def GetKey():
     global Minimum, Maximum
@@ -88,6 +91,50 @@ def GetKey():
 
     Connect()
 
+def ModSelection(Message, Username, ClientSocket):
+    global Mods, ModUsers, ModOnline
+    # ClientSocket = User who should have mod giving someone else mod
+    # Or User who doesn't have mod but is the first online, or first
+    # to apply for mod.
+
+    # ModSocket = User who should not have mod but is being applied by
+    # a User who does have mod.
+
+    try:
+        ModCandidate = Message[5:]
+        Index = Users.index(ModCandidate)
+        ModSocket = Clients[Index]
+
+        Index = Clients.index(ClientSocket)
+        Username = Users[Index]
+
+        if UserOnline == 1:
+            print("[Mod] Mod Assigned as there was only 1 user online.")
+            Mods.append(ClientSocket)
+            PrivateBroadcast(Message, ClientSocket)
+            ModOnline += 1
+
+        elif ModOnline == 0:
+            print("[Mod] Mod Assigned as there were no mods online.")
+            Mods.append(ClientSocket)
+            PrivateBroadcast(Message, ClientSocket)
+            ModOnline += 1
+
+        elif ClientSocket in Mods:
+            if not ModSocket in Mods:
+                print("[Mod] Mod Assigned by", Username, "to", ModCandidate)
+                Mods.append(ModSocket)
+                PrivateBroadcast(Message, ModSocket)
+                ModOnline += 1
+
+            else:
+                PrivateCommand("Your moderator candidate is already a mod", ClientSocket)
+
+        else:
+            PrivateCommand("You do not have the power to execute this action", ClientSocket)
+
+    except:
+        PrivateCommand("Your moderator candidate is not a valid user", ClientSocket)
 
 def RSAEncrypt(Message):
     RSAEncryptedMessage = []
@@ -100,11 +147,9 @@ def RSAEncrypt(Message):
     Message = str("".join(RSAEncryptedMessage))
     return Message
 
-
 def GeneratePort():
     s.bind((IP, Port))
     print("[Server] Server Hosted on " + str(IP) + " with Port " + str(Port))
-
 
 def Broadcast(Message):
     # Sends a Public Message to all Connected Clients, not for Animating Purposes
@@ -130,10 +175,14 @@ def PrivateCommand(Message, ClientSocket):
     ClientSocket.send(Message.encode())
 
 def RemoveUser(Username, ClientSocket):
-    global UserOnline, Clients, Users
+    global UserOnline, Clients, Users, ModOnline
     LeavingUser = Username
     Clients.remove(ClientSocket)
     Users.remove(Username)
+
+    if ClientSocket in Mods:
+        Mods.remove(ClientSocket)
+        ModOnline -= 1
 
     Message = "/remove " + LeavingUser
     Broadcast(Message)
@@ -156,15 +205,14 @@ def Listen(ClientSocket):
                         RemoveUser(Username, ClientSocket)
                         break
                     else:
-                        Command(Message, ClientSocket)
+                        Command(Message, Username, ClientSocket)
                 else:
                     Broadcast(UnifiedMessage)
 
         except:
             RemoveUser(Username, ClientSocket)
-            break
 
-def Command(Message, ClientSocket):
+def Command(Message, Username, ClientSocket):
     if Message == "/space":
         PrivateCommand(str(UserCount), ClientSocket)
     elif Message == "/online":
@@ -194,11 +242,16 @@ def Command(Message, ClientSocket):
         PrivateBroadcast(Message, ClientSocket)
     elif Message[0:5] == "/save":
         PrivateBroadcast(Message, ClientSocket)
+    elif Message[0:4] == "/mod":
+        if Message == "/modonline":
+            PrivateCommand(str(ModOnline), ClientSocket)
+        else:
+            ModSelection(Message, Username, ClientSocket)
     else:
-        PrivateCommand("Unknown Command", ClientSocket)
+        PrivateCommand("Your command is unknown", ClientSocket)
 
 def Connect():
-    global UserOnline, SpaceRemaining
+    global UserOnline, SpaceRemaining, Users, Clients
     GeneratePort()
     s.listen()
     for i in range(UserCount):
