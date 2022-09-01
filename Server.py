@@ -1,4 +1,4 @@
-##1/9/2022
+##2/9/2022
 ##V13 Beta
 
 import socket
@@ -15,7 +15,7 @@ SpaceRemaining = UserCount
 
 Hostname = socket.gethostname()
 IP = socket.gethostbyname(Hostname)
-IP = '192.168.1.119'
+#IP = ''
 Port = 49125
 
 # Clients and Mods are lists of ClientSockets, whereas Users and ModUsers is a list of Usernames
@@ -92,6 +92,36 @@ def GetKey():
 
     Connect()
 
+def VoteKick(Message, ClientSocket):
+    # ClientSocket is the mod socket
+    # Username requested to kick
+    # UserKickSocket is the user socket
+    # UserToKick is the user to be kicked
+    try:
+        Index = Clients.index(ClientSocket)
+        Username = Users[Index]
+
+        UserToKick = Message[6:]
+        Index = Users.index(UserToKick)
+        UserKickSocket = Clients[Index]
+
+        if UserToKick not in ModUsers:
+            # If the person a mod is trying to kick is not a mod
+            if Username in ModUsers:
+                # If the person kicking is a mod
+                if len(Mods) == 1:
+                    PublicCommand((Username + " is kicking " + UserToKick))
+                    RemoveUser(UserToKick, UserKickSocket)
+
+                if len(Mods) > 1:
+                    PrivateCommand("You cannot kick at this time", ClientSocket)
+            else:
+                PrivateCommand("You do not have the power to execute this action", ClientSocket)
+        else:
+            PrivateCommand("You cannot kick a mod", ClientSocket)
+    except:
+        PrivateCommand("You cannot kick this person as they do not exist", ClientSocket)
+
 def ModSelection(Message, Username, ClientSocket):
     global Mods, ModUsers, ModOnline
     # ClientSocket = User who should have mod giving someone else mod
@@ -115,6 +145,7 @@ def ModSelection(Message, Username, ClientSocket):
                 Mods.append(ClientSocket)
                 ModUsers.append(Username)
                 PrivateBroadcast(Message, ClientSocket)
+                PrivateCommand((Username + " is now a mod "), ClientSocket)
                 ModOnline += 1
             else:
                 PrivateCommand("You are already a mod", ClientSocket)
@@ -125,6 +156,7 @@ def ModSelection(Message, Username, ClientSocket):
                 Mods.append(ModSocket)
                 ModUsers.append(ModCandidate)
                 PrivateBroadcast(Message, ModSocket)
+                PublicCommand((ModCandidate + " is now a mod"))
                 ModOnline += 1
             else:
                 PrivateCommand("You are already a mod", ClientSocket)
@@ -133,15 +165,19 @@ def ModSelection(Message, Username, ClientSocket):
             if not ModSocket in Mods:
                 print("[Mod] Mod Assigned by", Username, "to", ModCandidate)
                 Mods.append(ModSocket)
-                ModUsers.append(Username)
+                ModUsers.append(ModCandidate)
                 PrivateBroadcast(Message, ModSocket)
+                PublicCommand((Username + " gave " + ModCandidate + " mod"))
                 ModOnline += 1
 
             else:
-                PrivateCommand("Your moderator candidate is already a mod", ClientSocket)
+                if ModSocket == ClientSocket:
+                    PrivateCommand("You are already a mod", ClientSocket)
+                else:
+                    PrivateCommand("Your moderator candidate is already a mod", ClientSocket)
         else:
             PrivateCommand("You do not have the power to execute this action", ClientSocket)
-    except:
+    except ValueError:
         PrivateCommand("Your moderator candidate is not a valid user", ClientSocket)
 
 def RSAEncrypt(Message):
@@ -168,6 +204,14 @@ def Broadcast(Message):
     for Client in Clients:
         Client.send(Message.encode())
 
+def PublicCommand(Message):
+    # Sends "/display", which tells every Client to Animate it's banner
+    time.sleep(0.1)
+    Message = "/display " + Message
+    Message = RSAEncrypt(Message)
+    for Client in Clients:
+        Client.send(Message.encode())
+
 def PrivateBroadcast(Message, ClientSocket):
     # Sends a Private Message to 1 Specfic Client, not for Animating Purposes.
     time.sleep(0.1)
@@ -185,17 +229,16 @@ def PrivateCommand(Message, ClientSocket):
 def RemoveUser(Username, ClientSocket):
     try:
         global UserOnline, Clients, Users, ModOnline
-        LeavingUser = Username
-        Clients.remove(ClientSocket)
-        Users.remove(Username)
-
         if ClientSocket in Mods:
             Mods.remove(ClientSocket)
             ModUsers.remove(Username)
             ModOnline -= 1
 
-        Message = "/remove " + LeavingUser
+        Message = "/remove " + Username
         Broadcast(Message)
+
+        Clients.remove(ClientSocket)
+        Users.remove(Username)
 
         UserOnline -= 1
     except:
@@ -214,7 +257,9 @@ def Listen(ClientSocket):
             if Message:
                 if Message[0] == "/":
                     if Message == "/leave":
-                        RemoveUser(Username, ClientSocket)
+                        if ClientSocket in Clients:
+                            RemoveUser(Username, ClientSocket)
+
                         break
                     else:
                         Command(Message, Username, ClientSocket)
@@ -223,6 +268,7 @@ def Listen(ClientSocket):
 
         except:
             RemoveUser(Username, ClientSocket)
+            break
 
 def Command(Message, Username, ClientSocket):
     if Message == "/space":
@@ -265,6 +311,8 @@ def Command(Message, Username, ClientSocket):
             PrivateCommand(str(ModOnline), ClientSocket)
         else:
             ModSelection(Message, Username, ClientSocket)
+    elif Message[0:5] == "/kick":
+        VoteKick(Message, ClientSocket)
     else:
         PrivateCommand("Your command is unknown", ClientSocket)
 
