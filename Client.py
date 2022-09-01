@@ -398,7 +398,7 @@ def AlwaysUpdate():
     Users = []
     while True:
         if Mod == True:
-            AnimationColor = (218, 165, 32)
+            AnimationColor = (240, 230, 140)
         else:
             AnimationColor = (173, 216, 230)
 
@@ -439,10 +439,17 @@ def AlwaysUpdate():
             AnimateThread = Thread(target=Animations.SwitchTheme, args=[""])
             AnimateThread.start()
 
-        elif Message == "/mod":
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You have been assigned as a Mod!", (218, 165, 32)])
-            AnimateThread.start()
-            Mod = True
+        elif Message[0:4] == "/mod":
+            if Message[5:] == Username and Mod == False:
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You have been assigned as a mod!", (240, 230, 140)])
+                AnimateThread.start()
+                AnimateThread = Thread(target=Animations.FadeToColor, args=["Khaki"])
+                AnimateThread.start()
+                Mod = True
+
+            elif Mod == True:
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You are already a mod", (240, 230, 140)])
+                AnimateThread.start()
 
         elif Message[0:6] == "/color":
             Color = Message[7:]
@@ -508,7 +515,7 @@ def Connect():
     PortInput.value = 49125
     Color = "lightblue"
     Username = "tomm"
-    PrivateKey = ["19421", "24617"]
+    PrivateKey = ["23143", "27371"]
 
     try:
         if PrivateKey[0] and PrivateKey[1]:
