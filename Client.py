@@ -80,7 +80,7 @@ class Animations:
         self.Message = Message
         self.Color = Color
 
-    def ModBorder(self):
+    def ModBorder(self, DisplayMessage):
         global AnimationRunning
 
         (R, G, B) = (173, 216, 230)
@@ -99,12 +99,13 @@ class Animations:
 
             MainBox.set_border(3, (R, G, B))
 
+        if DisplayMessage == True:
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You have changed the border color", (240, 230, 140)])
+            AnimateThread.start()
+
         AnimationRunning = False
 
-        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You have changed the border color", (240, 230, 140)])
-        AnimateThread.start()
-
-    def FadeToColor(NewColor):
+    def FadeToColor(NewColor, DisplayMessage):
         global AnimationRunning
         global Color
 
@@ -147,8 +148,9 @@ class Animations:
 
             sleep(Rate)
 
-        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You changed the text color", AnimationColor])
-        AnimateThread.start()
+        if DisplayMessage == True:
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You changed the text color", AnimationColor])
+            AnimateThread.start()
 
         AnimationRunning = False
 
@@ -297,7 +299,7 @@ class Animations:
 
         AnimationRunning = False
 
-    def SwitchTheme(self):
+    def SwitchTheme(self, DisplayMessage):
         global DarkMode
         global AnimationRunning
 
@@ -387,12 +389,13 @@ class Animations:
         History.text_color = Color
         MessageInput.text_color = Color
 
-        if DarkMode == True:
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned Dark Mode on", AnimationColor])
-            AnimateThread.start()
-        else:
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned Light Mode on", AnimationColor])
-            AnimateThread.start()
+        if DisplayMessage == True:
+            if DarkMode == True:
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned Dark Mode on", AnimationColor])
+                AnimateThread.start()
+            else:
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned Light Mode on", AnimationColor])
+                AnimateThread.start()
 
 def SaveChatHistory(Location):
     if Location and not " " in Location:
@@ -465,7 +468,7 @@ def AlwaysUpdate():
             AnimateThread.start()
 
         elif Message == "/theme":
-            AnimateThread = Thread(target=Animations.SwitchTheme, args=[""])
+            AnimateThread = Thread(target=Animations.SwitchTheme, args=["", True])
             AnimateThread.start()
 
         elif Message[0:4] == "/mod":
@@ -473,13 +476,16 @@ def AlwaysUpdate():
                 Mod = True
                 AnimateThread = Thread(target=Animations.AnimateHeader, args=["You have been assigned as a mod!", (240, 230, 140)])
                 AnimateThread.start()
-                AnimateThread = Thread(target=Animations.FadeToColor, args=["Khaki"])
-                AnimateThread.start()
-                AnimateThread = Thread(target=Animations.ModBorder, args=[""])
-                AnimateThread.start()
                 if DarkMode == False:
-                    AnimateThread = Thread(target=Animations.SwitchTheme, args=[""])
+                    AnimateThread = Thread(target=Animations.SwitchTheme, args=["", False])
                     AnimateThread.start()
+                    sleep(0.1)
+                AnimateThread = Thread(target=Animations.ModBorder, args=["", False])
+                AnimateThread.start()
+                sleep(0.1)
+                AnimateThread = Thread(target=Animations.FadeToColor, args=["Khaki", False])
+                AnimateThread.start()
+                sleep(0.1)
 
             elif Mod == True:
                 AnimateThread = Thread(target=Animations.AnimateHeader, args=["You are already a mod", (240, 230, 140)])
@@ -487,7 +493,7 @@ def AlwaysUpdate():
 
         elif Message[0:6] == "/color":
             Color = Message[7:]
-            AnimateThread = Thread(target=Animations.FadeToColor, args=[Color])
+            AnimateThread = Thread(target=Animations.FadeToColor, args=[Color, True])
             AnimateThread.start()
 
         elif Message[0:5] == "/save":
@@ -545,11 +551,11 @@ def Connect():
     PrivateKey = PrivateKey.split(", ")
 
     #Override Inputs. Disable these for Proper functionality.
-    Host = '192.168.1.138'
-    PortInput.value = 49125
+    Host = '192.168.1.119'
+    PortInput.value = 49126
     Color = "lightblue"
     Username = "tomm"
-    PrivateKey = ["23143", "27371"]
+    PrivateKey = ["3341", "5933"]
 
     try:
         if PrivateKey[0] and PrivateKey[1]:
