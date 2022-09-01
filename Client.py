@@ -487,10 +487,6 @@ def AlwaysUpdate():
                 AnimateThread.start()
                 sleep(0.1)
 
-            elif Mod == True:
-                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You are already a mod", (240, 230, 140)])
-                AnimateThread.start()
-
         elif Message[0:6] == "/color":
             Color = Message[7:]
             AnimateThread = Thread(target=Animations.FadeToColor, args=[Color, True])
@@ -552,10 +548,10 @@ def Connect():
 
     #Override Inputs. Disable these for Proper functionality.
     Host = '192.168.1.119'
-    PortInput.value = 49126
+    PortInput.value = 49125
     Color = "lightblue"
     Username = "tomm"
-    PrivateKey = ["3341", "5933"]
+    PrivateKey = ["9677", "12319"]
 
     try:
         if PrivateKey[0] and PrivateKey[1]:
