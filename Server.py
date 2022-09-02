@@ -12,12 +12,13 @@ UserCount = 1000
 UserOnline = 0
 ModOnline = 0
 Vote = 0
+VotesNeeded = 2
 SpaceRemaining = UserCount
 
 Hostname = socket.gethostname()
 IP = socket.gethostbyname(Hostname)
 IP = '192.168.1.119'
-Port = 49125
+Port = 49126
 
 VoteActive = False
 
@@ -26,6 +27,7 @@ Clients = []
 Users = []
 Mods = []
 ModUsers = []
+HasVoted = []
 
 def GetKey():
     global Minimum, Maximum
@@ -96,43 +98,43 @@ def GetKey():
     Connect()
 
 def VoteKick(Message, ClientSocket):
-    global Vote, VoteActive
+    global Vote, VoteActive, UserToKick, UserKickSocket, HasVoted
     # ClientSocket is the mod socket
     # Username requested to kick
     # UserKickSocket is the user socket
     # UserToKick is the user to be kicked
 
-    Index = Clients.index(ClientSocket)
-    Username = Users[Index]
+    try:
+        Index = Clients.index(ClientSocket)
+        Username = Users[Index]
 
-    UserToKick = Message[6:]
-    Index = Users.index(UserToKick)
-    UserKickSocket = Clients[Index]
+        UserToKick = Message[6:]
+        Index = Users.index(UserToKick)
+        UserKickSocket = Clients[Index]
 
-    if UserToKick not in ModUsers:
-        # If the person a mod is trying to kick is not a mod
-        if Username in ModUsers:
-            # If the person kicking is a mod
-            if len(Mods) == 1:
-                PublicCommand((Username + " is kicking " + UserToKick))
-                RemoveUser(UserToKick, UserKickSocket)
-
-            if len(Mods) > 1:
-                VoteActive = True
-                print("[Server] Starting vote")
-                if Vote == 2:
-                    PublicCommand((Username + " is kicking " + UserToKick))
+        if UserToKick not in ModUsers:
+            # If the person a mod is trying to kick is not a mod
+            if Username in ModUsers:
+                # If the person kicking is a mod
+                if len(Mods) == 1:
+                    PublicCommand("A moderator is kicking " + UserToKick)
                     RemoveUser(UserToKick, UserKickSocket)
-                    VoteActive = False
-                    Vote = 0
 
-                PublicCommand("You can now vote to kick " + UserToKick + ". " + Vote + " voted.", ClientSocket)
+                if len(Mods) > 1:
+                    if VoteActive == False:
+                        HasVoted = []
+                        HasVoted.append(Username)
+                        Vote = 1
+                        VoteActive = True
+                        PublicCommand("Moderators can now vote to kick " + UserToKick)
+
+                        print("[Server] Starting vote")
+            else:
+                PrivateCommand("You do not have the power to execute this action", ClientSocket)
         else:
-            PrivateCommand("You do not have the power to execute this action", ClientSocket)
-    else:
-        PrivateCommand("You cannot kick a mod", ClientSocket)
-    #except:
-        #PrivateCommand("You cannot kick this person as they do not exist", ClientSocket)
+            PrivateCommand("You cannot kick a mod", ClientSocket)
+    except:
+        PrivateCommand("You cannot kick this person as they do not exist", ClientSocket)
 
 def ModSelection(Message, Username, ClientSocket):
     global Mods, ModUsers, ModOnline
@@ -225,7 +227,7 @@ def PublicCommand(Message):
         Client.send(Message.encode())
 
 def PrivateBroadcast(Message, ClientSocket):
-    # Sends a Private Message to 1 Specfic Client, not for Animating Purposes.
+    # Sends a Private Message to 1 specific Client, not for Animating Purposes.
     time.sleep(0.1)
 
     Message = RSAEncrypt(Message)
@@ -259,31 +261,31 @@ def RemoveUser(Username, ClientSocket):
 def Listen(ClientSocket):
     global UserOnline, Clients, Users
     while True:
-        try:
-            Index = Clients.index(ClientSocket)
-            Username = Users[Index]
+        #try:
+        Index = Clients.index(ClientSocket)
+        Username = Users[Index]
 
-            Message = ClientSocket.recv(1024).decode()
-            UnifiedMessage = Username + ": " + Message
+        Message = ClientSocket.recv(1024).decode()
+        UnifiedMessage = Username + ": " + Message
 
-            if Message:
-                if Message[0] == "/":
-                    if Message == "/leave":
-                        if ClientSocket in Clients:
-                            RemoveUser(Username, ClientSocket)
-
-                        break
-                    else:
-                        Command(Message, Username, ClientSocket)
+        if Message:
+            if Message[0] == "/":
+                if Message == "/leave":
+                    if ClientSocket in Clients:
+                        RemoveUser(Username, ClientSocket)
+                    break
                 else:
-                    Broadcast(UnifiedMessage)
+                    Command(Message, Username, ClientSocket)
+            else:
+                Broadcast(UnifiedMessage)
 
-        except:
-            RemoveUser(Username, ClientSocket)
-            break
+        #except:
+            #RemoveUser(Username, ClientSocket)
+            #print("in except")
+           # break
 
 def Command(Message, Username, ClientSocket):
-    global Vote
+    global Vote, VoteActive
     if Message == "/space":
         PrivateCommand(str(UserCount), ClientSocket)
     elif Message == "/online":
@@ -325,15 +327,44 @@ def Command(Message, Username, ClientSocket):
         else:
             ModSelection(Message, Username, ClientSocket)
     elif Message[0:5] == "/kick":
-        VoteKick(Message, ClientSocket)
-    elif Message[0:5] == "/vote":
         if VoteActive == False:
-            PrivateCommand("You cannot vote at this time", ClientSocket)
+            VoteKick(Message, ClientSocket)
         else:
-            if Message[6:].casefold() == "kick":
-                Vote += 1
+            PrivateCommand("You cannot kick as another vote is taking place", ClientSocket)
+    elif Message[0:5].casefold() == "/vote":
+        if VoteActive == False:
+            PrivateCommand("You cannot complete this action", ClientSocket)
+
+        else:
+            # Vote is active
+            if Message[6:].casefold() == "details":
+                if VotesNeeded - Vote == 1:
+                    PrivateCommand("1 more vote is needed to kick " + UserToKick, ClientSocket)
+                else:
+                    PrivateCommand(str(VotesNeeded - Vote) + " more votes are needed to kick " + UserToKick, ClientSocket)
+
+            elif ClientSocket in Mods:
+                if Message[6:].casefold() == "kick":
+                    if not Username in HasVoted:
+                        Vote += 1
+                        HasVoted.append(Username)
+                        if Vote == 1:
+                            PublicCommand(str(Vote) + " moderator has voted in favour of kicking " + UserToKick)
+                        elif Vote > 1:
+                            PublicCommand(str(Vote) + " moderators has voted in favour of kicking " + UserToKick)
+
+                        if Vote == VotesNeeded:
+                            PublicCommand(UserToKick + " has been kicked")
+                            RemoveUser(UserToKick, UserKickSocket)
+                            VoteActive = False
+                            Vote = 0
+                    else:
+                        PrivateCommand("Your have already cast your vote", ClientSocket)
+
+                else:
+                    PrivateCommand("Your vote command is unknown", ClientSocket)
             else:
-                PrivateCommand("Your vote command is unknown", ClientSocket)
+                PrivateCommand("You do not have the power to execute this action", ClientSocket)
     else:
         PrivateCommand("Your command is unknown", ClientSocket)
 
