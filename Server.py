@@ -12,13 +12,14 @@ UserCount = 1000
 UserOnline = 0
 ModOnline = 0
 Vote = 0
+VoteAgainst = 0
 VotesNeeded = 2
 SpaceRemaining = UserCount
 
 Hostname = socket.gethostname()
 IP = socket.gethostbyname(Hostname)
-IP = '192.168.1.119'
-Port = 49126
+IP = '192.168.1.138'
+Port = 49125
 
 VoteActive = False
 
@@ -125,6 +126,7 @@ def VoteKick(Message, ClientSocket):
                         HasVoted = []
                         HasVoted.append(Username)
                         Vote = 1
+                        VoteAgainst = 0
                         VoteActive = True
                         PublicCommand("Moderators can now vote to kick " + UserToKick)
 
@@ -285,7 +287,7 @@ def Listen(ClientSocket):
            # break
 
 def Command(Message, Username, ClientSocket):
-    global Vote, VoteActive
+    global Vote, VoteActive, VoteAgainst
     if Message == "/space":
         PrivateCommand(str(UserCount), ClientSocket)
     elif Message == "/online":
@@ -333,23 +335,20 @@ def Command(Message, Username, ClientSocket):
             PrivateCommand("You cannot kick as another vote is taking place", ClientSocket)
     elif Message[0:5].casefold() == "/vote":
         if VoteActive == False:
-            PrivateCommand("You cannot complete this action", ClientSocket)
+            PrivateCommand("You cannot complete this action as there is no ongoing vote", ClientSocket)
 
         else:
             # Vote is active
             if Message[6:].casefold() == "details":
-                if VotesNeeded - Vote == 1:
-                    PrivateCommand("1 more vote is needed to kick " + UserToKick, ClientSocket)
-                else:
-                    PrivateCommand(str(VotesNeeded - Vote) + " more votes are needed to kick " + UserToKick, ClientSocket)
+                PrivateCommand("For: " + str(Vote) + ". Against: " + str(VoteAgainst), ClientSocket)
 
             elif ClientSocket in Mods:
-                if Message[6:].casefold() == "kick":
+                if Message[6:].casefold() == "for":
                     if not Username in HasVoted:
                         Vote += 1
                         HasVoted.append(Username)
                         if Vote == 1:
-                            PublicCommand(str(Vote) + " moderator has voted in favour of kicking " + UserToKick)
+                            PublicCommand("1 moderator has voted in favour of kicking " + UserToKick)
                         elif Vote > 1:
                             PublicCommand(str(Vote) + " moderators has voted in favour of kicking " + UserToKick)
 
@@ -358,9 +357,40 @@ def Command(Message, Username, ClientSocket):
                             RemoveUser(UserToKick, UserKickSocket)
                             VoteActive = False
                             Vote = 0
+                            VoteAgainst = 0
+
+                        elif len(HasVoted) == 2 and len(Mods) == 2 and Vote + VoteAgainst == 2:
+                            PublicCommand(UserToKick + " will not be kicked")
+                            VoteActive = False
+                            Vote = 0
+                            VoteAgainst = 0
+
                     else:
                         PrivateCommand("Your have already cast your vote", ClientSocket)
 
+                elif Message[6:].casefold() == "against":
+                    if not Username in HasVoted:
+                        VoteAgainst += 1
+                        HasVoted.append(Username)
+                        if VoteAgainst == 1:
+                            PublicCommand("1 moderator has voted against kicking " + UserToKick)
+                        elif VoteAgainst > 1:
+                            PublicCommand(str(VoteAgainst) + " moderators has voted against kicking " + UserToKick)
+
+                        if VoteAgainst == VotesNeeded:
+                            PublicCommand(UserToKick + " will not be kicked")
+                            VoteActive = False
+                            Vote = 0
+                            VoteAgainst = 0
+
+                        elif len(HasVoted) == 2 and len(Mods) == 2 and Vote + VoteAgainst == 2:
+                            PublicCommand(UserToKick + " will not be kicked")
+                            VoteActive = False
+                            Vote = 0
+                            VoteAgainst = 0
+
+                    else:
+                        PrivateCommand("Your have already cast your vote", ClientSocket)
                 else:
                     PrivateCommand("Your vote command is unknown", ClientSocket)
             else:
