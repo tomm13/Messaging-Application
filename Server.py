@@ -11,12 +11,15 @@ s = socket.socket()
 UserCount = 1000
 UserOnline = 0
 ModOnline = 0
+Vote = 0
 SpaceRemaining = UserCount
 
 Hostname = socket.gethostname()
 IP = socket.gethostbyname(Hostname)
-#IP = ''
+IP = '192.168.1.119'
 Port = 49125
+
+VoteActive = False
 
 # Clients and Mods are lists of ClientSockets, whereas Users and ModUsers is a list of Usernames
 Clients = []
@@ -93,34 +96,43 @@ def GetKey():
     Connect()
 
 def VoteKick(Message, ClientSocket):
+    global Vote, VoteActive
     # ClientSocket is the mod socket
     # Username requested to kick
     # UserKickSocket is the user socket
     # UserToKick is the user to be kicked
-    try:
-        Index = Clients.index(ClientSocket)
-        Username = Users[Index]
 
-        UserToKick = Message[6:]
-        Index = Users.index(UserToKick)
-        UserKickSocket = Clients[Index]
+    Index = Clients.index(ClientSocket)
+    Username = Users[Index]
 
-        if UserToKick not in ModUsers:
-            # If the person a mod is trying to kick is not a mod
-            if Username in ModUsers:
-                # If the person kicking is a mod
-                if len(Mods) == 1:
+    UserToKick = Message[6:]
+    Index = Users.index(UserToKick)
+    UserKickSocket = Clients[Index]
+
+    if UserToKick not in ModUsers:
+        # If the person a mod is trying to kick is not a mod
+        if Username in ModUsers:
+            # If the person kicking is a mod
+            if len(Mods) == 1:
+                PublicCommand((Username + " is kicking " + UserToKick))
+                RemoveUser(UserToKick, UserKickSocket)
+
+            if len(Mods) > 1:
+                VoteActive = True
+                print("[Server] Starting vote")
+                if Vote == 2:
                     PublicCommand((Username + " is kicking " + UserToKick))
                     RemoveUser(UserToKick, UserKickSocket)
+                    VoteActive = False
+                    Vote = 0
 
-                if len(Mods) > 1:
-                    PrivateCommand("You cannot kick at this time", ClientSocket)
-            else:
-                PrivateCommand("You do not have the power to execute this action", ClientSocket)
+                PublicCommand("You can now vote to kick " + UserToKick + ". " + Vote + " voted.", ClientSocket)
         else:
-            PrivateCommand("You cannot kick a mod", ClientSocket)
-    except:
-        PrivateCommand("You cannot kick this person as they do not exist", ClientSocket)
+            PrivateCommand("You do not have the power to execute this action", ClientSocket)
+    else:
+        PrivateCommand("You cannot kick a mod", ClientSocket)
+    #except:
+        #PrivateCommand("You cannot kick this person as they do not exist", ClientSocket)
 
 def ModSelection(Message, Username, ClientSocket):
     global Mods, ModUsers, ModOnline
@@ -271,6 +283,7 @@ def Listen(ClientSocket):
             break
 
 def Command(Message, Username, ClientSocket):
+    global Vote
     if Message == "/space":
         PrivateCommand(str(UserCount), ClientSocket)
     elif Message == "/online":
@@ -313,6 +326,14 @@ def Command(Message, Username, ClientSocket):
             ModSelection(Message, Username, ClientSocket)
     elif Message[0:5] == "/kick":
         VoteKick(Message, ClientSocket)
+    elif Message[0:5] == "/vote":
+        if VoteActive == False:
+            PrivateCommand("You cannot vote at this time", ClientSocket)
+        else:
+            if Message[6:].casefold() == "kick":
+                Vote += 1
+            else:
+                PrivateCommand("Your vote command is unknown", ClientSocket)
     else:
         PrivateCommand("Your command is unknown", ClientSocket)
 
@@ -327,16 +348,22 @@ def Connect():
             Clients.append(ClientSocket)
 
             Username = ClientSocket.recv(1024).decode()
-            Users.append(Username)
 
-            Message = "/add " + " ".join(Users)
-            Broadcast(Message)
+            if Username in Users:
+                PrivateBroadcast("/disconnect", ClientSocket)
+                Clients.remove(ClientSocket)
 
-            UserOnline += 1
-            SpaceRemaining -= 1
+            else:
+                Users.append(Username)
 
-            ListeningThread = Thread(target=Listen, args=[ClientSocket])
-            ListeningThread.start()
+                Message = "/add " + " ".join(Users)
+                Broadcast(Message)
+
+                UserOnline += 1
+                SpaceRemaining -= 1
+
+                ListeningThread = Thread(target=Listen, args=[ClientSocket])
+                ListeningThread.start()
 
         except:
             RemoveUser(Username, ClientSocket)
