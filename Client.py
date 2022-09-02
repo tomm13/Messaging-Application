@@ -99,10 +99,6 @@ class Animations:
 
             MainBox.set_border(3, (R, G, B))
 
-        if DisplayMessage == True:
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You have changed the border color", (240, 230, 140)])
-            AnimateThread.start()
-
         AnimationRunning = False
 
     def FadeToColor(NewColor, DisplayMessage):
@@ -391,10 +387,10 @@ class Animations:
 
         if DisplayMessage == True:
             if DarkMode == True:
-                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned Dark Mode on", AnimationColor])
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned dark mode on", AnimationColor])
                 AnimateThread.start()
             else:
-                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned Light Mode on", AnimationColor])
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned light mode on", AnimationColor])
                 AnimateThread.start()
 
 def SaveChatHistory(Location):
@@ -552,10 +548,10 @@ def Connect():
 
     #Override Inputs. Disable these for Proper functionality.
     Host = '192.168.1.138'
-    PortInput.value = 49125
+    PortInput.value = 49126
     Color = "lightblue"
     Username = "tomm"
-    PrivateKey = ["19543", "34579"]
+    PrivateKey = ["6365", "10823"]
 
     try:
         if PrivateKey[0] and PrivateKey[1]:
