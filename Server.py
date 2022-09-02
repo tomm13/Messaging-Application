@@ -19,7 +19,7 @@ SpaceRemaining = UserCount
 Hostname = socket.gethostname()
 IP = socket.gethostbyname(Hostname)
 IP = '192.168.1.138'
-Port = 49126
+Port = 49125
 
 VoteActive = False
 
@@ -29,6 +29,7 @@ Users = []
 Mods = []
 ModUsers = []
 HasVoted = []
+HasModded = []
 
 def GetKey():
     global Minimum, Maximum
@@ -139,7 +140,7 @@ def VoteKick(Message, ClientSocket):
         PrivateCommand("You cannot kick this person as they do not exist", ClientSocket)
 
 def ModSelection(Message, Username, ClientSocket):
-    global Mods, ModUsers, ModOnline
+    global Mods, ModUsers, ModOnline, HasModded
     # ClientSocket = User who should have mod giving someone else mod
     # Or User who doesn't have mod but is the first online, or first
     # to apply for mod.
@@ -156,35 +157,36 @@ def ModSelection(Message, Username, ClientSocket):
         Username = Users[Index]
 
         if UserOnline == 1:
-            if not ModSocket in Mods:
-                print("[Mod] Mod Assigned to", Username, "as there was only 1 user online")
-                Mods.append(ClientSocket)
-                ModUsers.append(Username)
-                PrivateBroadcast(Message, ClientSocket)
-                PrivateCommand((Username + " is now a mod "), ClientSocket)
-                ModOnline += 1
-            else:
-                PrivateCommand("You are already a mod", ClientSocket)
+            # If they're the only person online
+            print("[Mod] Mod Assigned to", Username, "as there was only 1 user online")
+            Mods.append(ClientSocket)
+            ModUsers.append(Username)
+            PrivateBroadcast(Message, ClientSocket)
+            PrivateCommand((Username + " is now a mod "), ClientSocket)
+            ModOnline += 1
 
         elif ModOnline == 0:
-            if not ModSocket in Mods:
-                print("[Mod] Mod Assigned to", ModCandidate, "as there were no mods online")
-                Mods.append(ModSocket)
-                ModUsers.append(ModCandidate)
-                PrivateBroadcast(Message, ModSocket)
-                PublicCommand((ModCandidate + " is now a mod"))
-                ModOnline += 1
-            else:
-                PrivateCommand("You are already a mod", ClientSocket)
+            # If there are no mods online currently
+            print("[Mod] Mod Assigned to", ModCandidate, "as there were no mods online")
+            Mods.append(ModSocket)
+            ModUsers.append(ModCandidate)
+            PrivateBroadcast(Message, ModSocket)
+            PublicCommand((ModCandidate + " is now a mod"))
+            ModOnline += 1
 
         elif ClientSocket in Mods:
             if not ModSocket in Mods:
-                print("[Mod] Mod Assigned by", Username, "to", ModCandidate)
-                Mods.append(ModSocket)
-                ModUsers.append(ModCandidate)
-                PrivateBroadcast(Message, ModSocket)
-                PublicCommand((Username + " gave " + ModCandidate + " mod"))
-                ModOnline += 1
+                if not ClientSocket in HasModded:
+                    print("[Mod] Mod Assigned by", Username, "to", ModCandidate)
+                    Mods.append(ModSocket)
+                    ModUsers.append(ModCandidate)
+                    HasModded.append((ClientSocket))
+                    PrivateBroadcast(Message, ModSocket)
+                    PublicCommand((Username + " gave " + ModCandidate + " mod"))
+                    ModOnline += 1
+
+                else:
+                    PrivateCommand("You have already assigned a mod", ClientSocket)
 
             else:
                 if ModSocket == ClientSocket:
