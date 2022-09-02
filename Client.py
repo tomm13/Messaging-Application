@@ -32,6 +32,7 @@ if platform.system() == "Darwin":
 elif platform.system() == "Windows":
     Rate = 0.00000
 
+
 class Boxes(Box):
     # This is for UI design. This allows creations of box instances.
     def __init__(self, master, width, height, align):
@@ -66,6 +67,7 @@ class TextBoxes(TextBox):
         self.text_color = "lightblue"
         self.bg = (40, 40, 40)
 
+
 class Texts(Text):
     # Allows for creation of Text Objects
     def __init__(self, master, text, text_size, text_color):
@@ -73,6 +75,7 @@ class Texts(Text):
         self.text = text
         self.text_size = text_size
         self.text_color = text_color
+
 
 class Animations:
     # Stores all Animations
@@ -110,12 +113,14 @@ class Animations:
         Color = NewColor
 
         if NewColor.casefold() == "khaki" and Mod == False:
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You don't have the power to use this color", AnimationColor])
+            AnimateThread = Thread(target=Animations.AnimateHeader,
+                                   args=["You don't have the power to use this color", AnimationColor])
             AnimateThread.start()
             return
 
         if OldTextColor == NewTextColor:
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can't change to the same color", AnimationColor])
+            AnimateThread = Thread(target=Animations.AnimateHeader,
+                                   args=["You can't change to the same color", AnimationColor])
             AnimateThread.start()
             return
 
@@ -305,13 +310,13 @@ class Animations:
 
         if DarkMode == True:
             while DarkMode == True:
-                #To turn Dark Mode off
+                # To turn Dark Mode off
                 R = 255
                 G = 255
                 B = 255
 
                 while not (R, G, B) == (0, 0, 0):
-                    #Text Fades to Black
+                    # Text Fades to Black
                     R -= 1
                     G -= 1
                     B -= 1
@@ -320,7 +325,7 @@ class Animations:
                     DisplayHeader.text_color = (R, G, B)
 
                 while not (R, G, B) == (215, 215, 215):
-                    #All backgrounds fade from black to white
+                    # All backgrounds fade from black to white
                     R += 1
                     G += 1
                     B += 1
@@ -345,13 +350,13 @@ class Animations:
 
         else:
             while DarkMode == False:
-                #To turn Dark Mode on
+                # To turn Dark Mode on
                 R = 0
                 G = 0
                 B = 0
 
                 while not (R, G, B) == (255, 255, 255):
-                    #Text Fades to White
+                    # Text Fades to White
                     R += 1
                     G += 1
                     B += 1
@@ -360,7 +365,7 @@ class Animations:
                     DisplayHeader.text_color = (R, G, B)
 
                 while not (R, G, B) == (70, 70, 70):
-                    #All Background fade to grey
+                    # All Background fade to grey
                     R -= 1
                     G -= 1
                     B -= 1
@@ -387,11 +392,14 @@ class Animations:
 
         if DisplayMessage == True:
             if DarkMode == True:
-                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned dark mode on", AnimationColor])
+                AnimateThread = Thread(target=Animations.AnimateHeader,
+                                       args=["You turned dark mode on", AnimationColor])
                 AnimateThread.start()
             else:
-                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned light mode on", AnimationColor])
+                AnimateThread = Thread(target=Animations.AnimateHeader,
+                                       args=["You turned light mode on", AnimationColor])
                 AnimateThread.start()
+
 
 def SaveChatHistory(Location):
     if Location and not " " in Location:
@@ -405,8 +413,10 @@ def SaveChatHistory(Location):
         AnimateThread.start()
 
     else:
-        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can't save to this location", AnimationColor])
+        AnimateThread = Thread(target=Animations.AnimateHeader,
+                               args=["You can't save to this location", AnimationColor])
         AnimateThread.start()
+
 
 def RSADecrypt(Message):
     Message = Message.split()
@@ -420,6 +430,7 @@ def RSADecrypt(Message):
 
     Message = str("".join(RSADecryptedMessage))
     return Message
+
 
 def AlwaysUpdate():
     global LinesSent, Mod, AnimationColor
@@ -494,6 +505,14 @@ def AlwaysUpdate():
             SaveChatThread = Thread(target=SaveChatHistory, args=[Location])
             SaveChatThread.start()
 
+        elif Message == "/disconnect":
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You cannot use this username", (173, 216, 230)])
+            AnimateThread.start()
+            while True:
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You are not connected", (216, 36, 41)])
+                AnimateThread.start()
+                sleep(0.1)
+
         else:
             LinesSent += 1
             if LinesSent > 15:
@@ -503,6 +522,7 @@ def AlwaysUpdate():
             ChatHistory.append(Message)
             History.append(Message)
 
+
 def SendToServer():
     Message = MessageInput.value
     if Message:
@@ -510,12 +530,14 @@ def SendToServer():
             Leave()
         else:
             if len(Message) + len(Username) + 2 >= 80:
-                AnimateThread = Thread(target=Animations.AnimateHeader, args=["Your message is too long.", AnimationColor])
+                AnimateThread = Thread(target=Animations.AnimateHeader,
+                                       args=["Your message is too long.", AnimationColor])
                 AnimateThread.start()
 
             else:
                 s.send(Message.encode())
                 MessageInput.clear()
+
 
 def Leave():
     s.send("/leave".encode())
@@ -532,6 +554,7 @@ def Leave():
 
     quit()
 
+
 def Connect():
     global Username
     global Color
@@ -546,12 +569,12 @@ def Connect():
     PrivateKey = str(KeyInput.value)
     PrivateKey = PrivateKey.split(", ")
 
-    #Override Inputs. Disable these for Proper functionality.
-    Host = '192.168.1.138'
-    PortInput.value = 49126
+    # Override Inputs. Disable these for Proper functionality.
+    Host = '192.168.1.119'
+    PortInput.value = 49125
     Color = "lightblue"
     Username = "tomm"
-    PrivateKey = ["6365", "10823"]
+    PrivateKey = ["10577", "17933"]
 
     try:
         if PrivateKey[0] and PrivateKey[1]:
@@ -592,6 +615,7 @@ def Connect():
             Status.value = "Invalid Key"
     except IndexError:
         Status.value = "Index Error"
+
 
 def OpenChat():
     global Chatroom, ChatroomOpened, ConnectWindowOpened
@@ -661,6 +685,7 @@ def OpenChat():
     ConnectWindow.hide()
     Chatroom.show()
 
+
 def OpenConnectWindow():
     global ConnectWindow, ConnectWindowOpened, Status
 
@@ -701,5 +726,6 @@ def OpenConnectWindow():
 
     ConnectWindowOpened = True
     ConnectWindow.display()
+
 
 OpenConnectWindow()
