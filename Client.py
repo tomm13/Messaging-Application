@@ -571,10 +571,10 @@ def Connect():
 
     # Override Inputs. Disable these for Proper functionality.
     Host = '192.168.1.119'
-    PortInput.value = 49125
+    PortInput.value = 49126
     Color = "lightblue"
     Username = "tomm"
-    PrivateKey = ["10577", "17933"]
+    PrivateKey = ["41059", "62113"]
 
     try:
         if PrivateKey[0] and PrivateKey[1]:
