@@ -1,4 +1,4 @@
-##2/9/2022
+##3/9/2022
 ##V13 Beta
 
 import socket
@@ -19,7 +19,7 @@ SpaceRemaining = UserCount
 Hostname = socket.gethostname()
 IP = socket.gethostbyname(Hostname)
 IP = '192.168.1.138'
-Port = 49125
+Port = 49126
 
 VoteActive = False
 
@@ -245,10 +245,16 @@ def PrivateCommand(Message, ClientSocket):
 def RemoveUser(Username, ClientSocket):
     try:
         global UserOnline, Clients, Users, ModOnline
+        global VoteAgainst, Vote, VoteActive
         if ClientSocket in Mods:
             Mods.remove(ClientSocket)
             ModUsers.remove(Username)
             ModOnline -= 1
+            if VoteActive == True:
+                PublicCommand("The vote is reset as a moderator has disconnected")
+                VoteActive = False
+                Vote = 0
+                VoteAgainst = 0
 
         Message = "/remove " + Username
         Broadcast(Message)
@@ -263,28 +269,26 @@ def RemoveUser(Username, ClientSocket):
 def Listen(ClientSocket):
     global UserOnline, Clients, Users
     while True:
-        #try:
-        Index = Clients.index(ClientSocket)
-        Username = Users[Index]
+        try:
+            Index = Clients.index(ClientSocket)
+            Username = Users[Index]
 
-        Message = ClientSocket.recv(1024).decode()
-        UnifiedMessage = Username + ": " + Message
+            Message = ClientSocket.recv(1024).decode()
+            UnifiedMessage = Username + ": " + Message
 
-        if Message:
-            if Message[0] == "/":
-                if Message == "/leave":
-                    if ClientSocket in Clients:
-                        RemoveUser(Username, ClientSocket)
-                    break
+            if Message:
+                if Message[0] == "/":
+                    if Message == "/leave":
+                        if ClientSocket in Clients:
+                            RemoveUser(Username, ClientSocket)
+                        break
+                    else:
+                        Command(Message, Username, ClientSocket)
                 else:
-                    Command(Message, Username, ClientSocket)
-            else:
-                Broadcast(UnifiedMessage)
-
-        #except:
-            #RemoveUser(Username, ClientSocket)
-            #print("in except")
-           # break
+                    Broadcast(UnifiedMessage)
+        except:
+            RemoveUser(Username, ClientSocket)
+            break
 
 def Command(Message, Username, ClientSocket):
     global Vote, VoteActive, VoteAgainst
@@ -340,7 +344,7 @@ def Command(Message, Username, ClientSocket):
         else:
             # Vote is active
             if Message[6:].casefold() == "details":
-                PrivateCommand("For: " + str(Vote) + ". Against: " + str(VoteAgainst), ClientSocket)
+                PrivateCommand("For: " + str(Vote) + " Against: " + str(VoteAgainst), ClientSocket)
 
             elif ClientSocket in Mods:
                 if Message[6:].casefold() == "for":
