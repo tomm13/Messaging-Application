@@ -30,7 +30,7 @@ These were created to simplify the UI and enhance the UX. These vary from output
 
 ### Moderators (or Mods)
 
-In order for the chatroom to stay civilised, moderators were created. Moderators are chosen to remove any user they deem unfit, with the approval of other moderators in most situations.
+In order for the chatroom to stay civilised, moderators were created. Moderators are chosen to remove any user they deem unfit, with the approval of other moderators in most situations. To become a moderator one must either be the first to use the `/mod <self>` command, or is assigned by another moderator.
 
 #### Moderator benefits:
 
@@ -44,9 +44,22 @@ In order for the chatroom to stay civilised, moderators were created. Moderators
 
 <img width="1197" alt="Screenshot 2022-09-03 at 00 04 36" src="https://user-images.githubusercontent.com/42684333/188244864-2df61d82-463f-48b6-b03d-8c677bda9977.png">
 
-- VoteKicking, which grants the moderator rights to kick non-moderators (when there is only 1 moderator), or to call a vote which all moderators could participate, in which 2 moderators must vote for or against the removal of a specific user. When a vote is called, the moderator that called the vote will automatically cast their vote in favour of the removal.
+- ### VoteKicking, explained more in depth below.
 
+If there is only 1 moderator online, any non-moderator the moderator decides to kick will be removed immediately:
 
+<img width="1194" alt="Screenshot 2022-09-03 at 00 11 14" src="https://user-images.githubusercontent.com/42684333/188245205-c60966c3-c627-4a70-9396-d3d2f5bf115a.png">
+
+If there is more than 1 moderator online, a moderator must first call for a vote, using the same `/kick <user>` command:
+  
+ <img width="1198" alt="Screenshot 2022-09-03 at 00 06 53" src="https://user-images.githubusercontent.com/42684333/188245394-51d3169b-e4e2-44c3-8b96-816e37b18aa0.png">
+  
+ This moderator will now automatically cast his vote in favor of removing `<user>`. By default 2 votes must be made in favor to remove `<user>` outright.
+ To do this a moderator must use the `/vote for` command.
+ 
+  Conversely, if 2 moderators voted against removing `<user>`, the vote is called off and `<user>` is not kicked. To vote against the removal of `<user>`, a moderator must use the `/vote against`command:
+  
+  <img width="1195" alt="Screenshot 2022-09-03 at 00 07 28" src="https://user-images.githubusercontent.com/42684333/188245609-57e21eec-7909-4b54-8fe2-137d90f2d49a.png">
 
 ### Commands
 
