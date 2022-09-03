@@ -1,4 +1,4 @@
-##2/9/2022
+##3/9/2022
 ##V13 Beta
 
 import socket
@@ -11,18 +11,25 @@ s = socket.socket()
 UserCount = 1000
 UserOnline = 0
 ModOnline = 0
+Vote = 0
+VoteAgainst = 0
+VotesNeeded = 2
 SpaceRemaining = UserCount
 
 Hostname = socket.gethostname()
 IP = socket.gethostbyname(Hostname)
-#IP = ''
-Port = 49125
+IP = '192.168.1.138'
+Port = 49126
+
+VoteActive = False
 
 # Clients and Mods are lists of ClientSockets, whereas Users and ModUsers is a list of Usernames
 Clients = []
 Users = []
 Mods = []
 ModUsers = []
+HasVoted = []
+HasModded = []
 
 def GetKey():
     global Minimum, Maximum
@@ -93,10 +100,12 @@ def GetKey():
     Connect()
 
 def VoteKick(Message, ClientSocket):
+    global Vote, VoteActive, UserToKick, UserKickSocket, HasVoted
     # ClientSocket is the mod socket
     # Username requested to kick
     # UserKickSocket is the user socket
     # UserToKick is the user to be kicked
+
     try:
         Index = Clients.index(ClientSocket)
         Username = Users[Index]
@@ -110,11 +119,19 @@ def VoteKick(Message, ClientSocket):
             if Username in ModUsers:
                 # If the person kicking is a mod
                 if len(Mods) == 1:
-                    PublicCommand((Username + " is kicking " + UserToKick))
+                    PublicCommand("A moderator is kicking " + UserToKick)
                     RemoveUser(UserToKick, UserKickSocket)
 
                 if len(Mods) > 1:
-                    PrivateCommand("You cannot kick at this time", ClientSocket)
+                    if VoteActive == False:
+                        HasVoted = []
+                        HasVoted.append(Username)
+                        Vote = 1
+                        VoteAgainst = 0
+                        VoteActive = True
+                        PublicCommand("Moderators can now vote to kick " + UserToKick)
+
+                        print("[Server] Starting vote")
             else:
                 PrivateCommand("You do not have the power to execute this action", ClientSocket)
         else:
@@ -123,7 +140,7 @@ def VoteKick(Message, ClientSocket):
         PrivateCommand("You cannot kick this person as they do not exist", ClientSocket)
 
 def ModSelection(Message, Username, ClientSocket):
-    global Mods, ModUsers, ModOnline
+    global Mods, ModUsers, ModOnline, HasModded
     # ClientSocket = User who should have mod giving someone else mod
     # Or User who doesn't have mod but is the first online, or first
     # to apply for mod.
@@ -140,35 +157,36 @@ def ModSelection(Message, Username, ClientSocket):
         Username = Users[Index]
 
         if UserOnline == 1:
-            if not ModSocket in Mods:
-                print("[Mod] Mod Assigned to", Username, "as there was only 1 user online")
-                Mods.append(ClientSocket)
-                ModUsers.append(Username)
-                PrivateBroadcast(Message, ClientSocket)
-                PrivateCommand((Username + " is now a mod "), ClientSocket)
-                ModOnline += 1
-            else:
-                PrivateCommand("You are already a mod", ClientSocket)
+            # If they're the only person online
+            print("[Mod] Mod Assigned to", Username, "as there was only 1 user online")
+            Mods.append(ClientSocket)
+            ModUsers.append(Username)
+            PrivateBroadcast(Message, ClientSocket)
+            PrivateCommand((Username + " is now a mod "), ClientSocket)
+            ModOnline += 1
 
         elif ModOnline == 0:
-            if not ModSocket in Mods:
-                print("[Mod] Mod Assigned to", ModCandidate, "as there were no mods online")
-                Mods.append(ModSocket)
-                ModUsers.append(ModCandidate)
-                PrivateBroadcast(Message, ModSocket)
-                PublicCommand((ModCandidate + " is now a mod"))
-                ModOnline += 1
-            else:
-                PrivateCommand("You are already a mod", ClientSocket)
+            # If there are no mods online currently
+            print("[Mod] Mod Assigned to", ModCandidate, "as there were no mods online")
+            Mods.append(ModSocket)
+            ModUsers.append(ModCandidate)
+            PrivateBroadcast(Message, ModSocket)
+            PublicCommand((ModCandidate + " is now a mod"))
+            ModOnline += 1
 
         elif ClientSocket in Mods:
             if not ModSocket in Mods:
-                print("[Mod] Mod Assigned by", Username, "to", ModCandidate)
-                Mods.append(ModSocket)
-                ModUsers.append(ModCandidate)
-                PrivateBroadcast(Message, ModSocket)
-                PublicCommand((Username + " gave " + ModCandidate + " mod"))
-                ModOnline += 1
+                if not ClientSocket in HasModded:
+                    print("[Mod] Mod Assigned by", Username, "to", ModCandidate)
+                    Mods.append(ModSocket)
+                    ModUsers.append(ModCandidate)
+                    HasModded.append((ClientSocket))
+                    PrivateBroadcast(Message, ModSocket)
+                    PublicCommand((Username + " gave " + ModCandidate + " mod"))
+                    ModOnline += 1
+
+                else:
+                    PrivateCommand("You have already assigned a mod", ClientSocket)
 
             else:
                 if ModSocket == ClientSocket:
@@ -213,7 +231,7 @@ def PublicCommand(Message):
         Client.send(Message.encode())
 
 def PrivateBroadcast(Message, ClientSocket):
-    # Sends a Private Message to 1 Specfic Client, not for Animating Purposes.
+    # Sends a Private Message to 1 specific Client, not for Animating Purposes.
     time.sleep(0.1)
 
     Message = RSAEncrypt(Message)
@@ -229,10 +247,16 @@ def PrivateCommand(Message, ClientSocket):
 def RemoveUser(Username, ClientSocket):
     try:
         global UserOnline, Clients, Users, ModOnline
+        global VoteAgainst, Vote, VoteActive
         if ClientSocket in Mods:
             Mods.remove(ClientSocket)
             ModUsers.remove(Username)
             ModOnline -= 1
+            if VoteActive == True:
+                PublicCommand("The vote is reset as a moderator has disconnected")
+                VoteActive = False
+                Vote = 0
+                VoteAgainst = 0
 
         Message = "/remove " + Username
         Broadcast(Message)
@@ -259,18 +283,17 @@ def Listen(ClientSocket):
                     if Message == "/leave":
                         if ClientSocket in Clients:
                             RemoveUser(Username, ClientSocket)
-
                         break
                     else:
                         Command(Message, Username, ClientSocket)
                 else:
                     Broadcast(UnifiedMessage)
-
         except:
             RemoveUser(Username, ClientSocket)
             break
 
 def Command(Message, Username, ClientSocket):
+    global Vote, VoteActive, VoteAgainst
     if Message == "/space":
         PrivateCommand(str(UserCount), ClientSocket)
     elif Message == "/online":
@@ -312,7 +335,74 @@ def Command(Message, Username, ClientSocket):
         else:
             ModSelection(Message, Username, ClientSocket)
     elif Message[0:5] == "/kick":
-        VoteKick(Message, ClientSocket)
+        if VoteActive == False:
+            VoteKick(Message, ClientSocket)
+        else:
+            PrivateCommand("You cannot kick as another vote is taking place", ClientSocket)
+    elif Message[0:5].casefold() == "/vote":
+        if VoteActive == False:
+            PrivateCommand("You cannot complete this action as there is no ongoing vote", ClientSocket)
+
+        else:
+            # Vote is active
+            if Message[6:].casefold() == "details":
+                PrivateCommand("For: " + str(Vote) + " Against: " + str(VoteAgainst), ClientSocket)
+
+            elif ClientSocket in Mods:
+                if Message[6:].casefold() == "for":
+                    if not Username in HasVoted:
+                        Vote += 1
+                        HasVoted.append(Username)
+                        if Vote == 1:
+                            PublicCommand("1 moderator has voted in favour of kicking " + UserToKick)
+                        elif Vote > 1:
+                            PublicCommand(str(Vote) + " moderators has voted in favour of kicking " + UserToKick)
+
+                        if Vote == VotesNeeded:
+                            PublicCommand(UserToKick + " has been kicked")
+                            RemoveUser(UserToKick, UserKickSocket)
+                            VoteActive = False
+                            Vote = 0
+                            VoteAgainst = 0
+
+                        elif len(HasVoted) == 2 and len(Mods) == 2 and Vote + VoteAgainst == 2:
+                            PublicCommand(UserToKick + " will not be kicked")
+                            VoteActive = False
+                            Vote = 0
+                            VoteAgainst = 0
+
+                    else:
+                        PrivateCommand("Your have already cast your vote", ClientSocket)
+
+                elif Message[6:].casefold() == "against":
+                    if not Username in HasVoted:
+                        VoteAgainst += 1
+                        HasVoted.append(Username)
+                        if VoteAgainst == 1:
+                            PublicCommand("1 moderator has voted against kicking " + UserToKick)
+                        elif VoteAgainst > 1:
+                            PublicCommand(str(VoteAgainst) + " moderators has voted against kicking " + UserToKick)
+
+                        if VoteAgainst == VotesNeeded:
+                            PublicCommand(UserToKick + " will not be kicked")
+                            VoteActive = False
+                            Vote = 0
+                            VoteAgainst = 0
+
+                        elif len(HasVoted) == 2 and len(Mods) == 2 and Vote + VoteAgainst == 2:
+                            PublicCommand(UserToKick + " will not be kicked")
+                            VoteActive = False
+                            Vote = 0
+                            VoteAgainst = 0
+
+                    else:
+                        PrivateCommand("Your have already cast your vote", ClientSocket)
+                else:
+                    PrivateCommand("Your vote command is unknown", ClientSocket)
+            else:
+                PrivateCommand("You do not have the power to execute this action", ClientSocket)
+    elif Message == "/filler":
+        PrivateBroadcast(Message, ClientSocket)
     else:
         PrivateCommand("Your command is unknown", ClientSocket)
 
@@ -327,16 +417,21 @@ def Connect():
             Clients.append(ClientSocket)
 
             Username = ClientSocket.recv(1024).decode()
-            Users.append(Username)
+            if Username in Users:
+                PrivateBroadcast("/disconnect", ClientSocket)
+                Clients.remove(ClientSocket)
 
-            Message = "/add " + " ".join(Users)
-            Broadcast(Message)
+            else:
+                Users.append(Username)
 
-            UserOnline += 1
-            SpaceRemaining -= 1
+                Message = "/add " + " ".join(Users)
+                Broadcast(Message)
 
-            ListeningThread = Thread(target=Listen, args=[ClientSocket])
-            ListeningThread.start()
+                UserOnline += 1
+                SpaceRemaining -= 1
+
+                ListeningThread = Thread(target=Listen, args=[ClientSocket])
+                ListeningThread.start()
 
         except:
             RemoveUser(Username, ClientSocket)

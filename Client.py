@@ -1,8 +1,8 @@
-##2/9/2022
+##3/9/2022
 ##V13 Beta
 import platform
 import socket
-from time import sleep
+from time import sleep, localtime, strftime
 from threading import Thread
 
 import colorutils
@@ -20,6 +20,7 @@ StopRainbow = False
 AnimationRunning = False
 
 Mod = False
+RunFiller = False
 
 WaitTime = 0.75
 LinesSent = 1
@@ -31,6 +32,7 @@ if platform.system() == "Darwin":
     Rate = 0.00025
 elif platform.system() == "Windows":
     Rate = 0.00000
+
 
 class Boxes(Box):
     # This is for UI design. This allows creations of box instances.
@@ -66,6 +68,7 @@ class TextBoxes(TextBox):
         self.text_color = "lightblue"
         self.bg = (40, 40, 40)
 
+
 class Texts(Text):
     # Allows for creation of Text Objects
     def __init__(self, master, text, text_size, text_color):
@@ -74,13 +77,50 @@ class Texts(Text):
         self.text_size = text_size
         self.text_color = text_color
 
+
 class Animations:
     # Stores all Animations
     def __init__(self, Message, Color):
         self.Message = Message
         self.Color = Color
 
-    def ModBorder(self, DisplayMessage):
+    def Filler(self):
+        Turn = 1
+        while RunFiller == True:
+            sleep(15)
+            while AnimationRunning == True:
+                sleep(15)
+
+            if Turn == 1:
+                Time = strftime("%H:%M", localtime())
+                Time = "Time: " + str(Time)
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=[Time, AnimationColor])
+                AnimateThread.start()
+                Turn += 1
+
+            elif Turn == 2:
+                Message = "Messages sent: " + str(len(ChatHistory))
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=[Message, AnimationColor])
+                AnimateThread.start()
+                Turn += 1
+
+            elif Turn == 3:
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can save the chat history using /save", AnimationColor])
+                AnimateThread.start()
+                Turn += 1
+
+            elif Turn == 4:
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can switch the chat theme using /theme", AnimationColor])
+                AnimateThread.start()
+                Turn += 1
+
+            elif Turn == 5:
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can switch the chat text color using /color", AnimationColor])
+                AnimateThread.start()
+                Turn = 1
+
+
+    def ModBorder(self):
         global AnimationRunning
 
         (R, G, B) = (173, 216, 230)
@@ -110,12 +150,14 @@ class Animations:
         Color = NewColor
 
         if NewColor.casefold() == "khaki" and Mod == False:
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You don't have the power to use this color", AnimationColor])
+            AnimateThread = Thread(target=Animations.AnimateHeader,
+                                   args=["You don't have the power to use this color", AnimationColor])
             AnimateThread.start()
             return
 
         if OldTextColor == NewTextColor:
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can't change to the same color", AnimationColor])
+            AnimateThread = Thread(target=Animations.AnimateHeader,
+                                   args=["You can't change to the same color", AnimationColor])
             AnimateThread.start()
             return
 
@@ -305,13 +347,13 @@ class Animations:
 
         if DarkMode == True:
             while DarkMode == True:
-                #To turn Dark Mode off
+                # To turn Dark Mode off
                 R = 255
                 G = 255
                 B = 255
 
                 while not (R, G, B) == (0, 0, 0):
-                    #Text Fades to Black
+                    # Text Fades to Black
                     R -= 1
                     G -= 1
                     B -= 1
@@ -320,7 +362,7 @@ class Animations:
                     DisplayHeader.text_color = (R, G, B)
 
                 while not (R, G, B) == (215, 215, 215):
-                    #All backgrounds fade from black to white
+                    # All backgrounds fade from black to white
                     R += 1
                     G += 1
                     B += 1
@@ -345,13 +387,13 @@ class Animations:
 
         else:
             while DarkMode == False:
-                #To turn Dark Mode on
+                # To turn Dark Mode on
                 R = 0
                 G = 0
                 B = 0
 
                 while not (R, G, B) == (255, 255, 255):
-                    #Text Fades to White
+                    # Text Fades to White
                     R += 1
                     G += 1
                     B += 1
@@ -360,7 +402,7 @@ class Animations:
                     DisplayHeader.text_color = (R, G, B)
 
                 while not (R, G, B) == (70, 70, 70):
-                    #All Background fade to grey
+                    # All Background fade to grey
                     R -= 1
                     G -= 1
                     B -= 1
@@ -387,11 +429,14 @@ class Animations:
 
         if DisplayMessage == True:
             if DarkMode == True:
-                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned dark mode on", AnimationColor])
+                AnimateThread = Thread(target=Animations.AnimateHeader,
+                                       args=["You turned dark mode on", AnimationColor])
                 AnimateThread.start()
             else:
-                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned light mode on", AnimationColor])
+                AnimateThread = Thread(target=Animations.AnimateHeader,
+                                       args=["You turned light mode on", AnimationColor])
                 AnimateThread.start()
+
 
 def SaveChatHistory(Location):
     if Location and not " " in Location:
@@ -405,8 +450,10 @@ def SaveChatHistory(Location):
         AnimateThread.start()
 
     else:
-        AnimateThread = Thread(target=Animations.AnimateHeader, args=["You can't save to this location", AnimationColor])
+        AnimateThread = Thread(target=Animations.AnimateHeader,
+                               args=["You can't save to this location", AnimationColor])
         AnimateThread.start()
+
 
 def RSADecrypt(Message):
     Message = Message.split()
@@ -422,7 +469,7 @@ def RSADecrypt(Message):
     return Message
 
 def AlwaysUpdate():
-    global LinesSent, Mod, AnimationColor
+    global LinesSent, Mod, AnimationColor, RunFiller
     Users = []
     while True:
         if Mod == True:
@@ -472,17 +519,21 @@ def AlwaysUpdate():
 
         elif Message[0:4] == "/mod":
             if Message[5:] == Username and Mod == False:
+                global RunFiller
                 Mod = True
+                RunFiller = True
                 if DarkMode == False:
                     AnimateThread = Thread(target=Animations.SwitchTheme, args=["", False])
                     AnimateThread.start()
                     sleep(0.1)
-                AnimateThread = Thread(target=Animations.ModBorder, args=["", False])
+                AnimateThread = Thread(target=Animations.ModBorder, args=[""])
                 AnimateThread.start()
                 sleep(0.1)
                 AnimateThread = Thread(target=Animations.FadeToColor, args=["Khaki", False])
                 AnimateThread.start()
                 sleep(0.1)
+                FillerThread = Thread(target=Animations.Filler, args=[""])
+                FillerThread.start()
 
         elif Message[0:6] == "/color":
             Color = Message[7:]
@@ -494,6 +545,27 @@ def AlwaysUpdate():
             SaveChatThread = Thread(target=SaveChatHistory, args=[Location])
             SaveChatThread.start()
 
+        elif Message == "/disconnect":
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You cannot use this username", AnimationColor])
+            AnimateThread.start()
+            while True:
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You are not connected", (216, 36, 41)])
+                AnimateThread.start()
+                sleep(0.1)
+
+        elif Message == "/filler":
+            if RunFiller == False:
+                RunFiller = True
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned filler on", AnimationColor])
+                AnimateThread.start()
+                FillerThread = Thread(target=Animations.Filler, args=[""])
+                FillerThread.start()
+
+            else:
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You turned filler off", AnimationColor])
+                AnimateThread.start()
+                RunFiller = False
+
         else:
             LinesSent += 1
             if LinesSent > 15:
@@ -503,6 +575,7 @@ def AlwaysUpdate():
             ChatHistory.append(Message)
             History.append(Message)
 
+
 def SendToServer():
     Message = MessageInput.value
     if Message:
@@ -510,7 +583,8 @@ def SendToServer():
             Leave()
         else:
             if len(Message) + len(Username) + 2 >= 80:
-                AnimateThread = Thread(target=Animations.AnimateHeader, args=["Your message is too long.", AnimationColor])
+                AnimateThread = Thread(target=Animations.AnimateHeader,
+                                       args=["Your message is too long.", AnimationColor])
                 AnimateThread.start()
 
             else:
@@ -527,9 +601,7 @@ def Leave():
         Chatroom.hide()
 
     s.close()
-
     print("You have disconencted.")
-
     quit()
 
 def Connect():
@@ -546,12 +618,12 @@ def Connect():
     PrivateKey = str(KeyInput.value)
     PrivateKey = PrivateKey.split(", ")
 
-    #Override Inputs. Disable these for Proper functionality.
+    # Override Inputs. Disable these for Proper functionality.
     Host = '192.168.1.138'
     PortInput.value = 49126
     Color = "lightblue"
     Username = "tomm"
-    PrivateKey = ["6365", "10823"]
+    PrivateKey = ["1203", "1909"]
 
     try:
         if PrivateKey[0] and PrivateKey[1]:
@@ -661,6 +733,7 @@ def OpenChat():
     ConnectWindow.hide()
     Chatroom.show()
 
+
 def OpenConnectWindow():
     global ConnectWindow, ConnectWindowOpened, Status
 
@@ -701,5 +774,6 @@ def OpenConnectWindow():
 
     ConnectWindowOpened = True
     ConnectWindow.display()
+
 
 OpenConnectWindow()
