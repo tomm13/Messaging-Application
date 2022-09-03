@@ -19,7 +19,7 @@ SpaceRemaining = UserCount
 Hostname = socket.gethostname()
 IP = socket.gethostbyname(Hostname)
 IP = '192.168.1.138'
-Port = 49125
+Port = 49126
 
 VoteActive = False
 
@@ -401,6 +401,8 @@ def Command(Message, Username, ClientSocket):
                     PrivateCommand("Your vote command is unknown", ClientSocket)
             else:
                 PrivateCommand("You do not have the power to execute this action", ClientSocket)
+    elif Message == "/filler":
+        PrivateBroadcast(Message, ClientSocket)
     else:
         PrivateCommand("Your command is unknown", ClientSocket)
 
@@ -415,7 +417,6 @@ def Connect():
             Clients.append(ClientSocket)
 
             Username = ClientSocket.recv(1024).decode()
-
             if Username in Users:
                 PrivateBroadcast("/disconnect", ClientSocket)
                 Clients.remove(ClientSocket)
