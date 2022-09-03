@@ -49,6 +49,7 @@ Commands are an essential part of the code, especially with linking animations a
 - `/port` - Shows Port
 - `/key` - Shows RSA Decryption Key
 - `/theme` - Switches between light mode and dark mode
+- `/filler` - When on, displays a useful message every 15 seconds after the last animation. (eg. time, messages sent, commands to use)
 - `/color <color>` - Switches text color to `<color>`
 - `/save <location>' - Saves the chat history to `<location>`
 - `/mod <user>` - Sends a request to give the moderator role to `<user>` 
