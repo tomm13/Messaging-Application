@@ -1,5 +1,5 @@
-##3/9/2022
-##V13 Beta
+##4/9/2022
+##V13 Beta 2
 import platform
 import socket
 from time import sleep, localtime, strftime
@@ -483,6 +483,7 @@ def AlwaysUpdate():
         if Message[0:4] == "/add":
             Message = Message[5:]
             Message = Message.split()
+            Message.sort()
 
             UserList.clear()
             UserList.append("Users Online:")
@@ -623,7 +624,7 @@ def Connect():
     PortInput.value = 49126
     Color = "lightblue"
     Username = "tomm"
-    PrivateKey = ["1203", "1909"]
+    PrivateKey = ["3557", "18091"]
 
     try:
         if PrivateKey[0] and PrivateKey[1]:
