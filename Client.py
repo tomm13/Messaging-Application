@@ -1,5 +1,5 @@
-##4/9/2022
-##V13 Beta 2
+##7/9/2022
+##V13 Beta
 import platform
 import socket
 from time import sleep, localtime, strftime
@@ -145,50 +145,54 @@ class Animations:
     def FadeToColor(NewColor, DisplayMessage):
         global AnimationRunning
         global Color
+        try:
+            OldTextColor = colorutils.Color(web=Color)
+            NewTextColor = colorutils.Color(web=NewColor)
+            Color = NewColor
 
-        OldTextColor = colorutils.Color(web=Color)
-        NewTextColor = colorutils.Color(web=NewColor)
-        Color = NewColor
+            if NewColor.casefold() == "khaki" and Mod == False:
+                AnimateThread = Thread(target=Animations.AnimateHeader,
+                                       args=["You don't have the power to use this color", AnimationColor])
+                AnimateThread.start()
+                return
 
-        if NewColor.casefold() == "khaki" and Mod == False:
-            AnimateThread = Thread(target=Animations.AnimateHeader,
-                                   args=["You don't have the power to use this color", AnimationColor])
-            AnimateThread.start()
-            return
+            if OldTextColor == NewTextColor:
+                AnimateThread = Thread(target=Animations.AnimateHeader,
+                                       args=["You can't change to the same color", AnimationColor])
+                AnimateThread.start()
+                return
 
-        if OldTextColor == NewTextColor:
-            AnimateThread = Thread(target=Animations.AnimateHeader,
-                                   args=["You can't change to the same color", AnimationColor])
-            AnimateThread.start()
-            return
+            while AnimationRunning == True:
+                sleep(WaitTime)
+            AnimationRunning = True
 
-        while AnimationRunning == True:
-            sleep(WaitTime)
-        AnimationRunning = True
+            (R, G, B) = OldTextColor.rgb
 
-        (R, G, B) = OldTextColor.rgb
+            while not R == NewTextColor.red or not G == NewTextColor.green or not B == NewTextColor.blue:
+                if R > NewTextColor.red:
+                    R -= 1
+                if G > NewTextColor.green:
+                    G -= 1
+                if B > NewTextColor.blue:
+                    B -= 1
+                if R < NewTextColor.red:
+                    R += 1
+                if G < NewTextColor.green:
+                    G += 1
+                if B < NewTextColor.blue:
+                    B += 1
 
-        while not R == NewTextColor.red or not G == NewTextColor.green or not B == NewTextColor.blue:
-            if R > NewTextColor.red:
-                R -= 1
-            if G > NewTextColor.green:
-                G -= 1
-            if B > NewTextColor.blue:
-                B -= 1
-            if R < NewTextColor.red:
-                R += 1
-            if G < NewTextColor.green:
-                G += 1
-            if B < NewTextColor.blue:
-                B += 1
+                History.text_color = (R, G, B)
+                MessageInput.text_color = (R, G, B)
 
-            History.text_color = (R, G, B)
-            MessageInput.text_color = (R, G, B)
+                sleep(Rate)
 
-            sleep(Rate)
+            if DisplayMessage == True:
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You changed the text color", AnimationColor])
+                AnimateThread.start()
 
-        if DisplayMessage == True:
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You changed the text color", AnimationColor])
+        except:
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You cannot use an undefined color", AnimationColor])
             AnimateThread.start()
 
         AnimationRunning = False
@@ -575,6 +579,8 @@ def AlwaysUpdate():
         else:
             LinesSent += 1
             if LinesSent > 15:
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You created a new page", AnimationColor])
+                AnimateThread.start()
                 History.clear()
                 LinesSent = 2
 
@@ -625,11 +631,11 @@ def Connect():
     PrivateKey = PrivateKey.split(", ")
 
     # Override Inputs. Disable these for Proper functionality.
-    Host = '192.168.1.138'
+    Host = '10.28.206.198'
     PortInput.value = 49126
     Color = "lightblue"
     Username = "tomm"
-    PrivateKey = ["3557", "18091"]
+    PrivateKey = ["4391", "9917"]
 
     try:
         if PrivateKey[0] and PrivateKey[1]:
