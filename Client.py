@@ -1,4 +1,4 @@
-##3/9/2022
+##7/9/2022
 ##V13 Beta
 import platform
 import socket
@@ -569,6 +569,8 @@ def AlwaysUpdate():
         else:
             LinesSent += 1
             if LinesSent > 15:
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You created a new page", AnimationColor])
+                AnimateThread.start()
                 History.clear()
                 LinesSent = 2
 
@@ -619,11 +621,11 @@ def Connect():
     PrivateKey = PrivateKey.split(", ")
 
     # Override Inputs. Disable these for Proper functionality.
-    Host = '192.168.1.138'
+    Host = '10.28.206.198'
     PortInput.value = 49126
     Color = "lightblue"
     Username = "tomm"
-    PrivateKey = ["1203", "1909"]
+    PrivateKey = ["4391", "9917"]
 
     try:
         if PrivateKey[0] and PrivateKey[1]:
