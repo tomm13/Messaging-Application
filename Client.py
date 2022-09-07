@@ -140,6 +140,7 @@ class Animations:
             MainBox.set_border(3, (R, G, B))
 
         AnimationRunning = False
+        return
 
     def FadeToColor(NewColor, DisplayMessage):
         global AnimationRunning
@@ -195,6 +196,7 @@ class Animations:
             AnimateThread.start()
 
         AnimationRunning = False
+        return
 
     def AnimateHeader(Message, Color):
         global AnimationRunning
@@ -340,6 +342,7 @@ class Animations:
                 sleep(Rate)
 
         AnimationRunning = False
+        return
 
     def SwitchTheme(self, DisplayMessage):
         global DarkMode
@@ -441,6 +444,7 @@ class Animations:
                                        args=["You turned light mode on", AnimationColor])
                 AnimateThread.start()
 
+        return
 
 def SaveChatHistory(Location):
     if Location and not " " in Location:
@@ -458,6 +462,7 @@ def SaveChatHistory(Location):
                                args=["You can't save to this location", AnimationColor])
         AnimateThread.start()
 
+    return
 
 def RSADecrypt(Message):
     Message = Message.split()
@@ -487,6 +492,7 @@ def AlwaysUpdate():
         if Message[0:4] == "/add":
             Message = Message[5:]
             Message = Message.split()
+            Message.sort()
 
             UserList.clear()
             UserList.append("Users Online:")
