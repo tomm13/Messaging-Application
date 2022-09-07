@@ -144,50 +144,54 @@ class Animations:
     def FadeToColor(NewColor, DisplayMessage):
         global AnimationRunning
         global Color
+        try:
+            OldTextColor = colorutils.Color(web=Color)
+            NewTextColor = colorutils.Color(web=NewColor)
+            Color = NewColor
 
-        OldTextColor = colorutils.Color(web=Color)
-        NewTextColor = colorutils.Color(web=NewColor)
-        Color = NewColor
+            if NewColor.casefold() == "khaki" and Mod == False:
+                AnimateThread = Thread(target=Animations.AnimateHeader,
+                                       args=["You don't have the power to use this color", AnimationColor])
+                AnimateThread.start()
+                return
 
-        if NewColor.casefold() == "khaki" and Mod == False:
-            AnimateThread = Thread(target=Animations.AnimateHeader,
-                                   args=["You don't have the power to use this color", AnimationColor])
-            AnimateThread.start()
-            return
+            if OldTextColor == NewTextColor:
+                AnimateThread = Thread(target=Animations.AnimateHeader,
+                                       args=["You can't change to the same color", AnimationColor])
+                AnimateThread.start()
+                return
 
-        if OldTextColor == NewTextColor:
-            AnimateThread = Thread(target=Animations.AnimateHeader,
-                                   args=["You can't change to the same color", AnimationColor])
-            AnimateThread.start()
-            return
+            while AnimationRunning == True:
+                sleep(WaitTime)
+            AnimationRunning = True
 
-        while AnimationRunning == True:
-            sleep(WaitTime)
-        AnimationRunning = True
+            (R, G, B) = OldTextColor.rgb
 
-        (R, G, B) = OldTextColor.rgb
+            while not R == NewTextColor.red or not G == NewTextColor.green or not B == NewTextColor.blue:
+                if R > NewTextColor.red:
+                    R -= 1
+                if G > NewTextColor.green:
+                    G -= 1
+                if B > NewTextColor.blue:
+                    B -= 1
+                if R < NewTextColor.red:
+                    R += 1
+                if G < NewTextColor.green:
+                    G += 1
+                if B < NewTextColor.blue:
+                    B += 1
 
-        while not R == NewTextColor.red or not G == NewTextColor.green or not B == NewTextColor.blue:
-            if R > NewTextColor.red:
-                R -= 1
-            if G > NewTextColor.green:
-                G -= 1
-            if B > NewTextColor.blue:
-                B -= 1
-            if R < NewTextColor.red:
-                R += 1
-            if G < NewTextColor.green:
-                G += 1
-            if B < NewTextColor.blue:
-                B += 1
+                History.text_color = (R, G, B)
+                MessageInput.text_color = (R, G, B)
 
-            History.text_color = (R, G, B)
-            MessageInput.text_color = (R, G, B)
+                sleep(Rate)
 
-            sleep(Rate)
+            if DisplayMessage == True:
+                AnimateThread = Thread(target=Animations.AnimateHeader, args=["You changed the text color", AnimationColor])
+                AnimateThread.start()
 
-        if DisplayMessage == True:
-            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You changed the text color", AnimationColor])
+        except:
+            AnimateThread = Thread(target=Animations.AnimateHeader, args=["You cannot use an undefined color", AnimationColor])
             AnimateThread.start()
 
         AnimationRunning = False
