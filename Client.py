@@ -83,8 +83,7 @@ def Filler():
             sleep(5)
 
         Time = strftime("%H:%M", localtime())
-        Time = "Time: " + str(Time)
-        AnimateThread = Thread(target=AnimateHeader, args=[Time, instance.animationColor])
+        AnimateThread = Thread(target=AnimateHeader, args=[str(Time), instance.animationColor])
         AnimateThread.start()
         Turn += 1
 
