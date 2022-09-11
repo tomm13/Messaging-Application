@@ -1,6 +1,6 @@
 # 11/9/2022
 # V13 Beta Class
-import platform
+# import platform
 import socket
 from time import sleep, localtime, strftime
 from threading import Thread
@@ -592,11 +592,7 @@ class UI:
         self.animationRunning = False
         self.darkMode = False
         self.runFiller = False
-
-        if platform.system() == "Darwin":
-            self.rate = 0.00025
-        elif platform.system() == "Windows":
-            self.rate = 0.00000
+        self.rate = 0.00025
 
     def openChat(self):
         self.chatWindow = Window(self.setupWindow, width=1200, height=590, title="setupWindow", bg=(70, 70, 70))
@@ -710,17 +706,13 @@ class UI:
 
         build = Text(bottomPadding, text="development", align="bottom")
 
-        print("starting thread")
-
         animateThread = Thread(target=animateStatus)
         animateThread.start()
 
-        print("called thread func")
-
         self.setupWindow.display()
 
-#connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.119", "49129", "19663, 69353")
+connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
+#connectionInstance = Connection("tommy", "lightblue", "192.168.1.119", "49128", "26743, 31571")
 uiInstance = UI("San Francisco Bold", 22)
 
 UI.openSetup(uiInstance)
