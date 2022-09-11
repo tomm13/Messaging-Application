@@ -1,6 +1,7 @@
 # 11/9/2022
 # V13 Beta Class
-# import platform
+
+import platform
 import socket
 from time import sleep, localtime, strftime
 from threading import Thread
@@ -11,7 +12,7 @@ from guizero import *
 ChatHistory = []
 
 def animateStatus():
-    while True:
+    while not connectionInstance.connected:
         (R, G, B) = (255, 255, 255)
 
         while not R == uiInstance.animationColor[0] or not G == uiInstance.animationColor[1] or not \
@@ -530,16 +531,14 @@ class Connection:
         self.mod = False
 
     def connect(self, usernameInput, colorInput, hostInput, portInput, privateKeyInput):
-        self.username = usernameInput.value
-        self.color = colorInput.value
-        self.host = hostInput.value
-        self.port = int(portInput.value, base=10)
-        self.privateKey = privateKeyInput.value.split(", ")
-
         try:
+            self.username = usernameInput.value
+            self.color = colorInput.value
+            self.host = hostInput.value
+            self.port = int(portInput.value, base=10)
+            self.privateKey = privateKeyInput.value.split(", ")
             self.d = int(self.privateKey[0], base=10)
             self.N = int(self.privateKey[1], base=10)
-            # Checks: if the private key is formatted correctly
 
             if not self.username == "" and not self.username == "Username" and not " " in self.username:
                 # Checks: if username is not empty, not Username and does not contain spaces
@@ -559,15 +558,17 @@ class Connection:
                         uiInstance.status.value = "Restart Client"
 
                     except BrokenPipeError:
-                        uiInstance.setupWindow.hide()
-
                         uiInstance.status.value = "Broken Pipe"
+
                 else:
                     uiInstance.status.value = "Color Locked"
             else:
                 uiInstance.status.value = "Invalid Username"
         except IndexError:
-           uiInstance.status.value = "Index Error"
+            uiInstance.status.value = "Invalid Input"
+
+        except ValueError:
+            uiInstance.status.value = "Invalid Input"
 
     def leave(self):
         self.socket.send("/leave".encode())
@@ -592,7 +593,11 @@ class UI:
         self.animationRunning = False
         self.darkMode = False
         self.runFiller = False
-        self.rate = 0.00025
+
+        if platform.system() == "Darwin":
+            self.rate = 0.00025
+        elif platform.system() == "Windows":
+            self.rate = 0.00000
 
     def openChat(self):
         self.chatWindow = Window(self.setupWindow, width=1200, height=590, title="setupWindow", bg=(70, 70, 70))
@@ -711,8 +716,8 @@ class UI:
 
         self.setupWindow.display()
 
-connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-#connectionInstance = Connection("tommy", "lightblue", "192.168.1.119", "49128", "26743, 31571")
+#connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
+connectionInstance = Connection("tommy", "lightblue", "172.20.10.2", "49130", "10691, 23927")
 uiInstance = UI("San Francisco Bold", 22)
 
 UI.openSetup(uiInstance)
