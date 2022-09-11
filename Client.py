@@ -400,7 +400,7 @@ def RSADecrypt(Message):
     return Message
 
 def AlwaysUpdate():
-    global LinesSent, RunFiller
+    global LinesSent, RunFiller, Users
     Users = []
     while True:
         Message = connectionInstance.socket.recv(1024).decode()
@@ -719,7 +719,7 @@ class UI:
         self.setupWindow.display()
 
 #connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tommy", "lightblue", "172.20.10.2", "49129", "101, 551")
+connectionInstance = Connection("tomm", "lightblue", "172.20.10.2", "1547, 2419")
 uiInstance = UI("San Francisco Bold", 22)
 
 UI.openSetup(uiInstance)
