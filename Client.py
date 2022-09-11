@@ -1,5 +1,5 @@
-##7/9/2022
-##V13 Beta
+# 11/9/2022
+# V13 Beta Class
 import platform
 import socket
 from time import sleep, localtime, strftime
@@ -10,83 +10,24 @@ from guizero import *
 
 ChatHistory = []
 
-DarkMode = False
-StopRainbow = False
-
-Mod = False
-RunFiller = False
-
-WaitTime = 0.75
-LinesSent = 1
-
-Location = " - "
-privateKey = ""
-
-if platform.system() == "Darwin":
-    Rate = 0.00025
-elif platform.system() == "Windows":
-    Rate = 0.00000
-
-
-class Boxes(Box):
-    # This is for UI design. This allows creations of box instances.
-    def __init__(self, master, width, height, align):
-        super().__init__(master, width=width, height=height, align=align)
-        self.width = width
-        self.height = height
-        self.align = align
-
-
-class Buttons(PushButton):
-    # This is for UI design. Allows easier creation of button instances.
-    def __init__(self, master, text, command):
-        super().__init__(master, text=text, command=command)
-        self.text = text
-        self.command = command
-
-
-class Blockers(Box):
-    # This is for UI design. Generally used for Invisible Padding Boxes. Have no align.
-    def __init__(self, master, width, height):
-        super().__init__(master, width=width, height=height)
-        self.width = width
-        self.height = height
-
-
-class TextBoxes(TextBox):
-    # Allows for creation of TextBoxes
-    def __init__(self, master, text):
-        super().__init__(master, text=text, width="fill")
-        self.text = text
-        self.text_size = 16
-        self.text_color = "lightblue"
-        self.bg = (40, 40, 40)
-
-
-class Texts(Text):
-    # Allows for creation of Text Objects
-    def __init__(self, master, text, text_size, text_color):
-        super().__init__(master, text=text)
-        self.text = text
-        self.text_size = text_size
-        self.text_color = text_color
-
 def Filler():
-    while RunFiller:
+    while uiInstance.runFiller:
         sleep(60)
         while uiInstance.animationRunning:
-            sleep(WaitTime)
+            sleep(uiInstance.waitTime)
         uiInstance.animationRunning = True
 
         Time = strftime("%H:%M", localtime())
         AnimateThread = Thread(target=AnimateHeader, args=[str(Time), uiInstance.animationColor])
         AnimateThread.start()
 
+    return
+
 def ModBorder():
     (R, G, B) = (173, 216, 230)
 
     while uiInstance.animationRunning:
-        sleep(WaitTime)
+        sleep(uiInstance.waitTime)
     uiInstance.animationRunning = True
 
     while not (R, G, B) == (240, 230, 140):
@@ -108,7 +49,7 @@ def FadeToColor(newColor, displayMessage):
         oldTextColor = colorutils.Color(web=connectionInstance.color)
         newTextColor = colorutils.Color(web=newColor)
 
-        if newColor.casefold() == "khaki" and Mod == False:
+        if newColor.casefold() == "khaki" and connectionInstance.mod == False:
             AnimateThread = Thread(target=AnimateHeader,
                                    args=["You don't have the power to use this color", uiInstance.animationColor])
             AnimateThread.start()
@@ -121,7 +62,7 @@ def FadeToColor(newColor, displayMessage):
             return
 
         while uiInstance.animationRunning:
-            sleep(WaitTime)
+            sleep(uiInstance.waitTime)
         uiInstance.animationRunning = True
 
         (R, G, B) = oldTextColor.rgb
@@ -143,7 +84,7 @@ def FadeToColor(newColor, displayMessage):
             uiInstance.chatHistory.text_color = (R, G, B)
             uiInstance.messageInput.text_color = (R, G, B)
 
-            sleep(Rate)
+            sleep(uiInstance.rate)
 
         if displayMessage:
             animateThread = Thread(target=AnimateHeader, args=["You changed the text color", uiInstance.animationColor])
@@ -161,10 +102,10 @@ def FadeToColor(newColor, displayMessage):
 
 def AnimateHeader(Message, Color):
     while uiInstance.animationRunning:
-        sleep(WaitTime)
+        sleep(uiInstance.waitTime)
     uiInstance.animationRunning = True
 
-    if not DarkMode:
+    if not uiInstance.darkMode:
         (R, G, B) = (0, 0, 0)
 
         while not R == 255 or not G == 255 or not B == 255:
@@ -177,7 +118,7 @@ def AnimateHeader(Message, Color):
                 B += 1
 
             uiInstance.header.text_color = (R, G, B)
-            sleep(Rate)
+            sleep(uiInstance.rate)
 
         uiInstance.header.value = Message
 
@@ -191,7 +132,7 @@ def AnimateHeader(Message, Color):
                 B -= 1
 
             uiInstance.header.bg = (R, G, B)
-            sleep(Rate)
+            sleep(uiInstance.rate)
 
         sleep(1)
 
@@ -205,7 +146,7 @@ def AnimateHeader(Message, Color):
                 G += 1
 
             uiInstance.header.bg = (R, G, B)
-            sleep(Rate)
+            sleep(uiInstance.rate)
 
         uiInstance.header.value = "Welcome " + connectionInstance.username
 
@@ -219,7 +160,7 @@ def AnimateHeader(Message, Color):
                 B -= 1
 
             uiInstance.header.text_color = (R, G, B)
-            sleep(Rate)
+            sleep(uiInstance.rate)
 
     else:
         (R, G, B) = (255, 255, 255)
@@ -240,7 +181,7 @@ def AnimateHeader(Message, Color):
                 B += 1
 
             uiInstance.header.text_color = (R, G, B)
-            sleep(Rate)
+            sleep(uiInstance.rate)
 
         uiInstance.header.value = Message
 
@@ -260,7 +201,7 @@ def AnimateHeader(Message, Color):
                 B -= 1
 
             uiInstance.header.bg = (R, G, B)
-            sleep(Rate)
+            sleep(uiInstance.rate)
 
         sleep(1)
 
@@ -280,7 +221,7 @@ def AnimateHeader(Message, Color):
                 G += 1
 
             uiInstance.header.bg = (R, G, B)
-            sleep(Rate)
+            sleep(uiInstance.rate)
 
         uiInstance.header.value = "Welcome " + connectionInstance.username
 
@@ -294,20 +235,18 @@ def AnimateHeader(Message, Color):
                 B += 1
 
             uiInstance.header.text_color = (R, G, B)
-            sleep(Rate)
+            sleep(uiInstance.rate)
 
     uiInstance.animationRunning = False
     return
 
 def SwitchTheme(DisplayMessage):
-    global DarkMode
-
     while uiInstance.animationRunning:
-        sleep(WaitTime)
+        sleep(uiInstance.waitTime)
     uiInstance.animationRunning = True
 
-    if DarkMode:
-        while DarkMode:
+    if uiInstance.darkMode:
+        while uiInstance.darkMode:
             # To turn Dark Mode off
             (R, G, B) = (255, 255, 255)
 
@@ -319,7 +258,7 @@ def SwitchTheme(DisplayMessage):
 
                 uiInstance.userList.text_color = (R, G, B)
                 uiInstance.header.text_color = (R, G, B)
-                sleep(Rate)
+                sleep(uiInstance.rate)
 
             while not (R, G, B) == (215, 215, 215):
                 # All backgrounds fade from black to white
@@ -331,7 +270,7 @@ def SwitchTheme(DisplayMessage):
                 uiInstance.chatHistory.bg = (R, G, B)
                 uiInstance.messageInput.bg = (R, G, B)
                 uiInstance.userList.bg = (R, G, B)
-                sleep(Rate)
+                sleep(uiInstance.rate)
 
             while not (R, G, B) == (255, 255, 255):
                 R += 1
@@ -341,12 +280,12 @@ def SwitchTheme(DisplayMessage):
                 uiInstance.header.bg = (R, G, B)
                 uiInstance.chatHistory.bg = (R, G, B)
                 uiInstance.messageInput.bg = (R, G, B)
-                sleep(Rate)
+                sleep(uiInstance.rate)
 
-            DarkMode = False
+            uiInstance.darkMode = False
 
     else:
-        while not DarkMode:
+        while not uiInstance.darkMode:
             # To turn Dark Mode on
             R = 0
             G = 0
@@ -371,7 +310,7 @@ def SwitchTheme(DisplayMessage):
                 uiInstance.chatHistory.bg = (R, G, B)
                 uiInstance.header.bg = (R, G, B)
                 uiInstance.userList.bg = (R, G, B)
-                sleep(Rate)
+                sleep(uiInstance.rate)
 
             while not (R, G, B) == (40, 40, 40):
                 R -= 1
@@ -379,16 +318,16 @@ def SwitchTheme(DisplayMessage):
                 B -= 1
 
                 uiInstance.userList.bg = (R, G, B)
-                sleep(Rate)
+                sleep(uiInstance.rate)
 
-            DarkMode = True
+            uiInstance.darkMode = True
 
     uiInstance.animationRunning = False
     uiInstance.chatHistory.text_color = connectionInstance.color
     uiInstance.messageInput.text_color = connectionInstance.color
 
     if DisplayMessage:
-        if DarkMode:
+        if uiInstance.darkMode:
             animateThread = Thread(target=AnimateHeader,
                                    args=["You turned dark mode on", uiInstance.animationColor])
             animateThread.start()
@@ -431,7 +370,7 @@ def RSADecrypt(Message):
     return Message
 
 def AlwaysUpdate():
-    global LinesSent, Mod, RunFiller
+    global LinesSent, RunFiller
     Users = []
     while True:
         Message = connectionInstance.socket.recv(1024).decode()
@@ -445,54 +384,54 @@ def AlwaysUpdate():
             Message = Message.split()
             Message.sort()
 
-            UserList.clear()
-            UserList.append("Users Online:")
+            uiInstance.userList.clear()
+            uiInstance.userList.append("Users Online:")
 
             for User in Message:
                 if User not in Users:
-                    UserList.append(User)
+                    uiInstance.userList.append(User)
                     Users.append(User)
                     Message = User + " has connected"
-                    AnimateThread = Thread(target=AnimateHeader, args=[Message, (124, 252, 0)])
-                    AnimateThread.start()
+                    animateThread = Thread(target=AnimateHeader, args=[Message, (124, 252, 0)])
+                    animateThread.start()
                 else:
-                    UserList.append(User)
+                    uiInstance.userList.append(User)
 
         elif Message[0:7] == "/remove":
             if Message[8:] == connectionInstance.username:
                 connectionInstance.leave()
                 break
             User = Message[8:]
-            UserList.remove(User)
+            uiInstance.userList.remove(User)
             Users.remove(User)
             Message = User + " has disconnected"
-            AnimateThread = Thread(target=AnimateHeader, args=[Message, uiInstance.animationColor])
-            AnimateThread.start()
+            animateThread = Thread(target=AnimateHeader, args=[Message, uiInstance.animationColor])
+            animateThread.start()
 
         elif Message[0:8] == "/display":
             Message = Message[9:]
-            AnimateThread = Thread(target=AnimateHeader, args=[Message, uiInstance.animationColor])
-            AnimateThread.start()
+            animateThread = Thread(target=AnimateHeader, args=[Message, uiInstance.animationColor])
+            animateThread.start()
 
         elif Message == "/theme":
-            AnimateThread = Thread(target=SwitchTheme, args=[True])
-            AnimateThread.start()
+            animateThread = Thread(target=SwitchTheme, args=[True])
+            animateThread.start()
 
         elif Message[0:4] == "/mod":
-            if Message[5:] == connectionInstance.username and Mod == False:
+            if Message[5:] == connectionInstance.username and not connectionInstance.mod:
                 uiInstance.animationColor = (240, 230, 140)
                 global RunFiller
-                Mod = True
+                connectionInstance.mod = True
                 RunFiller = True
-                if DarkMode == False:
-                    AnimateThread = Thread(target=SwitchTheme, args=[False])
-                    AnimateThread.start()
-                AnimateThread = Thread(target=ModBorder)
-                AnimateThread.start()
-                AnimateThread = Thread(target=FadeToColor, args=["khaki", False])
-                AnimateThread.start()
-                FillerThread = Thread(target=Filler)
-                FillerThread.start()
+                if not uiInstance.darkMode:
+                    animateThread = Thread(target=SwitchTheme, args=[False])
+                    animateThread.start()
+                animateThread = Thread(target=ModBorder)
+                animateThread.start()
+                animateThread = Thread(target=FadeToColor, args=["khaki", False])
+                animateThread.start()
+                fillerThread = Thread(target=Filler)
+                fillerThread.start()
 
         elif Message[0:6] == "/color":
             connectionInstance.newColor = Message[7:]
@@ -510,47 +449,47 @@ def AlwaysUpdate():
             while True:
                 AnimateThread = Thread(target=AnimateHeader, args=["You are not connected", (216, 36, 41)])
                 AnimateThread.start()
-                sleep(Rate)
+                sleep(uiInstance.rate)
 
         elif Message == "/filler":
-            if RunFiller == False:
-                RunFiller = True
-                AnimateThread = Thread(target=AnimateHeader, args=["You turned filler on", uiInstance.animationColor])
-                AnimateThread.start()
-                FillerThread = Thread(target=Filler)
-                FillerThread.start()
+            if uiInstance.runFiller == False:
+                uiInstance.runFiller = True
+                animateThread = Thread(target=AnimateHeader, args=["You turned filler on", uiInstance.animationColor])
+                animateThread.start()
+                fillerThread = Thread(target=Filler)
+                fillerThread.start()
 
             else:
-                AnimateThread = Thread(target=AnimateHeader, args=["You turned filler off", uiInstance.animationColor])
-                AnimateThread.start()
+                animateThread = Thread(target=AnimateHeader, args=["You turned filler off", uiInstance.animationColor])
+                animateThread.start()
                 RunFiller = False
 
         else:
-            LinesSent += 1
-            if LinesSent > 15:
-                AnimateThread = Thread(target=AnimateHeader, args=["You created a new page", uiInstance.animationColor])
-                AnimateThread.start()
-                History.clear()
-                LinesSent = 2
+            uiInstance.linesSent += 1
+            if uiInstance.linesSent > 15:
+                animateThread = Thread(target=AnimateHeader, args=["You created a new page", uiInstance.animationColor])
+                animateThread.start()
+                uiInstance.chatHistory.clear()
+                uiInstance.linesSent = 2
 
             ChatHistory.append(Message)
-            History.append(Message)
+            uiInstance.chatHistory.append(Message)
 
 
 def SendToServer():
-    Message = MessageInput.value
+    Message = uiInstance.messageInput.value
     if Message:
         if Message == "/leave":
             connectionInstance.leave()
         else:
             if len(Message) + len(connectionInstance.username) + 2 >= 80:
-                AnimateThread = Thread(target=AnimateHeader,
+                animateThread = Thread(target=AnimateHeader,
                                        args=["Your message is too long.", uiInstance.animationColor])
-                AnimateThread.start()
+                animateThread.start()
 
             else:
                 connectionInstance.socket.send(Message.encode())
-                MessageInput.clear()
+                uiInstance.messageInput.clear()
 
 class Connection:
     def __init__(self, username, color, host, port, privateKey):
@@ -560,6 +499,7 @@ class Connection:
         self.port = port
         self.privateKey = privateKey
         self.socket = socket.socket()
+        self.mod = False
 
     def connect(self, usernameInput, colorInput, hostInput, portInput, privateKeyInput):
         self.username = usernameInput.value
@@ -580,35 +520,35 @@ class Connection:
                         self.socket.connect((self.host, self.port))
                         self.socket.send(self.username.encode())
 
-                        Status.value = "Connection Success"
-                        Status.text_color = "lightblue"
+                        uiInstance.status.value = "Connection Success"
+                        uiInstance.status.text_color = "lightblue"
 
                         UI.openChat(uiInstance)
 
                     except ConnectionRefusedError:
-                        Status.value = "Connection Full"
+                        uiInstance.status.value = "Connection Full"
 
                     except OSError:
-                        Status.value = "Restart Client"
-                        Status.text_color = "red"
+                        uiInstance.status.value = "Restart Client"
+                        uiInstance.status.text_color = "red"
 
                     except BrokenPipeError:
-                        setupWindow.hide()
+                        uiInstance.setupWindow.hide()
 
-                        Status.value = "Broken Pipe"
-                        Status.text_color = "red"
+                        uiInstance.status.value = "Broken Pipe"
+                        uiInstance.status.text_color = "red"
                 else:
-                    Status.value = "Color Locked"
+                    uiInstance.status.value = "Color Locked"
             else:
-                Status.value = "Invalid Username"
+                uiInstance.status.value = "Invalid Username"
         except IndexError:
-           Status.value = "Index Error"
+           uiInstance.status.value = "Index Error"
 
     def leave(self):
         self.socket.send("/leave".encode())
 
-        setUp.hide()
-        setupWindow.hide()
+        uiInstance.setupWindow.hide()
+        uiInstance.chatWindow.hide()
 
         self.socket.close()
         print("You have disconnected.")
@@ -620,126 +560,136 @@ class UI:
         self.fontSize = fontSize
         self.color = connectionInstance.color
         self.animationColor = (173, 216, 230)
+        self.bg = (70, 70, 70)
+        self.darkbg = (40, 40, 40)
+        self.waitTime = 0.75
+        self.linesSent = 1
         self.animationRunning = False
+        self.darkMode = False
+        self.runFiller = False
+
+        if platform.system() == "Darwin":
+            self.rate = 0.00025
+        elif platform.system() == "Windows":
+            self.rate = 0.00000
 
     def openChat(self):
-        global setupWindow, setupWindowOpened, setUpOpened
-        setupWindow = Window(setUp, width=1200, height=590, title="setupWindow")
-        setupWindow.when_closed = connectionInstance.leave
-        setupWindow.font = self.color
-        setupWindow.bg = (70, 70, 70)
+        self.chatWindow = Window(self.setupWindow, width=1200, height=590, title="setupWindow", bg=(70, 70, 70))
+        self.chatWindow.when_closed = connectionInstance.leave
 
-        topPadding = Box(setupWindow, width="fill", height=50, align="top")
-        leftPadding = Box(setupWindow, width=50, height="fill", align="left")
-        rightPadding = Box(setupWindow, width=50, height="fill", align="right")
-        bottomPadding = Box(setupWindow, width="fill", height=50, align="bottom")
+        topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
+        leftPadding = Box(self.chatWindow, width=50, height="fill", align="left")
+        rightPadding = Box(self.chatWindow, width=50, height="fill", align="right")
+        bottomPadding = Box(self.chatWindow, width="fill", height=50, align="bottom")
 
-        global MainBox
-        MainBox = Blockers(setupWindow, "fill", "fill")
-        MainBox.set_border(3, (173, 216, 230))
-        self.border = MainBox
+        self.border = Box(self.chatWindow, width="fill", height="fill")
+        self.border.set_border(3, (173, 216, 230))
 
-        Header = Box(MainBox, width="fill", height=40, align="top")
+        header = Box(self.border, width="fill", height=40, align="top")
+        buttonBlocker = Box(self.border, width="fill", height=3, align="bottom")
+        buttonBox = Box(self.border, width="fill", height=40, align="bottom")
+        userBlocker = Box(self.border, width="fill", height=3, align="top")
+        userBox = Box(self.border, width="fill", height="fill")
 
-        ButtonBlocker = Box(MainBox, width="fill", height=3, align="bottom")
-        ButtonBox = Box(MainBox, width="fill", height=40, align="bottom")
+        self.userList = ListBox(userBox, items=["Users Online:"], width=150, height="fill", align="left")
+        self.userList.text_color = (0, 0, 0)
+        self.userList.bg = (215, 215, 215)
+        self.userList.text_size = self.fontSize - 2
 
-        UserBlocker = Box(MainBox, width="fill", height=3, align="top")
-        UserBox = Blockers(MainBox, "fill", "fill")
+        self.header = Text(header, text=("Welcome " + connectionInstance.username))
+        self.header.text_size = 30
+        self.header.text_color = (0, 0, 0)
+        self.header.bg = (255, 255, 255)
+        self.header.width = "fill"
 
-        global UserList
-        UserList = ListBox(UserBox, items=["Users Online:"], width=150, height="fill", align="left")
-        UserList.text_color = (0, 0, 0)
-        UserList.bg = (215, 215, 215)
-        UserList.text_size = self.fontSize - 4
+        self.chatHistory = TextBox(userBox, "Hi!", "fill", height="fill", multiline=True, align="left")
+        self.chatHistory.text_color = connectionInstance.color
+        self.chatHistory.bg = (255, 255, 255)
+        self.chatHistory.text_size = self.fontSize
+        self.chatHistory.disable()
 
-        self.userList = UserList
+        self.sendButton = PushButton(buttonBox, text="Send", command=SendToServer)
+        self.sendButton.text_color = (0, 0, 0)
+        self.sendButton.bg = (255, 255, 255)
+        self.sendButton.align = "right"
 
-        global DisplayHeader
-        DisplayHeader = Texts(Header, ("Welcome " + connectionInstance.username), 30, (0, 0, 0))
-        DisplayHeader.bg = (255, 255, 255)
-        DisplayHeader.width = "fill"
-
-        self.header = DisplayHeader
-
-        HistoryBlocker = Boxes(UserBox, 3, "fill", "left")
-
-        global History
-        History = TextBox(UserBox, "Hi!", "fill", height="fill", multiline=True, align="left")
-        History.text_color = connectionInstance.color
-        History.bg = (255, 255, 255)
-        History.text_size = self.fontSize
-        History.disable()
-
-        self.chatHistory = History
-
-        global SendButton
-        SendButton = Buttons(ButtonBox, "Send", SendToServer)
-        SendButton.text_color = (0, 0, 0)
-        SendButton.bg = (255, 255, 255)
-        SendButton.align = "right"
-
-        global MessageInput
-        MessageInput = TextBox(ButtonBox, width="fill", height="fill", align="bottom")
-        MessageInput.text_color = connectionInstance.color
-        MessageInput.bg = (255, 255, 255)
-        MessageInput.text_size = self.fontSize + 2
-
-        self.messageInput = MessageInput
+        self.messageInput = TextBox(buttonBox, width="fill", height="fill", align="bottom")
+        self.messageInput.text_color = connectionInstance.color
+        self.messageInput.bg = (255, 255, 255)
+        self.messageInput.text_size = self.fontSize + 2
 
         ##Threads start here
 
-        global ListeningThread
-        ListeningThread = Thread(target=AlwaysUpdate)
-        ListeningThread.start()
+        listeningThread = Thread(target=AlwaysUpdate)
+        listeningThread.start()
 
-        setupWindowOpened = True
-        setUpOpened = False
-        setUp.hide()
-        setupWindow.show()
+        self.setupWindow.hide()
+        self.chatWindow.show()
 
     def openSetup(self):
-        global setUp, setUpOpened, Status
+        self.setupWindow = App(title="Connect To Server", width=800, height=275)
+        self.setupWindow.bg = (70, 70, 70)
+        self.setupWindow.font = "San Francisco Bold"
 
-        setUp = App(title="Connect To Server", height=275, width=800)
-        setUp.bg = (70, 70, 70)
-        setUp.font = "San Francisco Bold"
-        setUpOpened = True
+        topPadding = Box(self.setupWindow, width="fill", height=50, align="top")
+        bottomPadding = Box(self.setupWindow, width="fill", height=50, align="bottom")
+        contents = Box(self.setupWindow, width="fill", height="fill", align="top")
 
-        InputBox = Box(setUp, width="fill", height=275, align="left")
-        rightPadding = Box(setUp, width=16, height="fill", align="right")
-        VerifyBox = Box(setUp, width=400, height=150, align="right")
-
-        Status = Texts(VerifyBox, "Not Connected", 34, (255, 255, 255))
-
-        leftBlocker = Box(InputBox, width="fill", height=60, align="top")
-        rightBlocker = Box(VerifyBox, width="fill", height=40, align="top")
+        InputBox = Box(contents, width=400, height=150, align="left")
+        rightPadding = Box(contents, width=16, height="fill", align="right")
+        VerifyBox = Box(contents, width=384, height=150, align="right")
 
         usernameBlocker = Box(InputBox, width=15, height=150, align="right")
-        usernameInputBox = Blockers(InputBox, 275, 30)
+        usernameInputBox = Box(InputBox, width=275, height=30)
         colorBlocker = Box(InputBox, width=15, height=120, align="right")
-        colorInputBox = Blockers(InputBox, 260, 30)
+        colorInputBox = Box(InputBox, width=260, height=30)
         hostBlocker = Box(InputBox, width=15, height=90, align="right")
-        hostInputBox = Blockers(InputBox, 245, 30)
+        hostInputBox = Box(InputBox, width=245, height=30)
         portBlocker = Box(InputBox, width=15, height=60, align="right")
-        portInputBox = Blockers(InputBox, 230, 30)
+        portInputBox = Box(InputBox, width=230, height=30)
         keyBlocker = Box(InputBox, width=15, height=30, align="right")
-        keyInputBox = Blockers(InputBox, 215, 30)
-        usernameInput = TextBoxes(usernameInputBox, connectionInstance.username)
-        colorInput = TextBoxes(colorInputBox, connectionInstance.color)
-        hostInput = TextBoxes(hostInputBox, connectionInstance.host)
-        portInput = TextBoxes(portInputBox, connectionInstance.port)
-        keyInput = TextBoxes(keyInputBox, connectionInstance.privateKey)
+        keyInputBox = Box(InputBox, width=215, height=30)
 
+        usernameInput = TextBox(usernameInputBox, text=connectionInstance.username, width="fill")
+        colorInput = TextBox(colorInputBox, text=connectionInstance.color, width="fill")
+        hostInput = TextBox(hostInputBox, text=connectionInstance.host, width="fill")
+        portInput = TextBox(portInputBox, text=connectionInstance.port, width="fill")
+        keyInput = TextBox(keyInputBox, text=connectionInstance.privateKey, width="fill")
+
+        usernameInput.text_color = self.animationColor
+        colorInput.text_color = self.animationColor
+        hostInput.text_color = self.animationColor
+        portInput.text_color = self.animationColor
+        keyInput.text_color = self.animationColor
+
+        usernameInput.text_size = self.fontSize - 6
+        colorInput.text_size = self.fontSize - 6
+        hostInput.text_size = self.fontSize - 6
+        portInput.text_size = self.fontSize - 6
+        keyInput.text_size = self.fontSize - 6
+
+        usernameInput.bg = self.darkbg
+        colorInput.bg = self.darkbg
+        hostInput.bg = self.darkbg
+        portInput.bg = self.darkbg
+        keyInput.bg = self.darkbg
+
+        self.status = Text(VerifyBox, text="Not Connected")
+        self.status.text_size = 34
+        self.status.text_color = (255, 255, 255)
+
+        rightBlocker = Box(VerifyBox, width="fill", height=40, align="top")
         AttemptConnect = PushButton(VerifyBox, text="Connect", command=connectionInstance.connect, args=
                                     [usernameInput, colorInput, hostInput, portInput, keyInput])
-        AttemptConnect.text_size = self.fontSize - 4
 
-        setUpOpened = True
-        setUp.display()
+        AttemptConnect.text_size = self.fontSize - 6
 
-#connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "49129", "4205, 21389")
+        build = Text(bottomPadding, text="development", align="bottom")
 
+        self.setupWindow.display()
+
+connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
+#connectionInstance = Connection("alt", "lightblue", "192.168.1.138", "49129", "17741, 22579")
 uiInstance = UI("San Francisco Bold", 22)
+
 UI.openSetup(uiInstance)
