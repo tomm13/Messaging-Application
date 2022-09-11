@@ -10,6 +10,33 @@ from guizero import *
 
 ChatHistory = []
 
+def animateStatus():
+    while True:
+        (R, G, B) = (255, 255, 255)
+
+        while not R == uiInstance.animationColor[0] or not G == uiInstance.animationColor[1] or not \
+                B == uiInstance.animationColor[2]:
+            if R > uiInstance.animationColor[0]:
+                R -= 1
+            if G > uiInstance.animationColor[1]:
+                G -= 1
+            if B > uiInstance.animationColor[2]:
+                B -= 1
+
+            uiInstance.status.text_color = (R, G, B)
+            sleep(uiInstance.rate * 20)
+
+        while not R == 255 or not G == 255 or not B == 255:
+            if R < 255:
+                R += 1
+            if G < 255:
+                G += 1
+            if B < 255:
+                B += 1
+
+            uiInstance.status.text_color = (R, G, B)
+            sleep(uiInstance.rate * 20)
+
 def Filler():
     while uiInstance.runFiller:
         sleep(60)
@@ -49,7 +76,7 @@ def FadeToColor(newColor, displayMessage):
         oldTextColor = colorutils.Color(web=connectionInstance.color)
         newTextColor = colorutils.Color(web=newColor)
 
-        if newColor.casefold() == "khaki" and connectionInstance.mod == False:
+        if newColor.casefold() == "khaki" and not connectionInstance.mod:
             AnimateThread = Thread(target=AnimateHeader,
                                    args=["You don't have the power to use this color", uiInstance.animationColor])
             AnimateThread.start()
@@ -435,20 +462,20 @@ def AlwaysUpdate():
 
         elif Message[0:6] == "/color":
             connectionInstance.newColor = Message[7:]
-            AnimateThread = Thread(target=FadeToColor, args=[connectionInstance.newColor, True])
-            AnimateThread.start()
+            animateThread = Thread(target=FadeToColor, args=[connectionInstance.newColor, True])
+            animateThread.start()
 
         elif Message[0:5] == "/save":
             Location = Message[6:]
-            SaveChatThread = Thread(target=SaveChatHistory, args=[Location])
-            SaveChatThread.start()
+            saveChatThread = Thread(target=SaveChatHistory, args=[Location])
+            saveChatThread.start()
 
         elif Message == "/disconnect":
-            AnimateThread = Thread(target=AnimateHeader, args=["You cannot use this username", uiInstance.animationColor])
-            AnimateThread.start()
+            animateThread = Thread(target=AnimateHeader, args=["You cannot use this username", uiInstance.animationColor])
+            animateThread.start()
             while True:
-                AnimateThread = Thread(target=AnimateHeader, args=["You are not connected", (216, 36, 41)])
-                AnimateThread.start()
+                animateThread = Thread(target=AnimateHeader, args=["You are not connected", (216, 36, 41)])
+                animateThread.start()
                 sleep(uiInstance.rate)
 
         elif Message == "/filler":
@@ -499,6 +526,7 @@ class Connection:
         self.port = port
         self.privateKey = privateKey
         self.socket = socket.socket()
+        self.connected = False
         self.mod = False
 
     def connect(self, usernameInput, colorInput, hostInput, portInput, privateKeyInput):
@@ -519,10 +547,9 @@ class Connection:
                     try:
                         self.socket.connect((self.host, self.port))
                         self.socket.send(self.username.encode())
+                        self.connected = True
 
                         uiInstance.status.value = "Connection Success"
-                        uiInstance.status.text_color = "lightblue"
-
                         UI.openChat(uiInstance)
 
                     except ConnectionRefusedError:
@@ -530,13 +557,11 @@ class Connection:
 
                     except OSError:
                         uiInstance.status.value = "Restart Client"
-                        uiInstance.status.text_color = "red"
 
                     except BrokenPipeError:
                         uiInstance.setupWindow.hide()
 
                         uiInstance.status.value = "Broken Pipe"
-                        uiInstance.status.text_color = "red"
                 else:
                     uiInstance.status.value = "Color Locked"
             else:
@@ -618,7 +643,7 @@ class UI:
         self.messageInput.bg = (255, 255, 255)
         self.messageInput.text_size = self.fontSize + 2
 
-        ##Threads start here
+        # Threads start here
 
         listeningThread = Thread(target=AlwaysUpdate)
         listeningThread.start()
@@ -676,7 +701,6 @@ class UI:
 
         self.status = Text(VerifyBox, text="Not Connected")
         self.status.text_size = 34
-        self.status.text_color = (255, 255, 255)
 
         rightBlocker = Box(VerifyBox, width="fill", height=40, align="top")
         AttemptConnect = PushButton(VerifyBox, text="Connect", command=connectionInstance.connect, args=
@@ -686,10 +710,17 @@ class UI:
 
         build = Text(bottomPadding, text="development", align="bottom")
 
+        print("starting thread")
+
+        animateThread = Thread(target=animateStatus)
+        animateThread.start()
+
+        print("called thread func")
+
         self.setupWindow.display()
 
-connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-#connectionInstance = Connection("alt", "lightblue", "192.168.1.138", "49129", "17741, 22579")
+#connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.119", "49129", "19663, 69353")
 uiInstance = UI("San Francisco Bold", 22)
 
 UI.openSetup(uiInstance)
