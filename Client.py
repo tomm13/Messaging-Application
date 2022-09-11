@@ -25,7 +25,7 @@ def animateStatus():
                 B -= 1
 
             uiInstance.status.text_color = (R, G, B)
-            sleep(uiInstance.rate * 20)
+            sleep(0.005)
 
         while not R == 255 or not G == 255 or not B == 255:
             if R < 255:
@@ -36,7 +36,9 @@ def animateStatus():
                 B += 1
 
             uiInstance.status.text_color = (R, G, B)
-            sleep(uiInstance.rate * 20)
+            sleep(0.005)
+
+    return
 
 def Filler():
     while uiInstance.runFiller:
@@ -600,7 +602,7 @@ class UI:
             self.rate = 0.00000
 
     def openChat(self):
-        self.chatWindow = Window(self.setupWindow, width=1200, height=590, title="setupWindow", bg=(70, 70, 70))
+        self.chatWindow = Window(self.setupWindow, width=1200, height=590, title="Chatroom", bg=(70, 70, 70))
         self.chatWindow.when_closed = connectionInstance.leave
 
         topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
@@ -653,7 +655,7 @@ class UI:
         self.chatWindow.show()
 
     def openSetup(self):
-        self.setupWindow = App(title="Connect To Server", width=800, height=275)
+        self.setupWindow = App(title="Connect", width=800, height=275)
         self.setupWindow.bg = (70, 70, 70)
         self.setupWindow.font = "San Francisco Bold"
 
@@ -717,7 +719,7 @@ class UI:
         self.setupWindow.display()
 
 #connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tommy", "lightblue", "172.20.10.2", "49130", "10691, 23927")
+connectionInstance = Connection("tommy", "lightblue", "172.20.10.2", "49129", "101, 551")
 uiInstance = UI("San Francisco Bold", 22)
 
 UI.openSetup(uiInstance)
