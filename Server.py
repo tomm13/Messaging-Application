@@ -1,4 +1,4 @@
-##3/9/2022
+##13/9/2022
 ##V13 Beta
 
 import socket
@@ -18,8 +18,11 @@ SpaceRemaining = UserCount
 
 Hostname = socket.gethostname()
 IP = socket.gethostbyname(Hostname)
+if IP == "127.0.0.1":
+    print("[Server] Server cannot be hosted on localhost")
+
 IP = '192.168.1.138'
-Port = 49126
+Port = 49130
 
 VoteActive = False
 
@@ -158,21 +161,27 @@ def ModSelection(Message, Username, ClientSocket):
 
         if UserOnline == 1:
             # If they're the only person online
-            print("[Mod] Mod Assigned to", Username, "as there was only 1 user online")
-            Mods.append(ClientSocket)
-            ModUsers.append(Username)
-            PrivateBroadcast(Message, ClientSocket)
-            PrivateCommand((Username + " is now a mod "), ClientSocket)
-            ModOnline += 1
+            if not ClientSocket in Mods:
+                print("[Mod] Mod Assigned to", Username, "as there was only 1 user online")
+                Mods.append(ClientSocket)
+                ModUsers.append(Username)
+                PrivateBroadcast(Message, ClientSocket)
+                PrivateCommand((Username + " is now a mod "), ClientSocket)
+                ModOnline += 1
+            else:
+                PrivateCommand("You are already a mod", ClientSocket)
 
         elif ModOnline == 0:
-            # If there are no mods online currently
-            print("[Mod] Mod Assigned to", ModCandidate, "as there were no mods online")
-            Mods.append(ModSocket)
-            ModUsers.append(ModCandidate)
-            PrivateBroadcast(Message, ModSocket)
-            PublicCommand((ModCandidate + " is now a mod"))
-            ModOnline += 1
+            if not ClientSocket in Mods:
+                # If there are no mods online currently
+                print("[Mod] Mod Assigned to", ModCandidate, "as there were no mods online")
+                Mods.append(ModSocket)
+                ModUsers.append(ModCandidate)
+                PrivateBroadcast(Message, ModSocket)
+                PublicCommand((ModCandidate + " is now a mod"))
+                ModOnline += 1
+            else:
+                PrivateCommand("You are already a mod", ClientSocket)
 
         elif ClientSocket in Mods:
             if not ModSocket in Mods:
@@ -225,14 +234,18 @@ def Broadcast(Message):
 def PublicCommand(Message):
     # Sends "/display", which tells every Client to Animate it's banner
     time.sleep(0.1)
+    print("[PublicDisplay] " + Message)
+
     Message = "/display " + Message
     Message = RSAEncrypt(Message)
+
     for Client in Clients:
         Client.send(Message.encode())
 
 def PrivateBroadcast(Message, ClientSocket):
     # Sends a Private Message to 1 specific Client, not for Animating Purposes.
     time.sleep(0.1)
+    print("[Private] "+ Message)
 
     Message = RSAEncrypt(Message)
     ClientSocket.send(Message.encode())
@@ -240,6 +253,8 @@ def PrivateBroadcast(Message, ClientSocket):
 def PrivateCommand(Message, ClientSocket):
     # Sends "/display", which tells 1 specific Client to Animate it's banner
     time.sleep(0.1)
+    print("[PrivateDisplay] " + Message)
+
     Message = "/display " + Message
     Message = RSAEncrypt(Message)
     ClientSocket.send(Message.encode())
@@ -263,6 +278,8 @@ def RemoveUser(Username, ClientSocket):
 
         Clients.remove(ClientSocket)
         Users.remove(Username)
+
+        ClientSocket.close()
 
         UserOnline -= 1
     except:
@@ -288,7 +305,8 @@ def Listen(ClientSocket):
                         Command(Message, Username, ClientSocket)
                 else:
                     Broadcast(UnifiedMessage)
-        except:
+        except Exception as e:
+            print(e)
             RemoveUser(Username, ClientSocket)
             break
 
@@ -341,7 +359,7 @@ def Command(Message, Username, ClientSocket):
             PrivateCommand("You cannot kick as another vote is taking place", ClientSocket)
     elif Message[0:5].casefold() == "/vote":
         if VoteActive == False:
-            PrivateCommand("You cannot complete this action as there is no ongoing vote", ClientSocket)
+            PrivateCommand("You cannot complete this action at this time", ClientSocket)
 
         else:
             # Vote is active
@@ -433,8 +451,9 @@ def Connect():
                 ListeningThread = Thread(target=Listen, args=[ClientSocket])
                 ListeningThread.start()
 
-        except:
+        except Exception as e:
             RemoveUser(Username, ClientSocket)
+            print(e)
             pass
 
 GetKey()
