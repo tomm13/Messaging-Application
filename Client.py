@@ -49,9 +49,9 @@ class Animation:
                 sleep(uiInstance.waitTime)
             uiInstance.animationRunning = True
 
-            Time = strftime("%H:%M", localtime())
-            AnimateThread = Thread(target=self.animateHeader, args=[str(Time), uiInstance.animationColor])
-            AnimateThread.start()
+            time = strftime("%H:%M", localtime())
+            animateThread = Thread(target=self.animateHeader, args=[str(time), uiInstance.animationColor])
+            animateThread.start()
 
         return
 
@@ -81,15 +81,15 @@ class Animation:
             newTextColor = colorutils.Color(web=newColor)
 
             if newColor.casefold() == "khaki" and not connectionInstance.mod:
-                AnimateThread = Thread(target=self.animateHeader,
+                animateThread = Thread(target=self.animateHeader,
                                        args=["You don't have the power to use this color", uiInstance.animationColor])
-                AnimateThread.start()
+                animateThread.start()
                 return
 
             if oldTextColor == newTextColor:
-                AnimateThread = Thread(target=self.animateHeader,
+                animateThread = Thread(target=self.animateHeader,
                                        args=["You can't change to the same color", uiInstance.animationColor])
-                AnimateThread.start()
+                animateThread.start()
                 return
 
             while uiInstance.animationRunning:
