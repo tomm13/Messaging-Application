@@ -9,9 +9,11 @@ from threading import Thread
 import colorutils
 from guizero import *
 
+
 class Animation:
     def __init__(self):
         self.runFiller = False
+        self.animationRunning = False
 
     def animateStatus(self):
         while not connectionInstance.connected:
@@ -43,11 +45,8 @@ class Animation:
         return
 
     def filler(self):
-        while uiInstance.runFiller:
+        while animationInstance.runFiller:
             sleep(60)
-            while uiInstance.animationRunning:
-                sleep(uiInstance.waitTime)
-            uiInstance.animationRunning = True
 
             time = strftime("%H:%M", localtime())
             animateThread = Thread(target=self.animateHeader, args=[str(time), uiInstance.animationColor])
@@ -58,9 +57,9 @@ class Animation:
     def changeBorder(self):
         (R, G, B) = (173, 216, 230)
 
-        while uiInstance.animationRunning:
+        while animationInstance.animationRunning:
             sleep(uiInstance.waitTime)
-        uiInstance.animationRunning = True
+        animationInstance.animationRunning = True
 
         while not (R, G, B) == (240, 230, 140):
             if R < 240:
@@ -72,7 +71,7 @@ class Animation:
 
             uiInstance.border.set_border(3, (R, G, B))
 
-        uiInstance.animationRunning = False
+        animationInstance.animationRunning = False
         return
 
     def fadeColor(self, newColor, displayMessage):
@@ -92,9 +91,9 @@ class Animation:
                 animateThread.start()
                 return
 
-            while uiInstance.animationRunning:
+            while animationInstance.animationRunning:
                 sleep(uiInstance.waitTime)
-            uiInstance.animationRunning = True
+            animationInstance.animationRunning = True
 
             (R, G, B) = oldTextColor.rgb
 
@@ -118,7 +117,8 @@ class Animation:
                 sleep(uiInstance.rate)
 
             if displayMessage:
-                animateThread = Thread(target=self.animateHeader, args=["You changed the text color", uiInstance.animationColor])
+                animateThread = Thread(target=self.animateHeader,
+                                       args=["You changed the text color", uiInstance.animationColor])
                 animateThread.start()
 
             # Once completed
@@ -126,16 +126,16 @@ class Animation:
 
         except:
             animateThread = Thread(target=self.animateHeader, args=["You cannot use an undefined color",
-                                                               uiInstance.animationColor])
+                                                                    uiInstance.animationColor])
             animateThread.start()
 
-        uiInstance.animationRunning = False
+        animationInstance.animationRunning = False
         return
 
     def animateHeader(self, message, color):
-        while uiInstance.animationRunning:
+        while animationInstance.animationRunning:
             sleep(uiInstance.waitTime)
-        uiInstance.animationRunning = True
+        animationInstance.animationRunning = True
 
         if not uiInstance.darkMode:
             (R, G, B) = (0, 0, 0)
@@ -269,13 +269,13 @@ class Animation:
                 uiInstance.header.text_color = (R, G, B)
                 sleep(uiInstance.rate)
 
-        uiInstance.animationRunning = False
+        animationInstance.animationRunning = False
         return
 
     def switchTheme(self, DisplayMessage):
-        while uiInstance.animationRunning:
+        while animationInstance.animationRunning:
             sleep(uiInstance.waitTime)
-        uiInstance.animationRunning = True
+        animationInstance.animationRunning = True
 
         if uiInstance.darkMode:
             while uiInstance.darkMode:
@@ -354,7 +354,7 @@ class Animation:
 
                 uiInstance.darkMode = True
 
-        uiInstance.animationRunning = False
+        animationInstance.animationRunning = False
         uiInstance.chatHistory.text_color = connectionInstance.color
         uiInstance.messageInput.text_color = connectionInstance.color
 
@@ -420,12 +420,14 @@ class Communication:
                 uiInstance.userList.remove(user)
                 self.users.remove(user)
                 message = user + " has disconnected"
-                animateThread = Thread(target=animationInstance.animateHeader, args=[message, uiInstance.animationColor])
+                animateThread = Thread(target=animationInstance.animateHeader,
+                                       args=[message, uiInstance.animationColor])
                 animateThread.start()
 
             elif message[0:8] == "/display":
                 message = message[9:]
-                animateThread = Thread(target=animationInstance.animateHeader, args=[message, uiInstance.animationColor])
+                animateThread = Thread(target=animationInstance.animateHeader,
+                                       args=[message, uiInstance.animationColor])
                 animateThread.start()
 
             elif message == "/theme":
@@ -436,7 +438,7 @@ class Communication:
                 if message[5:] == connectionInstance.username and not connectionInstance.mod:
                     uiInstance.animationColor = (240, 230, 140)
                     connectionInstance.mod = True
-                    RunFiller = True
+                    animationInstance.runFiller = True
                     if not uiInstance.darkMode:
                         animateThread = Thread(target=animationInstance.switchTheme, args=[False])
                         animateThread.start()
@@ -459,33 +461,34 @@ class Communication:
 
             elif message == "/disconnect":
                 animateThread = Thread(target=animationInstance.animateHeader, args=["You cannot use this username",
-                                                                   uiInstance.animationColor])
+                                                                                     uiInstance.animationColor])
                 animateThread.start()
                 while True:
-                    animateThread = Thread(target=animationInstance.animateHeader, args=["You are not connected", (216, 36, 41)])
+                    animateThread = Thread(target=animationInstance.animateHeader,
+                                           args=["You are not connected", (216, 36, 41)])
                     animateThread.start()
                     sleep(uiInstance.rate)
 
             elif message == "/filler":
-                if uiInstance.runFiller == False:
-                    uiInstance.runFiller = True
+                if animationInstance.runFiller == False:
+                    animationInstance.runFiller = True
                     animateThread = Thread(target=animationInstance.animateHeader, args=["You turned filler on",
-                                                                       uiInstance.animationColor])
+                                                                                         uiInstance.animationColor])
                     animateThread.start()
                     fillerThread = Thread(target=animationInstance.filler)
                     fillerThread.start()
 
                 else:
+                    animationInstance.runFiller = False
                     animateThread = Thread(target=animationInstance.animateHeader, args=["You turned filler off",
-                                                                       uiInstance.animationColor])
+                                                                                         uiInstance.animationColor])
                     animateThread.start()
-                    RunFiller = False
 
             else:
                 uiInstance.linesSent += 1
                 if uiInstance.linesSent > 15:
                     animateThread = Thread(target=animationInstance.animateHeader, args=["You created a new page",
-                                                                       uiInstance.animationColor])
+                                                                                         uiInstance.animationColor])
                     animateThread.start()
                     uiInstance.chatHistory.clear()
                     uiInstance.linesSent = 2
@@ -516,7 +519,8 @@ class Communication:
                 file.write("\n")
             file.close()
 
-            animateThread = Thread(target=animationInstance.animateHeader, args=["Your file has been saved", uiInstance.animationColor])
+            animateThread = Thread(target=animationInstance.animateHeader,
+                                   args=["Your file has been saved", uiInstance.animationColor])
             animateThread.start()
 
         else:
@@ -525,6 +529,7 @@ class Communication:
             animateThread.start()
 
         return
+
 
 class Connection:
     def __init__(self, username, color, host, port, privateKey):
@@ -585,6 +590,7 @@ class Connection:
         print("You have disconnected.")
         quit()
 
+
 class UI:
     def __init__(self, font, fontSize):
         self.font = font
@@ -595,9 +601,7 @@ class UI:
         self.darkbg = (40, 40, 40)
         self.waitTime = 0.75
         self.linesSent = 1
-        self.animationRunning = False
         self.darkMode = False
-        self.runFiller = False
 
         if platform.system() == "Darwin":
             self.rate = 0.00025
@@ -710,7 +714,7 @@ class UI:
 
         rightBlocker = Box(verifyBox, width="fill", height=40, align="top")
         AttemptConnect = PushButton(verifyBox, text="Connect", command=connectionInstance.connect, args=
-                                    [usernameInput, colorInput, hostInput, portInput, keyInput])
+        [usernameInput, colorInput, hostInput, portInput, keyInput])
 
         AttemptConnect.text_size = self.fontSize - 6
 
@@ -721,9 +725,10 @@ class UI:
 
         self.setupWindow.display()
 
-#connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
 
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "49130", "13543, 19337")
+# connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
+
+connectionInstance = Connection("alty", "lightblue", "192.168.1.138", "49130", "34971, 52939")
 uiInstance = UI("San Francisco Bold", 22)
 communicationInstance = Communication()
 animationInstance = Animation()
