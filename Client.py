@@ -1,4 +1,4 @@
-# 11/9/2022
+# 13/9/2022
 # V13 Beta Class
 
 import platform
@@ -8,8 +8,6 @@ from threading import Thread
 
 import colorutils
 from guizero import *
-
-ChatHistory = []
 
 def animateStatus():
     while not connectionInstance.connected:
@@ -124,7 +122,8 @@ def FadeToColor(newColor, displayMessage):
         connectionInstance.color = newColor
 
     except:
-        animateThread = Thread(target=AnimateHeader, args=["You cannot use an undefined color", uiInstance.animationColor])
+        animateThread = Thread(target=AnimateHeader, args=["You cannot use an undefined color",
+                                                           uiInstance.animationColor])
         animateThread.start()
 
     uiInstance.animationRunning = False
@@ -368,158 +367,162 @@ def SwitchTheme(DisplayMessage):
 
     return
 
-def SaveChatHistory(Location):
-    if Location and not " " in Location:
-        File = open(Location, "w")
-        for Chat in ChatHistory:
-            File.write(Chat)
-            File.write("\n")
-        File.close()
+class Communication:
+    def __init__(self):
+        self.users = []
+        self.chatHistory = []
 
-        animateThread = Thread(target=AnimateHeader, args=["Your file has been saved", uiInstance.animationColor])
-        animateThread.start()
+    def decrypt(self, message):
+        message = message.split()
+        decryptedMessage = []
 
-    else:
-        animateThread = Thread(target=AnimateHeader,
-                               args=["You can't save to this location", uiInstance.animationColor])
-        animateThread.start()
+        for letter in message:
+            letter = int(letter, base=10)
+            index = pow(letter, connectionInstance.d, connectionInstance.N)
+            decryptedLetter = chr(index)
+            decryptedMessage.append(decryptedLetter)
 
-    return
+        message = str("".join(decryptedMessage))
+        return message
 
-def RSADecrypt(Message):
-    Message = Message.split()
-    RSADecryptedMessage = []
+    def update(self):
+        while connectionInstance.connected:
+            message = connectionInstance.socket.recv(1024).decode()
+            message = self.decrypt(message)
 
-    for Letter in Message:
-        Letter = int(Letter, base=10)
-        Index = pow(Letter, connectionInstance.d, connectionInstance.N)
-        RSADecryptedLetter = chr(Index)
-        RSADecryptedMessage.append(RSADecryptedLetter)
+            if message[0:4] == "/add":
+                message = message[5:].split()
+                if len(message) > 1:
+                    message.sort()
 
-    Message = str("".join(RSADecryptedMessage))
-    return Message
+                uiInstance.userList.clear()
+                uiInstance.userList.append("Users Online:")
 
-def AlwaysUpdate():
-    global LinesSent, RunFiller, Users
-    Users = []
-    while True:
-        Message = connectionInstance.socket.recv(1024).decode()
-        Message = RSADecrypt(Message)
+                for user in message:
+                    if user not in self.users:
+                        uiInstance.userList.append(user)
+                        self.users.append(user)
 
-        if Message:
-            print(Message)
+                        message = user + " has connected"
+                        animateThread = Thread(target=AnimateHeader, args=[message, (124, 252, 0)])
+                        animateThread.start()
+                    else:
+                        uiInstance.userList.append(user)
 
-        if Message[0:4] == "/add":
-            Message = Message[5:]
-            Message = Message.split()
-            Message.sort()
+            elif message[0:7] == "/remove":
+                if message[8:] == connectionInstance.username:
+                    connectionInstance.leave()
+                    break
+                user = message[8:]
+                uiInstance.userList.remove(user)
+                self.users.remove(user)
+                message = user + " has disconnected"
+                animateThread = Thread(target=AnimateHeader, args=[message, uiInstance.animationColor])
+                animateThread.start()
 
-            uiInstance.userList.clear()
-            uiInstance.userList.append("Users Online:")
+            elif message[0:8] == "/display":
+                message = message[9:]
+                animateThread = Thread(target=AnimateHeader, args=[message, uiInstance.animationColor])
+                animateThread.start()
 
-            for User in Message:
-                if User not in Users:
-                    uiInstance.userList.append(User)
-                    Users.append(User)
-                    Message = User + " has connected"
-                    animateThread = Thread(target=AnimateHeader, args=[Message, (124, 252, 0)])
+            elif message == "/theme":
+                animateThread = Thread(target=SwitchTheme, args=[True])
+                animateThread.start()
+
+            elif message[0:4] == "/mod":
+                if message[5:] == connectionInstance.username and not connectionInstance.mod:
+                    uiInstance.animationColor = (240, 230, 140)
+                    global RunFiller
+                    connectionInstance.mod = True
+                    RunFiller = True
+                    if not uiInstance.darkMode:
+                        animateThread = Thread(target=SwitchTheme, args=[False])
+                        animateThread.start()
+                    animateThread = Thread(target=ModBorder)
                     animateThread.start()
+                    animateThread = Thread(target=FadeToColor, args=["khaki", False])
+                    animateThread.start()
+                    fillerThread = Thread(target=Filler)
+                    fillerThread.start()
+
+            elif message[0:6] == "/color":
+                connectionInstance.newColor = message[7:]
+                animateThread = Thread(target=FadeToColor, args=[connectionInstance.newColor, True])
+                animateThread.start()
+
+            elif message[0:5] == "/save":
+                self.location = message[6:]
+                saveChatThread = Thread(target=communicationInstance.saveChatHistory)
+                saveChatThread.start()
+
+            elif message == "/disconnect":
+                animateThread = Thread(target=AnimateHeader, args=["You cannot use this username",
+                                                                   uiInstance.animationColor])
+                animateThread.start()
+                while True:
+                    animateThread = Thread(target=AnimateHeader, args=["You are not connected", (216, 36, 41)])
+                    animateThread.start()
+                    sleep(uiInstance.rate)
+
+            elif message == "/filler":
+                if uiInstance.runFiller == False:
+                    uiInstance.runFiller = True
+                    animateThread = Thread(target=AnimateHeader, args=["You turned filler on",
+                                                                       uiInstance.animationColor])
+                    animateThread.start()
+                    fillerThread = Thread(target=Filler)
+                    fillerThread.start()
+
                 else:
-                    uiInstance.userList.append(User)
-
-        elif Message[0:7] == "/remove":
-            if Message[8:] == connectionInstance.username:
-                connectionInstance.leave()
-                break
-            User = Message[8:]
-            uiInstance.userList.remove(User)
-            Users.remove(User)
-            Message = User + " has disconnected"
-            animateThread = Thread(target=AnimateHeader, args=[Message, uiInstance.animationColor])
-            animateThread.start()
-
-        elif Message[0:8] == "/display":
-            Message = Message[9:]
-            animateThread = Thread(target=AnimateHeader, args=[Message, uiInstance.animationColor])
-            animateThread.start()
-
-        elif Message == "/theme":
-            animateThread = Thread(target=SwitchTheme, args=[True])
-            animateThread.start()
-
-        elif Message[0:4] == "/mod":
-            if Message[5:] == connectionInstance.username and not connectionInstance.mod:
-                uiInstance.animationColor = (240, 230, 140)
-                global RunFiller
-                connectionInstance.mod = True
-                RunFiller = True
-                if not uiInstance.darkMode:
-                    animateThread = Thread(target=SwitchTheme, args=[False])
+                    animateThread = Thread(target=AnimateHeader, args=["You turned filler off",
+                                                                       uiInstance.animationColor])
                     animateThread.start()
-                animateThread = Thread(target=ModBorder)
-                animateThread.start()
-                animateThread = Thread(target=FadeToColor, args=["khaki", False])
-                animateThread.start()
-                fillerThread = Thread(target=Filler)
-                fillerThread.start()
-
-        elif Message[0:6] == "/color":
-            connectionInstance.newColor = Message[7:]
-            animateThread = Thread(target=FadeToColor, args=[connectionInstance.newColor, True])
-            animateThread.start()
-
-        elif Message[0:5] == "/save":
-            Location = Message[6:]
-            saveChatThread = Thread(target=SaveChatHistory, args=[Location])
-            saveChatThread.start()
-
-        elif Message == "/disconnect":
-            animateThread = Thread(target=AnimateHeader, args=["You cannot use this username", uiInstance.animationColor])
-            animateThread.start()
-            while True:
-                animateThread = Thread(target=AnimateHeader, args=["You are not connected", (216, 36, 41)])
-                animateThread.start()
-                sleep(uiInstance.rate)
-
-        elif Message == "/filler":
-            if uiInstance.runFiller == False:
-                uiInstance.runFiller = True
-                animateThread = Thread(target=AnimateHeader, args=["You turned filler on", uiInstance.animationColor])
-                animateThread.start()
-                fillerThread = Thread(target=Filler)
-                fillerThread.start()
+                    RunFiller = False
 
             else:
-                animateThread = Thread(target=AnimateHeader, args=["You turned filler off", uiInstance.animationColor])
-                animateThread.start()
-                RunFiller = False
+                uiInstance.linesSent += 1
+                if uiInstance.linesSent > 15:
+                    animateThread = Thread(target=AnimateHeader, args=["You created a new page",
+                                                                       uiInstance.animationColor])
+                    animateThread.start()
+                    uiInstance.chatHistory.clear()
+                    uiInstance.linesSent = 2
 
-        else:
-            uiInstance.linesSent += 1
-            if uiInstance.linesSent > 15:
-                animateThread = Thread(target=AnimateHeader, args=["You created a new page", uiInstance.animationColor])
-                animateThread.start()
-                uiInstance.chatHistory.clear()
-                uiInstance.linesSent = 2
+                self.chatHistory.append(message)
+                uiInstance.chatHistory.append(message)
 
-            ChatHistory.append(Message)
-            uiInstance.chatHistory.append(Message)
-
-
-def SendToServer():
-    Message = uiInstance.messageInput.value
-    if Message:
-        if Message == "/leave":
-            connectionInstance.leave()
-        else:
-            if len(Message) + len(connectionInstance.username) + 2 >= 80:
-                animateThread = Thread(target=AnimateHeader,
-                                       args=["Your message is too long.", uiInstance.animationColor])
-                animateThread.start()
-
+    def sendToServer(self):
+        self.message = uiInstance.messageInput.value
+        if self.message:
+            if self.message == "/leave":
+                connectionInstance.leave()
             else:
-                connectionInstance.socket.send(Message.encode())
-                uiInstance.messageInput.clear()
+                if len(self.message) + len(connectionInstance.username) + 2 >= 80:
+                    animateThread = Thread(target=AnimateHeader,
+                                           args=["Your message is too long.", uiInstance.animationColor])
+                    animateThread.start()
+
+                else:
+                    connectionInstance.socket.send(self.message.encode())
+                    uiInstance.messageInput.clear()
+
+    def saveChatHistory(self):
+        if self.location and not " " in self.location:
+            file = open(self.location, "w")
+            for chatLine in communicationInstance.chatHistory:
+                file.write(chatLine)
+                file.write("\n")
+            file.close()
+
+            animateThread = Thread(target=AnimateHeader, args=["Your file has been saved", uiInstance.animationColor])
+            animateThread.start()
+
+        else:
+            animateThread = Thread(target=AnimateHeader,
+                                   args=["You can't save to this location", uiInstance.animationColor])
+            animateThread.start()
+
+        return
 
 class Connection:
     def __init__(self, username, color, host, port, privateKey):
@@ -566,14 +569,12 @@ class Connection:
                     uiInstance.status.value = "Color Locked"
             else:
                 uiInstance.status.value = "Invalid Username"
-        except IndexError:
-            uiInstance.status.value = "Invalid Input"
-
-        except ValueError:
+        except IndexError or IndexError:
             uiInstance.status.value = "Invalid Input"
 
     def leave(self):
         self.socket.send("/leave".encode())
+        self.connected = False
 
         uiInstance.setupWindow.hide()
         uiInstance.chatWindow.hide()
@@ -636,7 +637,7 @@ class UI:
         self.chatHistory.text_size = self.fontSize
         self.chatHistory.disable()
 
-        self.sendButton = PushButton(buttonBox, text="Send", command=SendToServer)
+        self.sendButton = PushButton(buttonBox, text="Send", command=communicationInstance.sendToServer)
         self.sendButton.text_color = (0, 0, 0)
         self.sendButton.bg = (255, 255, 255)
         self.sendButton.align = "right"
@@ -648,7 +649,7 @@ class UI:
 
         # Threads start here
 
-        listeningThread = Thread(target=AlwaysUpdate)
+        listeningThread = Thread(target=communicationInstance.update)
         listeningThread.start()
 
         self.setupWindow.hide()
@@ -663,20 +664,20 @@ class UI:
         bottomPadding = Box(self.setupWindow, width="fill", height=50, align="bottom")
         contents = Box(self.setupWindow, width="fill", height="fill", align="top")
 
-        InputBox = Box(contents, width=400, height=150, align="left")
+        inputBox = Box(contents, width=400, height=150, align="left")
         rightPadding = Box(contents, width=16, height="fill", align="right")
-        VerifyBox = Box(contents, width=384, height=150, align="right")
+        verifyBox = Box(contents, width=384, height=150, align="right")
 
-        usernameBlocker = Box(InputBox, width=15, height=150, align="right")
-        usernameInputBox = Box(InputBox, width=275, height=30)
-        colorBlocker = Box(InputBox, width=15, height=120, align="right")
-        colorInputBox = Box(InputBox, width=260, height=30)
-        hostBlocker = Box(InputBox, width=15, height=90, align="right")
-        hostInputBox = Box(InputBox, width=245, height=30)
-        portBlocker = Box(InputBox, width=15, height=60, align="right")
-        portInputBox = Box(InputBox, width=230, height=30)
-        keyBlocker = Box(InputBox, width=15, height=30, align="right")
-        keyInputBox = Box(InputBox, width=215, height=30)
+        usernameBlocker = Box(inputBox, width=15, height=150, align="right")
+        usernameInputBox = Box(inputBox, width=275, height=30)
+        colorBlocker = Box(inputBox, width=15, height=120, align="right")
+        colorInputBox = Box(inputBox, width=260, height=30)
+        hostBlocker = Box(inputBox, width=15, height=90, align="right")
+        hostInputBox = Box(inputBox, width=245, height=30)
+        portBlocker = Box(inputBox, width=15, height=60, align="right")
+        portInputBox = Box(inputBox, width=230, height=30)
+        keyBlocker = Box(inputBox, width=15, height=30, align="right")
+        keyInputBox = Box(inputBox, width=215, height=30)
 
         usernameInput = TextBox(usernameInputBox, text=connectionInstance.username, width="fill")
         colorInput = TextBox(colorInputBox, text=connectionInstance.color, width="fill")
@@ -702,11 +703,11 @@ class UI:
         portInput.bg = self.darkbg
         keyInput.bg = self.darkbg
 
-        self.status = Text(VerifyBox, text="Not Connected")
+        self.status = Text(verifyBox, text="Not Connected")
         self.status.text_size = 34
 
-        rightBlocker = Box(VerifyBox, width="fill", height=40, align="top")
-        AttemptConnect = PushButton(VerifyBox, text="Connect", command=connectionInstance.connect, args=
+        rightBlocker = Box(verifyBox, width="fill", height=40, align="top")
+        AttemptConnect = PushButton(verifyBox, text="Connect", command=connectionInstance.connect, args=
                                     [usernameInput, colorInput, hostInput, portInput, keyInput])
 
         AttemptConnect.text_size = self.fontSize - 6
@@ -719,7 +720,9 @@ class UI:
         self.setupWindow.display()
 
 #connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "172.20.10.2", "1547, 2419")
+
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "49130", "13543, 19337")
 uiInstance = UI("San Francisco Bold", 22)
+communicationInstance = Communication()
 
 UI.openSetup(uiInstance)
