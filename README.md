@@ -3,6 +3,8 @@ A chat application made with guizero, asymmetric encryption and sockets.
 
 This is the developmental branch. Currently the goal is to 1) Remove global variables in favour of classes 2) use camelcase for anything but class names, in which case PascalCase should be used and 3) make the code more readable by chaning var names or comments
 
+# Highlights and features
+
 ## Safety
 
 The safety of the chat application and it's users are one of it's most important aspects. The use of RSA encryption in this
