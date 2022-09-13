@@ -4,6 +4,7 @@
 import platform
 import socket
 import colorutils
+import sys
 from time import sleep, localtime, strftime
 from threading import Thread
 from guizero import *
@@ -28,7 +29,9 @@ class Animation:
                         B -= 1
 
                     uiInstance.status.text_color = (R, G, B)
-                    sleep(0.005)
+                    sleep(uiInstance.rate * 20)
+
+                sleep(0.5)
 
                 while not R == 255 or not G == 255 or not B == 255:
                     if R < 255:
@@ -39,7 +42,10 @@ class Animation:
                         B += 1
 
                     uiInstance.status.text_color = (R, G, B)
-                    sleep(0.005)
+                    sleep(uiInstance.rate * 20)
+
+                sleep(0.5)
+
         except Exception as e:
             if connectionInstance.connected:
                 print(e)
@@ -50,6 +56,10 @@ class Animation:
     def filler(self):
         try:
             while animationInstance.runFiller:
+                while animationInstance.animationRunning:
+                    sleep(uiInstance.waitTime)
+                animationInstance.animationRunning = True
+
                 sleep(60)
 
                 time = strftime("%H:%M", localtime())
@@ -61,6 +71,8 @@ class Animation:
                 print(e)
             else:
                 print("Closed thread successfully")
+
+        animationInstance.animationRunning = False
         return
 
     def changeBorder(self):
@@ -81,13 +93,13 @@ class Animation:
 
                 uiInstance.border.set_border(3, (R, G, B))
 
-            animationInstance.animationRunning = False
-
         except Exception as e:
             if connectionInstance.connected:
                 print(e)
             else:
                 print("Closed thread successfully")
+
+        animationInstance.animationRunning = False
         return
 
     def fadeColor(self, newColor, displayMessage):
@@ -382,7 +394,6 @@ class Animation:
 
                     uiInstance.darkMode = True
 
-            animationInstance.animationRunning = False
             uiInstance.chatHistory.text_color = connectionInstance.color
             uiInstance.messageInput.text_color = connectionInstance.color
 
@@ -401,6 +412,8 @@ class Animation:
                 print(e)
             else:
                 print("Closed thread successfully")
+
+        animationInstance.animationRunning = False
         return
 
 class Communication:
@@ -494,17 +507,12 @@ class Communication:
                     saveChatThread.start()
 
                 elif message == "/disconnect":
-                    animateThread = Thread(target=animationInstance.animateHeader, args=["You cannot use this username",
-                                                                                         uiInstance.animationColor])
-                    animateThread.start()
-                    while True:
-                        animateThread = Thread(target=animationInstance.animateHeader,
-                                               args=["You are not connected", (216, 36, 41)])
-                        animateThread.start()
-                        sleep(uiInstance.rate)
+                    print("Your username is used by someone else")
+                    connectionInstance.leave()
+                    break
 
                 elif message == "/filler":
-                    if animationInstance.runFiller == False:
+                    if not animationInstance.runFiller:
                         animationInstance.runFiller = True
                         animateThread = Thread(target=animationInstance.animateHeader, args=["You turned filler on",
                                                                                              uiInstance.animationColor])
@@ -553,7 +561,7 @@ class Communication:
                     uiInstance.messageInput.clear()
 
     def saveChatHistory(self):
-        if self.location and not " " in self.location:
+        if self.location and " " not in self.location:
             file = open(self.location, "w")
             for chatLine in communicationInstance.chatHistory:
                 file.write(chatLine)
@@ -604,36 +612,36 @@ class Connection:
                         UI.openChat(uiInstance)
 
                     except ConnectionRefusedError:
-                        uiInstance.status.value = "Connection Full"
+                        uiInstance.status.value = "Connection Refused"
 
                     except OSError:
                         uiInstance.status.value = "Restart Client"
 
                     except BrokenPipeError:
                         uiInstance.status.value = "Broken Pipe"
-
                 else:
                     uiInstance.status.value = "Color Locked"
             else:
                 uiInstance.status.value = "Invalid Username"
-        except IndexError or IndexError:
+        except IndexError or ValueError:
             uiInstance.status.value = "Invalid Input"
 
     def leave(self):
-        self.socket.send("/leave".encode())
-        self.connected = False
+        if connectionInstance.connected:
+            self.socket.send("/leave".encode())
+            self.connected = False
 
         uiInstance.setupWindow.hide()
         uiInstance.chatWindow.hide()
 
         self.socket.close()
-        print("You have disconnected. \nPlease terminate this process.")
-        quit()
+        print("You have disconnected")
+        sys.exit("Terminated process")
 
 class UI:
-    def __init__(self, font, fontSize):
-        self.font = font
-        self.fontSize = fontSize
+    def __init__(self):
+        self.font = "San Francisco"
+        self.fontSize = 22
         self.color = connectionInstance.color
         self.animationColor = (173, 216, 230)
         self.bg = (70, 70, 70)
@@ -671,7 +679,7 @@ class UI:
         self.userList.text_size = self.fontSize - 2
 
         self.header = Text(header, text=("Welcome " + connectionInstance.username))
-        self.header.text_size = 30
+        self.header.text_size = self.fontSize + 8
         self.header.text_color = (0, 0, 0)
         self.header.bg = (255, 255, 255)
         self.header.width = "fill"
@@ -703,7 +711,7 @@ class UI:
     def openSetup(self):
         self.setupWindow = App(title="Connect", width=800, height=275)
         self.setupWindow.bg = (70, 70, 70)
-        self.setupWindow.font = "San Francisco Bold"
+        self.setupWindow.font = self.font
 
         topPadding = Box(self.setupWindow, width="fill", height=50, align="top")
         bottomPadding = Box(self.setupWindow, width="fill", height=50, align="bottom")
@@ -749,7 +757,7 @@ class UI:
         keyInput.bg = self.darkbg
 
         self.status = Text(verifyBox, text="Not Connected")
-        self.status.text_size = 34
+        self.status.text_size = self.fontSize + 12
 
         rightBlocker = Box(verifyBox, width="fill", height=40, align="top")
         AttemptConnect = PushButton(verifyBox, text="Connect", command=connectionInstance.connect, args=
@@ -757,7 +765,7 @@ class UI:
 
         AttemptConnect.text_size = self.fontSize - 6
 
-        build = Text(bottomPadding, text="development", align="bottom")
+        build = Text(bottomPadding, text="development: classes", align="bottom")
 
         animateThread = Thread(target=animationInstance.animateStatus)
         animateThread.start()
@@ -767,8 +775,8 @@ class UI:
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
 
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "49130", "34971, 52939")
-uiInstance = UI("San Francisco Bold", 22)
+connectionInstance = Connection("tomm", "lightblue", "10.28.206.152", "49130", "32503, 57377")
+uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
 
