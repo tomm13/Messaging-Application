@@ -51,14 +51,16 @@ class Animation:
                 print(e)
             else:
                 print("Closed thread successfully")
-        return
+
+        finally:
+            return
 
     def filler(self):
         try:
             while animationInstance.runFiller:
                 while animationInstance.animationRunning:
                     sleep(uiInstance.waitTime)
-                animationInstance.animationRunning = True
+                animationInstance.runFiller = True
 
                 sleep(60)
 
@@ -72,16 +74,17 @@ class Animation:
             else:
                 print("Closed thread successfully")
 
-        animationInstance.animationRunning = False
-        return
+        finally:
+            animationInstance.runFiller = False
+            return
 
     def changeBorder(self):
         try:
-            (R, G, B) = (173, 216, 230)
-
             while animationInstance.animationRunning:
                 sleep(uiInstance.waitTime)
             animationInstance.animationRunning = True
+
+            (R, G, B) = (173, 216, 230)
 
             while not (R, G, B) == (240, 230, 140):
                 if R < 240:
@@ -99,8 +102,9 @@ class Animation:
             else:
                 print("Closed thread successfully")
 
-        animationInstance.animationRunning = False
-        return
+        finally:
+            animationInstance.animationRunning = False
+            return
 
     def fadeColor(self, newColor, displayMessage):
         try:
@@ -161,8 +165,9 @@ class Animation:
             else:
                 print("Closed thread successfully")
 
-        animationInstance.animationRunning = False
-        return
+        finally:
+            animationInstance.animationRunning = False
+            return
 
     def animateHeader(self, message, color):
         try:
@@ -308,8 +313,9 @@ class Animation:
             else:
                 print("Closed thread successfully")
 
-        animationInstance.animationRunning = False
-        return
+        finally:
+            animationInstance.animationRunning = False
+            return
 
     def switchTheme(self, DisplayMessage):
         try:
@@ -413,8 +419,9 @@ class Animation:
             else:
                 print("Closed thread successfully")
 
-        animationInstance.animationRunning = False
-        return
+        finally:
+            animationInstance.animationRunning = False
+            return
 
 class Communication:
     def __init__(self):
@@ -439,6 +446,9 @@ class Communication:
             while connectionInstance.connected:
                 message = connectionInstance.socket.recv(1024).decode()
                 message = self.decrypt(message)
+
+                if message:
+                    print(message)
 
                 if message[0:4] == "/add":
                     message = message[5:].split()
@@ -543,7 +553,9 @@ class Communication:
                 print(e)
             else:
                 print("Closed thread successfully")
-        return
+
+        finally:
+            return
 
     def sendToServer(self):
         self.message = uiInstance.messageInput.value
@@ -646,7 +658,7 @@ class UI:
         self.animationColor = (173, 216, 230)
         self.bg = (70, 70, 70)
         self.darkbg = (40, 40, 40)
-        self.waitTime = 0.75
+        self.waitTime = 1
         self.linesSent = 1
         self.darkMode = False
 
@@ -775,7 +787,7 @@ class UI:
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
 
-connectionInstance = Connection("tomm", "lightblue", "10.28.206.152", "49130", "32503, 57377")
+connectionInstance = Connection("tomm", "lightblue", "10.28.206.168", "49130", "25613, 32387")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
