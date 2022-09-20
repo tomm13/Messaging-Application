@@ -1,6 +1,6 @@
 # 13/9/2022
 # V13 Beta Class
-
+import _tkinter
 import platform
 import socket
 import colorutils
@@ -612,6 +612,8 @@ class Connection:
             self.d = int(self.privateKey[0], base=10)
             self.N = int(self.privateKey[1], base=10)
 
+            uiInstance.status.value = "Awaiting Response"
+
             if not self.username == "" and not self.username == "Username" and not " " in self.username:
                 # Checks: if username is not empty, not Username and does not contain spaces
                 if not self.color.casefold() == "khaki":
@@ -632,11 +634,14 @@ class Connection:
                     except BrokenPipeError:
                         uiInstance.status.value = "Broken Pipe"
                 else:
-                    uiInstance.status.value = "Color Locked"
+                    uiInstance.status.value = "Invalid Color"
             else:
                 uiInstance.status.value = "Invalid Username"
-        except IndexError or ValueError:
-            uiInstance.status.value = "Invalid Input"
+        except ValueError:
+            uiInstance.status.value = "Invalid Values"
+
+        except IndexError:
+            uiInstance.status.value = "Invalid Key Format"
 
     def leave(self):
         if connectionInstance.connected:
@@ -654,7 +659,7 @@ class UI:
     def __init__(self):
         self.font = "San Francisco"
         self.fontSize = 22
-        self.color = connectionInstance.color
+        self.color = (173, 216, 230)
         self.animationColor = (173, 216, 230)
         self.bg = (70, 70, 70)
         self.darkbg = (40, 40, 40)
@@ -668,57 +673,62 @@ class UI:
             self.rate = 0.00000
 
     def openChat(self):
-        self.chatWindow = Window(self.setupWindow, width=1200, height=590, title="Chatroom", bg=(70, 70, 70))
-        self.chatWindow.when_closed = connectionInstance.leave
+        try:
+            self.chatWindow = Window(self.setupWindow, width=1200, height=590, title="Chatroom", bg=(70, 70, 70))
+            self.chatWindow.when_closed = connectionInstance.leave
 
-        topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
-        leftPadding = Box(self.chatWindow, width=50, height="fill", align="left")
-        rightPadding = Box(self.chatWindow, width=50, height="fill", align="right")
-        bottomPadding = Box(self.chatWindow, width="fill", height=50, align="bottom")
+            topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
+            leftPadding = Box(self.chatWindow, width=50, height="fill", align="left")
+            rightPadding = Box(self.chatWindow, width=50, height="fill", align="right")
+            bottomPadding = Box(self.chatWindow, width="fill", height=50, align="bottom")
 
-        self.border = Box(self.chatWindow, width="fill", height="fill")
-        self.border.set_border(3, (173, 216, 230))
+            self.border = Box(self.chatWindow, width="fill", height="fill")
+            self.border.set_border(3, (173, 216, 230))
 
-        header = Box(self.border, width="fill", height=40, align="top")
-        buttonBlocker = Box(self.border, width="fill", height=3, align="bottom")
-        buttonBox = Box(self.border, width="fill", height=40, align="bottom")
-        userBlocker = Box(self.border, width="fill", height=3, align="top")
-        userBox = Box(self.border, width="fill", height="fill")
+            header = Box(self.border, width="fill", height=40, align="top")
+            buttonBlocker = Box(self.border, width="fill", height=3, align="bottom")
+            buttonBox = Box(self.border, width="fill", height=40, align="bottom")
+            userBlocker = Box(self.border, width="fill", height=3, align="top")
+            userBox = Box(self.border, width="fill", height="fill")
 
-        self.userList = ListBox(userBox, items=["Users Online:"], width=150, height="fill", align="left")
-        self.userList.text_color = (0, 0, 0)
-        self.userList.bg = (215, 215, 215)
-        self.userList.text_size = self.fontSize - 2
+            self.userList = ListBox(userBox, items=["Users Online:"], width=150, height="fill", align="left")
+            self.userList.text_color = (0, 0, 0)
+            self.userList.bg = (215, 215, 215)
+            self.userList.text_size = self.fontSize - 2
 
-        self.header = Text(header, text=("Welcome " + connectionInstance.username))
-        self.header.text_size = self.fontSize + 8
-        self.header.text_color = (0, 0, 0)
-        self.header.bg = (255, 255, 255)
-        self.header.width = "fill"
+            self.header = Text(header, text=("Welcome " + connectionInstance.username))
+            self.header.text_size = self.fontSize + 8
+            self.header.text_color = (0, 0, 0)
+            self.header.bg = (255, 255, 255)
+            self.header.width = "fill"
 
-        self.chatHistory = TextBox(userBox, "Hi!", "fill", height="fill", multiline=True, align="left")
-        self.chatHistory.text_color = connectionInstance.color
-        self.chatHistory.bg = (255, 255, 255)
-        self.chatHistory.text_size = self.fontSize
-        self.chatHistory.disable()
+            self.chatHistory = TextBox(userBox, "Hi!", "fill", height="fill", multiline=True, align="left")
+            self.chatHistory.text_color = connectionInstance.color
+            self.chatHistory.bg = (255, 255, 255)
+            self.chatHistory.text_size = self.fontSize
+            self.chatHistory.disable()
 
-        self.sendButton = PushButton(buttonBox, text="Send", command=communicationInstance.sendToServer)
-        self.sendButton.text_color = (0, 0, 0)
-        self.sendButton.bg = (255, 255, 255)
-        self.sendButton.align = "right"
+            self.sendButton = PushButton(buttonBox, text="Send", command=communicationInstance.sendToServer)
+            self.sendButton.text_color = (0, 0, 0)
+            self.sendButton.bg = (255, 255, 255)
+            self.sendButton.align = "right"
 
-        self.messageInput = TextBox(buttonBox, width="fill", height="fill", align="bottom")
-        self.messageInput.text_color = connectionInstance.color
-        self.messageInput.bg = (255, 255, 255)
-        self.messageInput.text_size = self.fontSize + 2
+            self.messageInput = TextBox(buttonBox, width="fill", height="fill", align="bottom")
+            self.messageInput.text_color = connectionInstance.color
+            self.messageInput.bg = (255, 255, 255)
+            self.messageInput.text_size = self.fontSize + 2
 
-        # Threads start here
+            # Threads start here
 
-        listeningThread = Thread(target=communicationInstance.update)
-        listeningThread.start()
+            listeningThread = Thread(target=communicationInstance.update)
+            listeningThread.start()
 
-        self.setupWindow.hide()
-        self.chatWindow.show()
+            self.setupWindow.hide()
+            self.chatWindow.show()
+
+        except:
+            print("Your client crashed unexpectedly")
+            connectionInstance.leave()
 
     def openSetup(self):
         self.setupWindow = App(title="Connect", width=800, height=275)
@@ -777,7 +787,7 @@ class UI:
 
         AttemptConnect.text_size = self.fontSize - 6
 
-        build = Text(bottomPadding, text="development: classes", align="bottom")
+        build = Text(bottomPadding, text="development: fixing inputs", align="bottom")
 
         animateThread = Thread(target=animationInstance.animateStatus)
         animateThread.start()
@@ -787,7 +797,7 @@ class UI:
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
 
-connectionInstance = Connection("tomm", "lightblue", "10.28.206.168", "49130", "25613, 32387")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.119", "49129", "1543, 2869")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
