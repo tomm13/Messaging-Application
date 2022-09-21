@@ -80,6 +80,7 @@ Commands are an essential part of the code, especially with linking animations a
 - `/theme` - Switches between light mode and dark mode
 - `/filler` - When on, displays a useful message every 15 seconds after the last animation. (eg. time, messages sent, commands to use)
 - `/color <color>` - Switches text color to `<color>`
+- `/rate <int>` - Holds animations for `<int>` seconds. Default 1.
 - `/save <location>' - Saves the chat history to `<location>`
 - `/mod <user>` - Sends a request to give the moderator role to `<user>` 
 - `/kick <user>` - Kicks/Starts a vote to kick `<user>`. Only valid if sent by a moderator
