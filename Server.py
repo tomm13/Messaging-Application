@@ -6,454 +6,287 @@ from threading import Thread
 import time
 import random
 
-s = socket.socket()
 
-UserCount = 1000
-UserOnline = 0
-ModOnline = 0
-Vote = 0
-VoteAgainst = 0
-VotesNeeded = 2
-SpaceRemaining = UserCount
+class Security:
+    def __init__(self):
+        pass
 
-Hostname = socket.gethostname()
-IP = socket.gethostbyname(Hostname)
-if IP == "127.0.0.1":
-    print("[Server] Server cannot be hosted on localhost")
+    def generateKey(self):
+        Minimum = 10
+        Maximum = 350
+        Primes = []
+        PrimeCandidates = []
+        for Number in range(Minimum, Maximum):
+            IsPrime = True
+            for Factor in range(2, Number):
+                if Number % Factor == 0:
+                    IsPrime = False
+            if IsPrime:
+                Primes.append(Number)
 
-IP = '192.168.1.138'
-Port = 49130
+        for Prime in range(2):
+            Max = len(Primes) - 1
+            RandomNum = random.randint(0, Max)
+            PrimeCandidates.append(Primes[RandomNum])
+            Primes.pop(RandomNum)
 
-VoteActive = False
+        global P, Q, N, PhiN
+        P = PrimeCandidates[0]
+        Q = PrimeCandidates[1]
+        N = P * Q
+        PhiN = (P - 1) * (Q - 1)
 
-# Clients and Mods are lists of ClientSockets, whereas Users and ModUsers is a list of Usernames
-Clients = []
-Users = []
-Mods = []
-ModUsers = []
-HasVoted = []
-HasModded = []
+        eList = []
+        for eCandidate in range(2, PhiN):
+            eList.append(eCandidate)
 
-def GetKey():
-    global Minimum, Maximum
-    Minimum = 10
-    Maximum = 350
-    Primes = []
-    PrimeCandidates = []
-    for Number in range(Minimum, Maximum):
-        IsPrime = True
-        for Factor in range(2, Number):
-            if Number % Factor == 0:
-                IsPrime = False
-        if IsPrime:
-            Primes.append(Number)
+        global e
 
-    for Prime in range(2):
-        Max = len(Primes) - 1
-        RandomNum = random.randint(0, Max)
-        PrimeCandidates.append(Primes[RandomNum])
-        Primes.pop(RandomNum)
+        for e in eList:
+            PhiNFactors = []
+            NFactors = []
+            eFactors = []
+            for Factor in range(1, e + 1):
+                if e % Factor == 0:
+                    eFactors.append(Factor)
 
-    global P, Q, N, PhiN
-    P = PrimeCandidates[0]
-    Q = PrimeCandidates[1]
-    N = P * Q
-    PhiN = (P - 1) * (Q - 1)
+            for Factor in range(1, N + 1):
+                if N % Factor == 0:
+                    NFactors.append(Factor)
 
-    eList = []
-    for eCandidate in range(2, PhiN):
-        eList.append(eCandidate)
+            for Factor in range(1, PhiN + 1):
+                if PhiN % Factor == 0:
+                    PhiNFactors.append(Factor)
 
-    global e
+            if 1 in eFactors and 1 in PhiNFactors and 1 in NFactors:
+                PhiNFactors.remove(1)
+                NFactors.remove(1)
+                eFactors.remove(1)
 
-    for e in eList:
-        PhiNFactors = []
-        NFactors = []
-        eFactors = []
-        for Factor in range(1, e + 1):
-            if e % Factor == 0:
-                eFactors.append(Factor)
-
-        for Factor in range(1, N + 1):
-            if N % Factor == 0:
-                NFactors.append(Factor)
-
-        for Factor in range(1, PhiN + 1):
-            if PhiN % Factor == 0:
-                PhiNFactors.append(Factor)
-
-        if 1 in eFactors and 1 in PhiNFactors and 1 in NFactors:
-            PhiNFactors.remove(1)
-            NFactors.remove(1)
-            eFactors.remove(1)
-
-        if len(eFactors) == 1 and eFactors[0] not in PhiNFactors and eFactors[0] not in NFactors:
-            # print("[Server] Public Key =", (e, N))
-            break
-
-    for k in range(1, 2 * Maximum):
-        if (k * PhiN + 1) % e == 0:
-            if not (k * PhiN + 1) // e == e:
-                global d
-                d = (k * PhiN + 1) // e
+            if len(eFactors) == 1 and eFactors[0] not in PhiNFactors and eFactors[0] not in NFactors:
+                # print("[Server] Public Key =", (e, N))
                 break
 
-    print("[Private] Private Key =", (d, N))
+        for k in range(1, 2 * Maximum):
+            if (k * PhiN + 1) % e == 0:
+                if not (k * PhiN + 1) // e == e:
+                    global d
+                    d = (k * PhiN + 1) // e
+                    break
 
-    Connect()
+        print("[Private] Private Key =", (d, N))
 
-def VoteKick(Message, ClientSocket):
-    global Vote, VoteActive, UserToKick, UserKickSocket, HasVoted
-    # ClientSocket is the mod socket
-    # Username requested to kick
-    # UserKickSocket is the user socket
-    # UserToKick is the user to be kicked
+        self.d = d
+        self.e = e
+        self.N = N
 
-    try:
-        Index = Clients.index(ClientSocket)
-        Username = Users[Index]
+    def generatePort(self):
+        while True:
+            try:
+                connectionInstance.socket.bind((connectionInstance.host, connectionInstance.port))
+                print("[Server] Server Hosted on " + str(connectionInstance.host) + " with Port " + str(connectionInstance.port))
+                break
 
-        UserToKick = Message[6:]
-        Index = Users.index(UserToKick)
-        UserKickSocket = Clients[Index]
+            except Exception as e:
+                print(e)
+                connectionInstance.port = random.randint(49125, 65536)
 
-        if UserToKick not in ModUsers:
-            # If the person a mod is trying to kick is not a mod
-            if Username in ModUsers:
-                # If the person kicking is a mod
-                if len(Mods) == 1:
-                    PublicCommand("A moderator is kicking " + UserToKick)
-                    RemoveUser(UserToKick, UserKickSocket)
+    def encrypt(self, message):
+        RSAEncryptedmessage = []
+        for Letter in message:
+            Index = ord(Letter)
+            NewIndex = pow(Index, e, N)
+            RSAEncryptedmessage.append(str(NewIndex))
+            RSAEncryptedmessage.append(" ")
 
-                if len(Mods) > 1:
-                    if VoteActive == False:
-                        HasVoted = []
-                        HasVoted.append(Username)
-                        Vote = 1
-                        VoteAgainst = 0
-                        VoteActive = True
-                        PublicCommand("Moderators can now vote to kick " + UserToKick)
+        message = str("".join(RSAEncryptedmessage))
+        return message
 
-                        print("[Server] Starting vote")
+class Actions:
+    def __init__(self):
+        self.modOnline = 0
+        self.mods = []
+        self.modUsers= []
+        self.voteActive = False
+
+    def vote(self, message):
+        if message[5:] == "kick":
+            self.voteActive = True
+
+    def mod(self, message):
+        username = message[5:]
+        index = connectionInstance.users.index(username)
+        clientSocket = connectionInstance.clients[index]
+
+        if not clientSocket in self.mods:
+            if self.modOnline == 0:
+                self.modUsers.append(username)
+                self.mods.append(clientSocket)
+                self.modOnline += 1
+
+                action = "/mod " + username
+                sendInstance.privateBroadcast(action, clientSocket)
+
+                message = username + " is now a mod"
+                sendInstance.broadcastDisplay(message)
+
             else:
-                PrivateCommand("You do not have the power to execute this action", ClientSocket)
+                sendInstance.privateBroadcastDisplay("You do not have the power", clientSocket)
         else:
-            PrivateCommand("You cannot kick a mod", ClientSocket)
-    except:
-        PrivateCommand("You cannot kick this person as they do not exist", ClientSocket)
+            sendInstance.privateBroadcastDisplay("You are already a mod", clientSocket)
 
-def ModSelection(Message, Username, ClientSocket):
-    global Mods, ModUsers, ModOnline, HasModded
-    # ClientSocket = User who should have mod giving someone else mod
-    # Or User who doesn't have mod but is the first online, or first
-    # to apply for mod.
 
-    # ModSocket = User who should not have mod but is being applied by
-    # a User who does have mod.
+class Send:
+    def broadcast(self, message):
+        # sendInstances a public message to every client, not for animating purposes.
+        time.sleep(0.1)
+        print("[Client] " + message)
 
-    try:
-        ModCandidate = Message[5:]
-        Index = Users.index(ModCandidate)
-        ModSocket = Clients[Index]
+        message = securityInstance.encrypt(message)
+        for client in connectionInstance.clients:
+            client.send(message.encode())
 
-        Index = Clients.index(ClientSocket)
-        Username = Users[Index]
+    def broadcastDisplay(self, message):
+        # sendInstances "/display" + a message to every client.
+        time.sleep(0.1)
+        print("[PublicDisplay] " + message)
 
-        if UserOnline == 1:
-            # If they're the only person online
-            if not ClientSocket in Mods:
-                print("[Mod] Mod Assigned to", Username, "as there was only 1 user online")
-                Mods.append(ClientSocket)
-                ModUsers.append(Username)
-                PrivateBroadcast(Message, ClientSocket)
-                PrivateCommand((Username + " is now a mod "), ClientSocket)
-                ModOnline += 1
-            else:
-                PrivateCommand("You are already a mod", ClientSocket)
+        message = "/display " + message
+        message = securityInstance.encrypt(message)
 
-        elif ModOnline == 0:
-            if not ClientSocket in Mods:
-                # If there are no mods online currently
-                print("[Mod] Mod Assigned to", ModCandidate, "as there were no mods online")
-                Mods.append(ModSocket)
-                ModUsers.append(ModCandidate)
-                PrivateBroadcast(Message, ModSocket)
-                PublicCommand((ModCandidate + " is now a mod"))
-                ModOnline += 1
-            else:
-                PrivateCommand("You are already a mod", ClientSocket)
+        for client in connectionInstance.clients:
+            client.send(message.encode())
 
-        elif ClientSocket in Mods:
-            if not ModSocket in Mods:
-                if not ClientSocket in HasModded:
-                    print("[Mod] Mod Assigned by", Username, "to", ModCandidate)
-                    Mods.append(ModSocket)
-                    ModUsers.append(ModCandidate)
-                    HasModded.append((ClientSocket))
-                    PrivateBroadcast(Message, ModSocket)
-                    PublicCommand((Username + " gave " + ModCandidate + " mod"))
-                    ModOnline += 1
+    def privateBroadcast(self, message, clientSocket):
+        # sendInstances a private message to 1 specific client, not for animating purposes.
+        time.sleep(0.1)
+        print("[Private] "+ message)
 
-                else:
-                    PrivateCommand("You have already assigned a mod", ClientSocket)
+        message = securityInstance.encrypt(message)
+        clientSocket.send(message.encode())
 
-            else:
-                if ModSocket == ClientSocket:
-                    PrivateCommand("You are already a mod", ClientSocket)
-                else:
-                    PrivateCommand("Your moderator candidate is already a mod", ClientSocket)
-        else:
-            PrivateCommand("You do not have the power to execute this action", ClientSocket)
-    except ValueError:
-        PrivateCommand("Your moderator candidate is not a valid user", ClientSocket)
+    def privateBroadcastDisplay(self, message, clientSocket):
+        # sendInstances "/display" + a message to 1 specific client.
+        time.sleep(0.1)
+        print("[PrivateDisplay] " + message)
 
-def RSAEncrypt(Message):
-    RSAEncryptedMessage = []
-    for Letter in Message:
-        Index = ord(Letter)
-        NewIndex = pow(Index, e, N)
-        RSAEncryptedMessage.append(str(NewIndex))
-        RSAEncryptedMessage.append(" ")
+        message = "/display " + message
+        message = securityInstance.encrypt(message)
+        clientSocket.send(message.encode())
 
-    Message = str("".join(RSAEncryptedMessage))
-    return Message
-
-def GeneratePort():
-    s.bind((IP, Port))
-    print("[Server] Server Hosted on " + str(IP) + " with Port " + str(Port))
-
-def Broadcast(Message):
-    # Sends a Public Message to all Connected Clients, not for Animating Purposes
-    time.sleep(0.1)
-    print("[Client] " + Message)
-
-    Message = RSAEncrypt(Message)
-    for Client in Clients:
-        Client.send(Message.encode())
-
-def PublicCommand(Message):
-    # Sends "/display", which tells every Client to Animate it's banner
-    time.sleep(0.1)
-    print("[PublicDisplay] " + Message)
-
-    Message = "/display " + Message
-    Message = RSAEncrypt(Message)
-
-    for Client in Clients:
-        Client.send(Message.encode())
-
-def PrivateBroadcast(Message, ClientSocket):
-    # Sends a Private Message to 1 specific Client, not for Animating Purposes.
-    time.sleep(0.1)
-    print("[Private] "+ Message)
-
-    Message = RSAEncrypt(Message)
-    ClientSocket.send(Message.encode())
-
-def PrivateCommand(Message, ClientSocket):
-    # Sends "/display", which tells 1 specific Client to Animate it's banner
-    time.sleep(0.1)
-    print("[PrivateDisplay] " + Message)
-
-    Message = "/display " + Message
-    Message = RSAEncrypt(Message)
-    ClientSocket.send(Message.encode())
-
-def RemoveUser(Username, ClientSocket):
-    try:
-        global UserOnline, Clients, Users, ModOnline
-        global VoteAgainst, Vote, VoteActive
-        if ClientSocket in Mods:
-            Mods.remove(ClientSocket)
-            ModUsers.remove(Username)
-            ModOnline -= 1
-            if VoteActive == True:
-                PublicCommand("The vote is reset as a moderator has disconnected")
-                VoteActive = False
-                Vote = 0
-                VoteAgainst = 0
-
-        Message = "/remove " + Username
-        Broadcast(Message)
-
-        Clients.remove(ClientSocket)
-        Users.remove(Username)
-
-        ClientSocket.close()
-
-        UserOnline -= 1
-    except:
-        "[Server] Failed to remove user"
-
-def Listen(ClientSocket):
-    global UserOnline, Clients, Users
-    while True:
-        try:
-            Index = Clients.index(ClientSocket)
-            Username = Users[Index]
-
-            Message = ClientSocket.recv(1024).decode()
-            UnifiedMessage = Username + ": " + Message
-
-            if Message:
-                if Message[0] == "/":
-                    if Message == "/leave":
-                        if ClientSocket in Clients:
-                            RemoveUser(Username, ClientSocket)
-                        break
-                    else:
-                        Command(Message, Username, ClientSocket)
-                else:
-                    Broadcast(UnifiedMessage)
-        except Exception as e:
-            print(e)
-            RemoveUser(Username, ClientSocket)
-            break
-
-def Command(Message, Username, ClientSocket):
-    global Vote, VoteActive, VoteAgainst
-    if Message == "/space":
-        PrivateCommand(str(UserCount), ClientSocket)
-    elif Message == "/online":
-        PrivateCommand(str(UserOnline), ClientSocket)
-    elif Message == "/users":
-        if len(Users) == 1:
-            PrivateCommand(str(Users[0]), ClientSocket)
-        else:
-            for User in Users:
-                PrivateCommand(str(User), ClientSocket)
+    def command(self, message, clientSocket):
+        if message == "/space":
+            sendInstance.privateBroadcastDisplay(str(connectionInstance.spaceRemaining), clientSocket)
+        elif message == "/online":
+            sendInstance.privateBroadcastDisplay(str(connectionInstance.userOnline), clientSocket)
+        elif message == "/users":
+            for user in connectionInstance.users:
+                sendInstance.privateBroadcastDisplay(str(user), clientSocket)
                 time.sleep(0.1)
-    elif Message == "/mods":
-        if len(ModUsers) == 1:
-            PrivateCommand(str(ModUsers[0]), ClientSocket)
+        elif message == "/ip":
+            sendInstance.privateBroadcastDisplay(str(connectionInstance.host), clientSocket)
+        elif message == "/port":
+            sendInstance.privateBroadcastDisplay(str(Port), clientSocket)
+        elif message == "/key":
+            sendInstance.privateBroadcastDisplay(str(d) + ", " + str(N), clientSocket)
+        elif message == "/theme":
+            sendInstance.privateBroadcast("/theme", clientSocket)
+        elif message[0:6] == "/color":
+            sendInstance.privateBroadcast(message, clientSocket)
+        elif message[0:5] == "/save":
+            sendInstance.privateBroadcast(message, clientSocket)
+        elif message[0:4] == "/mod":
+            actionsInstance.mod(message)
+        elif message[0:5] == "/kick" or message[0:5] == "/vote":
+            actionsInstance.vote(message)
+        elif message == "/filler":
+            sendInstance.privateBroadcast(message, clientSocket)
+        elif message[0:5] == "/rate":
+            sendInstance.privateBroadcast(message, clientSocket)
         else:
-            for ModUser in ModUsers:
-                PrivateCommand(str(ModUser), ClientSocket)
-                time.sleep(0.1)
-    elif Message == "/spaceleft":
-        PrivateCommand(str(SpaceRemaining), ClientSocket)
-    elif Message == "/ip":
-        if not IP == "":
-            PrivateCommand(str(IP), ClientSocket)
-        else:
-            PrivateCommand("35.242.179.43", ClientSocket)
-    elif Message == "/port":
-        PrivateCommand(str(Port), ClientSocket)
-    elif Message == "/key":
-        PrivateCommand(str((d, N)), ClientSocket)
-    elif Message == "/theme":
-        PrivateBroadcast("/theme", ClientSocket)
-    elif Message[0:6] == "/color":
-        PrivateBroadcast(Message, ClientSocket)
-    elif Message[0:5] == "/save":
-        PrivateBroadcast(Message, ClientSocket)
-    elif Message[0:4] == "/mod":
-        if Message == "/modonline":
-            PrivateCommand(str(ModOnline), ClientSocket)
-        else:
-            ModSelection(Message, Username, ClientSocket)
-    elif Message[0:5] == "/kick":
-        if VoteActive == False:
-            VoteKick(Message, ClientSocket)
-        else:
-            PrivateCommand("You cannot kick as another vote is taking place", ClientSocket)
-    elif Message[0:5].casefold() == "/vote":
-        if VoteActive == False:
-            PrivateCommand("You cannot complete this action at this time", ClientSocket)
+            sendInstance.privateBroadcastDisplay("Your command is unknown", clientSocket)
 
-        else:
-            # Vote is active
-            if Message[6:].casefold() == "details":
-                PrivateCommand("For: " + str(Vote) + " Against: " + str(VoteAgainst), ClientSocket)
+class Connection:
+    def __init__(self):
+        self.socket = socket.socket()
+        self.host = "192.168.1.138"
+        self.port = random.randint(49125, 65535)
+        self.userOnline = 0
+        self.spaceRemaining = 1000
+        self.users = []
+        self.clients = []
 
-            elif ClientSocket in Mods:
-                if Message[6:].casefold() == "for":
-                    if not Username in HasVoted:
-                        Vote += 1
-                        HasVoted.append(Username)
-                        if Vote == 1:
-                            PublicCommand("1 moderator has voted in favour of kicking " + UserToKick)
-                        elif Vote > 1:
-                            PublicCommand(str(Vote) + " moderators has voted in favour of kicking " + UserToKick)
+    def connect(self):
+        securityInstance.generateKey()
+        securityInstance.generatePort()
 
-                        if Vote == VotesNeeded:
-                            PublicCommand(UserToKick + " has been kicked")
-                            RemoveUser(UserToKick, UserKickSocket)
-                            VoteActive = False
-                            Vote = 0
-                            VoteAgainst = 0
+        self.socket.listen()
 
-                        elif len(HasVoted) == 2 and len(Mods) == 2 and Vote + VoteAgainst == 2:
-                            PublicCommand(UserToKick + " will not be kicked")
-                            VoteActive = False
-                            Vote = 0
-                            VoteAgainst = 0
+        for i in range(self.spaceRemaining):
+            # The main thread listens for incoming connections and accepts it
 
-                    else:
-                        PrivateCommand("Your have already cast your vote", ClientSocket)
+            clientSocket, Address = self.socket.accept()
+            self.clients.append(clientSocket)
 
-                elif Message[6:].casefold() == "against":
-                    if not Username in HasVoted:
-                        VoteAgainst += 1
-                        HasVoted.append(Username)
-                        if VoteAgainst == 1:
-                            PublicCommand("1 moderator has voted against kicking " + UserToKick)
-                        elif VoteAgainst > 1:
-                            PublicCommand(str(VoteAgainst) + " moderators has voted against kicking " + UserToKick)
+            username = clientSocket.recv(1024).decode()
+            if username in self.users:
+                sendInstance.privateBroadcast("/disconnect", clientSocket)
+                self.clients.remove(clientSocket)
 
-                        if VoteAgainst == VotesNeeded:
-                            PublicCommand(UserToKick + " will not be kicked")
-                            VoteActive = False
-                            Vote = 0
-                            VoteAgainst = 0
-
-                        elif len(HasVoted) == 2 and len(Mods) == 2 and Vote + VoteAgainst == 2:
-                            PublicCommand(UserToKick + " will not be kicked")
-                            VoteActive = False
-                            Vote = 0
-                            VoteAgainst = 0
-
-                    else:
-                        PrivateCommand("Your have already cast your vote", ClientSocket)
-                else:
-                    PrivateCommand("Your vote command is unknown", ClientSocket)
             else:
-                PrivateCommand("You do not have the power to execute this action", ClientSocket)
-    elif Message == "/filler":
-        PrivateBroadcast(Message, ClientSocket)
-    else:
-        PrivateCommand("Your command is unknown", ClientSocket)
+                self.users.append(username)
 
-def Connect():
-    global UserOnline, SpaceRemaining, Users, Clients
-    GeneratePort()
-    s.listen()
-    for i in range(UserCount):
+                message = "/add " + " ".join(self.users)
+                sendInstance.broadcast(message)
+
+                self.userOnline += 1
+                self.spaceRemaining -= 1
+
+                listeningThread = Thread(target=self.listen, args=[clientSocket])
+                listeningThread.start()
+
+    def listen(self, clientSocket):
+        index = self.clients.index(clientSocket)
+        username = self.users[index]
+        while True:
+            try:
+                message = clientSocket.recv(1024).decode()
+                unifiedmessage = username + ": " + message
+
+                if message:
+                    if message[0] == "/":
+                        if message == "/leave":
+                            if clientSocket in self.clients:
+                                self.removeUser(username, clientSocket)
+                            break
+                        else:
+                            sendInstance.command(message, clientSocket)
+                    else:
+                        sendInstance.broadcast(unifiedmessage)
+            except ConnectionResetError:
+                self.removeUser(username, clientSocket)
+                break
+
+    def removeUser(self, username, clientSocket):
         try:
-            global ClientSocket
-            ClientSocket, Address = s.accept()
-            Clients.append(ClientSocket)
+            message = "/remove " + username
+            sendInstance.broadcast(message)
 
-            Username = ClientSocket.recv(1024).decode()
-            if Username in Users:
-                PrivateBroadcast("/disconnect", ClientSocket)
-                Clients.remove(ClientSocket)
+            connectionInstance.clients.remove(clientSocket)
+            connectionInstance.users.remove(username)
 
-            else:
-                Users.append(Username)
+            clientSocket.close()
 
-                Message = "/add " + " ".join(Users)
-                Broadcast(Message)
-
-                UserOnline += 1
-                SpaceRemaining -= 1
-
-                ListeningThread = Thread(target=Listen, args=[ClientSocket])
-                ListeningThread.start()
-
+            self.userOnline -= 1
         except Exception as e:
-            RemoveUser(Username, ClientSocket)
-            print(e)
-            pass
+            print("[Server] Failed to remove user: " + e)
 
-GetKey()
+
+sendInstance = Send()
+securityInstance = Security()
+actionsInstance = Actions()
+connectionInstance = Connection()
+Connection.connect(connectionInstance)
+
+Port = 49128
+
