@@ -83,7 +83,8 @@ class Security:
         while True:
             try:
                 connectionInstance.socket.bind((connectionInstance.host, connectionInstance.port))
-                print("[Server] Server Hosted on " + str(connectionInstance.host) + " with Port " + str(connectionInstance.port))
+                print("[Server] Server Hosted on " + str(connectionInstance.host) + " with Port " +
+                      str(connectionInstance.port))
                 break
 
             except ConnectionError:
@@ -105,11 +106,133 @@ class Actions:
         self.modOnline = 0
         self.mods = []
         self.modUsers= []
+        self.hasVoted = []
+        self.hasVotedUsers = []
+        self.voteTarget = 2
         self.voteActive = False
+        self.userToKick = None
+        self.userToKickSocket = None
 
     def vote(self, message, clientSocket):
-        if message[5:] == "kick":
-            self.voteActive = True
+        modSocket = clientSocket
+        index = connectionInstance.clients.index(modSocket)
+        modUsername = connectionInstance.users[index]
+
+        if message[0:5] == "/kick":
+            username = message[6:]
+
+            if username in connectionInstance.users:
+                index = connectionInstance.users.index(username)
+                clientSocket = connectionInstance.clients[index]
+
+                if modSocket in self.mods and modUsername in self.modUsers:
+                    if clientSocket not in self.mods and username not in self.modUsers:
+                        if not self.voteActive:
+                            self.voteFor = 1
+                            self.voteAgainst = 0
+                            self.hasVoted.append(modSocket)
+                            self.hasVotedUsers.append(modUsername)
+                            self.userToKick = username
+                            self.userToKickSocket = clientSocket
+                            self.voteActive = True
+
+                            message = modUsername + " has started a vote to kick " + username
+                            sendInstance.broadcastDisplay(message)
+
+                        else:
+                            sendInstance.privateBroadcastDisplay("You cannot complete this action at this time",
+                                                                 modSocket)
+                    else:
+                        sendInstance.privateBroadcastDisplay("You cannot kick a mod", modSocket)
+                else:
+                    sendInstance.privateBroadcastDisplay("You need to be a mod to kick", modSocket)
+            else:
+                sendInstance.privateBroadcastDisplay("You can't kick this person", modSocket)
+
+        elif message[0:5] == "/vote":
+            if self.voteActive:
+                if message[6:] == "details":
+                    sendInstance.privateBroadcastDisplay("Being kicked: " + self.userToKick, modSocket)
+
+                    time.sleep(0.1)
+
+                    if self.voteTarget - (self.voteFor + self.voteAgainst) == 1:
+                        sendInstance.privateBroadcastDisplay(str(self.voteTarget - (self.voteFor + self.voteAgainst)) +
+                                                             " vote needed", modSocket)
+                    else:
+                        sendInstance.privateBroadcastDisplay(str(self.voteTarget - (self.voteFor + self.voteAgainst)) +
+                                                             " vote needed", modSocket)
+
+                    time.sleep(0.1)
+
+                    percentage = int(100 * self.voteFor / len(self.hasVoted))
+
+                    if percentage == 100:
+                        sendInstance.privateBroadcastDisplay("Currently the votes are unanimously in favour of kicking " +
+                                                             self.userToKick, modSocket)
+                    elif percentage == 0:
+                        sendInstance.privateBroadcastDisplay("Currently the votes are unanimously against kicking " +
+                                                             self.userToKick, modSocket)
+                    else:
+                        sendInstance.privateBroadcastDisplay(str(percentage) + "% is voting in favour of kicking " +
+                                                             self.userToKick, modSocket)
+
+                elif modSocket in self.mods and modUsername in self.modUsers:
+                    if modSocket not in self.hasVoted and modUsername not in self.hasVotedUsers:
+                        if message[6:] == "for":
+                            self.voteFor += 1
+
+                        elif message[6:] == "against":
+                            self.voteAgainst += 1
+
+                        else:
+                            sendInstance.privateBroadcastDisplay("Your vote argument is unknown", modSocket)
+                    else:
+                        sendInstance.privateBroadcastDisplay("You have already cast your vote", modSocket)
+                else:
+                    sendInstance.privateBroadcastDisplay("You need to be a mod to vote", modSocket)
+            else:
+                sendInstance.privateBroadcastDisplay("You cannot do this as there is no ongoing vote", modSocket)
+
+        if self.voteActive:
+            if self.voteFor == self.voteTarget:
+                sendInstance.broadcastDisplay(self.userToKick + " will be kicked")
+                connectionInstance.removeUser(self.userToKick, self.userToKickSocket)
+
+                percentage = int(100 * self.voteFor / len(self.hasVoted))
+
+                if percentage == 100:
+                    sendInstance.broadcastDisplay("The votes were unanimously in favour of kicking " +
+                                                  self.userToKick)
+                elif percentage == 0:
+                    sendInstance.broadcastDisplay("The votes were unanimously against kicking " +
+                                                  self.userToKick)
+                else:
+                    sendInstance.broadcastDisplay(str(percentage) + "% voted in favour of kicking " +
+                                                  self.userToKick)
+
+                self.hasVoted = []
+                self.hasVotedUsers = []
+                self.voteActive = False
+
+            elif self.voteAgainst == self.voteTarget or self.voteFor + self.voteAgainst == self.voteTarget:
+                sendInstance.broadcastDisplay(self.userToKick + " will not be kicked")
+
+                percentage = (100 * self.voteFor / len(self.hasVoted))
+
+                if percentage == 100:
+                    sendInstance.broadcastDisplay("The votes were unanimously in favour of kicking " +
+                                                  self.userToKick)
+                elif percentage == 0:
+                    sendInstance.broadcastDisplay("The votes were unanimously against kicking " +
+                                                  self.userToKick)
+                else:
+                    sendInstance.broadcastDisplay(str(percentage) + "% voted in favour of kicking " +
+                                                  self.userToKick)
+
+                self.hasVoted = []
+                self.hasVotedUsers = []
+                self.voteActive = False
 
     def mod(self, message, clientSocket):
         modSocket = clientSocket
@@ -117,36 +240,40 @@ class Actions:
         modUsername = connectionInstance.users[index]
 
         username = message[5:]
-        index = connectionInstance.users.index(username)
-        clientSocket = connectionInstance.clients[index]
 
-        if clientSocket not in self.mods and username not in self.modUsers:
-            if self.modOnline == 0:
-                self.modUsers.append(username)
-                self.mods.append(clientSocket)
-                self.modOnline += 1
+        if username in connectionInstance.users:
+            index = connectionInstance.users.index(username)
+            clientSocket = connectionInstance.clients[index]
 
-                action = "/mod " + username
-                sendInstance.privateBroadcast(action, clientSocket)
+            if clientSocket not in self.mods and username not in self.modUsers:
+                if self.modOnline == 0:
+                    self.modUsers.append(username)
+                    self.mods.append(clientSocket)
+                    self.modOnline += 1
 
-                message = username + " is now a mod"
-                sendInstance.broadcastDisplay(message)
+                    action = "/mod " + username
+                    sendInstance.privateBroadcast(action, clientSocket)
 
-            elif modSocket in self.mods and modUsername in self.modUsers:
-                self.modUsers.append(username)
-                self.mods.append(clientSocket)
-                self.modOnline += 1
+                    message = username + " is now a mod"
+                    sendInstance.broadcastDisplay(message)
 
-                action = "/mod " + username
-                sendInstance.privateBroadcast(action, clientSocket)
+                elif modSocket in self.mods and modUsername in self.modUsers:
+                    self.modUsers.append(username)
+                    self.mods.append(clientSocket)
+                    self.modOnline += 1
 
-                message = username + " is now a mod"
-                sendInstance.broadcastDisplay(message)
+                    action = "/mod " + username
+                    sendInstance.privateBroadcast(action, clientSocket)
 
+                    message = username + " is now a mod"
+                    sendInstance.broadcastDisplay(message)
+
+                else:
+                    sendInstance.privateBroadcastDisplay("You need to be a mod to do this", modSocket)
             else:
-                sendInstance.privateBroadcastDisplay("You need to be a mod to do this", modSocket)
+                sendInstance.privateBroadcastDisplay("You are already a mod", modSocket)
         else:
-            sendInstance.privateBroadcastDisplay("You are already a mod", clientSocket)
+            sendInstance.privateBroadcastDisplay("You cannot mod this person", modSocket)
 
 class Send:
     def broadcast(self, message):
@@ -298,6 +425,7 @@ class Connection:
             clientSocket.close()
 
             self.userOnline -= 1
+
         except Exception as e:
             print("[Server] Failed to remove user: " + str(e))
 
@@ -307,3 +435,6 @@ securityInstance = Security()
 actionsInstance = Actions()
 connectionInstance = Connection()
 Connection.connect(connectionInstance)
+
+
+
