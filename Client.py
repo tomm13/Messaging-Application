@@ -1,5 +1,5 @@
-# 13/9/2022
-# V13 Beta Class
+# 21/9/2022
+# V13 Beta 
 
 import platform
 import socket
@@ -802,7 +802,7 @@ class UI:
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
 
-connectionInstance = Connection("tomm2", "lightblue", "192.168.1.138", "65284", "23143, 40921")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "65109", "13457, 22733")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
