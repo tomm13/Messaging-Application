@@ -138,7 +138,7 @@ class Actions:
 
 class Send:
     def broadcast(self, message):
-        # sendInstances a public message to every client, not for animating purposes.
+        # Send a public message to every client, not for animating purposes.
         time.sleep(0.1)
         print("[Client] " + message)
 
@@ -147,7 +147,7 @@ class Send:
             client.send(message.encode())
 
     def broadcastDisplay(self, message):
-        # sendInstances "/display" + a message to every client.
+        # Send "/display" + a message to every client.
         time.sleep(0.1)
         print("[PublicDisplay] " + message)
 
@@ -158,7 +158,7 @@ class Send:
             client.send(message.encode())
 
     def privateBroadcast(self, message, clientSocket):
-        # sendInstances a private message to 1 specific client, not for animating purposes.
+        # Send a private message to 1 specific client, not for animating purposes.
         time.sleep(0.1)
         print("[Private] "+ message)
 
@@ -166,7 +166,7 @@ class Send:
         clientSocket.send(message.encode())
 
     def privateBroadcastDisplay(self, message, clientSocket):
-        # sendInstances "/display" + a message to 1 specific client.
+        # Send "/display" + a message to 1 specific client.
         time.sleep(0.1)
         print("[PrivateDisplay] " + message)
 
@@ -175,6 +175,7 @@ class Send:
         clientSocket.send(message.encode())
 
     def command(self, message, clientSocket):
+        # Ues list to prevent doubled code
         if message == "/space":
             sendInstance.privateBroadcastDisplay(str(connectionInstance.spaceRemaining), clientSocket)
         elif message == "/online":
@@ -205,6 +206,7 @@ class Send:
             sendInstance.privateBroadcast(message, clientSocket)
         else:
             sendInstance.privateBroadcastDisplay("Your command is unknown", clientSocket)
+
 
 class Connection:
     def __init__(self):
@@ -279,7 +281,7 @@ class Connection:
 
             self.userOnline -= 1
         except Exception as e:
-            print("[Server] Failed to remove user: " + e)
+            print("[Server] Failed to remove user: " + str(e))
 
 
 sendInstance = Send()
@@ -287,6 +289,3 @@ securityInstance = Security()
 actionsInstance = Actions()
 connectionInstance = Connection()
 Connection.connect(connectionInstance)
-
-Port = 49128
-
