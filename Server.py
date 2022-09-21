@@ -1,5 +1,5 @@
-##21/9/2022
-##V13 Beta
+# 21/9/2022
+# V13 Beta
 
 import socket
 from threading import Thread
