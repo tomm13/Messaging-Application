@@ -1,7 +1,9 @@
 # Chat-Application-Dev-Branch
 A chat application made with guizero, asymmetric encryption and sockets.
 
-This is the developmental branch. Currently the goal is to 1) Remove global variables in favour of classes 2) use camelcase for anything but class names, in which case PascalCase should be used and 3) make the code more readable by chaning var names or comments
+This is the developmental branch. Currently the goal is to 1) Remove global variables in favour of classes 2) use camelcase for anything but class names, in which case PascalCase should be used and 3) make the code more readable by chaning var names or comments.
+
+In most cases this branch should be held off from being merged as testing is still required.
 
 # Highlights and features
 
