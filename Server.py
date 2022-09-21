@@ -1,4 +1,4 @@
-##13/9/2022
+##21/9/2022
 ##V13 Beta
 
 import socket
@@ -70,7 +70,6 @@ class Security:
         for k in range(1, 2 * Maximum):
             if (k * PhiN + 1) % e == 0:
                 if not (k * PhiN + 1) // e == e:
-                    global d
                     d = (k * PhiN + 1) // e
                     break
 
@@ -87,8 +86,7 @@ class Security:
                 print("[Server] Server Hosted on " + str(connectionInstance.host) + " with Port " + str(connectionInstance.port))
                 break
 
-            except Exception as e:
-                print(e)
+            except ConnectionError:
                 connectionInstance.port = random.randint(49125, 65536)
 
     def encrypt(self, message):
@@ -109,16 +107,20 @@ class Actions:
         self.modUsers= []
         self.voteActive = False
 
-    def vote(self, message):
+    def vote(self, message, clientSocket):
         if message[5:] == "kick":
             self.voteActive = True
 
-    def mod(self, message):
+    def mod(self, message, clientSocket):
+        modSocket = clientSocket
+        index = connectionInstance.clients.index(modSocket)
+        modUsername = connectionInstance.users[index]
+
         username = message[5:]
         index = connectionInstance.users.index(username)
         clientSocket = connectionInstance.clients[index]
 
-        if not clientSocket in self.mods:
+        if clientSocket not in self.mods and username not in self.modUsers:
             if self.modOnline == 0:
                 self.modUsers.append(username)
                 self.mods.append(clientSocket)
@@ -130,11 +132,21 @@ class Actions:
                 message = username + " is now a mod"
                 sendInstance.broadcastDisplay(message)
 
+            elif modSocket in self.mods and modUsername in self.modUsers:
+                self.modUsers.append(username)
+                self.mods.append(clientSocket)
+                self.modOnline += 1
+
+                action = "/mod " + username
+                sendInstance.privateBroadcast(action, clientSocket)
+
+                message = username + " is now a mod"
+                sendInstance.broadcastDisplay(message)
+
             else:
-                sendInstance.privateBroadcastDisplay("You do not have the power", clientSocket)
+                sendInstance.privateBroadcastDisplay("You need to be a mod to do this", modSocket)
         else:
             sendInstance.privateBroadcastDisplay("You are already a mod", clientSocket)
-
 
 class Send:
     def broadcast(self, message):
@@ -187,9 +199,9 @@ class Send:
         elif message == "/ip":
             sendInstance.privateBroadcastDisplay(str(connectionInstance.host), clientSocket)
         elif message == "/port":
-            sendInstance.privateBroadcastDisplay(str(Port), clientSocket)
+            sendInstance.privateBroadcastDisplay(str(connectionInstance.port), clientSocket)
         elif message == "/key":
-            sendInstance.privateBroadcastDisplay(str(d) + ", " + str(N), clientSocket)
+            sendInstance.privateBroadcastDisplay(str(securityInstance.d) + ", " + str(securityInstance.N), clientSocket)
         elif message == "/theme":
             sendInstance.privateBroadcast("/theme", clientSocket)
         elif message[0:6] == "/color":
@@ -197,9 +209,9 @@ class Send:
         elif message[0:5] == "/save":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:4] == "/mod":
-            actionsInstance.mod(message)
+            actionsInstance.mod(message, clientSocket)
         elif message[0:5] == "/kick" or message[0:5] == "/vote":
-            actionsInstance.vote(message)
+            actionsInstance.vote(message, clientSocket)
         elif message == "/filler":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:5] == "/rate":
@@ -219,8 +231,8 @@ class Connection:
         self.clients = []
 
     def connect(self):
-        securityInstance.generateKey()
         securityInstance.generatePort()
+        securityInstance.generateKey()
 
         self.socket.listen()
 
@@ -271,6 +283,12 @@ class Connection:
 
     def removeUser(self, username, clientSocket):
         try:
+            if clientSocket in actionsInstance.mods and username in actionsInstance.modUsers:
+                actionsInstance.mods.remove(clientSocket)
+                actionsInstance.modUsers.remove(username)
+
+                actionsInstance.modOnline -= 1
+
             message = "/remove " + username
             sendInstance.broadcast(message)
 
