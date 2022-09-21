@@ -1,6 +1,6 @@
 # 13/9/2022
 # V13 Beta Class
-import _tkinter
+
 import platform
 import socket
 import colorutils
@@ -13,6 +13,7 @@ class Animation:
     def __init__(self):
         self.runFiller = False
         self.animationRunning = False
+        self.readRate = 1
 
     def animateStatus(self):
         try:
@@ -31,7 +32,7 @@ class Animation:
                     uiInstance.status.text_color = (R, G, B)
                     sleep(uiInstance.rate * 20)
 
-                sleep(0.5)
+                sleep(self.readRate)
 
                 while not R == 255 or not G == 255 or not B == 255:
                     if R < 255:
@@ -44,7 +45,7 @@ class Animation:
                     uiInstance.status.text_color = (R, G, B)
                     sleep(uiInstance.rate * 20)
 
-                sleep(0.5)
+                sleep(self.readRate)
 
         except Exception as e:
             if connectionInstance.connected:
@@ -204,7 +205,7 @@ class Animation:
                     uiInstance.header.bg = (R, G, B)
                     sleep(uiInstance.rate)
 
-                sleep(1)
+                sleep(self.readRate)
 
                 while not R == 255 or not G == 255 or not B == 255:
                     # Fades background from color to white
@@ -273,7 +274,7 @@ class Animation:
                     uiInstance.header.bg = (R, G, B)
                     sleep(uiInstance.rate)
 
-                sleep(1)
+                sleep(self.readRate)
 
                 while not R == 70 or not G == 70 or not B == 70:
                     # Fades background from color to black
@@ -536,6 +537,13 @@ class Communication:
                                                                                              uiInstance.animationColor])
                         animateThread.start()
 
+                elif message[0:5] == "/rate":
+                    animationInstance.readRate = int(message[6:])
+
+                    animateThread = Thread(target=animationInstance.animateHeader, args=["You changed the animation hold to " + str(animationInstance.readRate),
+                                                                                         uiInstance.animationColor])
+                    animateThread.start()
+
                 else:
                     uiInstance.linesSent += 1
                     if uiInstance.linesSent > 15:
@@ -611,8 +619,6 @@ class Connection:
             self.privateKey = privateKeyInput.value.split(", ")
             self.d = int(self.privateKey[0], base=10)
             self.N = int(self.privateKey[1], base=10)
-
-            uiInstance.status.value = "Awaiting Response"
 
             if not self.username == "" and not self.username == "Username" and not " " in self.username:
                 # Checks: if username is not empty, not Username and does not contain spaces
@@ -782,12 +788,12 @@ class UI:
         self.status.text_size = self.fontSize + 12
 
         rightBlocker = Box(verifyBox, width="fill", height=40, align="top")
-        AttemptConnect = PushButton(verifyBox, text="Connect", command=connectionInstance.connect, args=
+        attemptConnect = PushButton(verifyBox, text="Connect", command=connectionInstance.connect, args=
         [usernameInput, colorInput, hostInput, portInput, keyInput])
 
-        AttemptConnect.text_size = self.fontSize - 6
+        attemptConnect.text_size = self.fontSize - 6
 
-        build = Text(bottomPadding, text="development: fixing inputs", align="bottom")
+        build = Text(bottomPadding, text="development: serverside classes", align="bottom")
 
         animateThread = Thread(target=animationInstance.animateStatus)
         animateThread.start()
@@ -797,7 +803,7 @@ class UI:
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
 
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.119", "49129", "1543, 2869")
+connectionInstance = Connection("toamm", "lightblue", "192.168.1.138", "50159", "8813, 11359")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
