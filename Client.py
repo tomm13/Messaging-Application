@@ -453,8 +453,7 @@ class Communication:
 
                 if message[0:4] == "/add":
                     message = message[5:].split()
-                    if len(message) > 1:
-                        message.sort()
+                    message.sort()
 
                     uiInstance.userList.clear()
                     uiInstance.userList.append("Users Online:")
@@ -793,7 +792,7 @@ class UI:
 
         attemptConnect.text_size = self.fontSize - 6
 
-        build = Text(bottomPadding, text="development: serverside classes", align="bottom")
+        build = Text(bottomPadding, text="development: modding and votes", align="bottom")
 
         animateThread = Thread(target=animationInstance.animateStatus)
         animateThread.start()
@@ -803,7 +802,7 @@ class UI:
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
 
-connectionInstance = Connection("toamm", "lightblue", "192.168.1.138", "50159", "8813, 11359")
+connectionInstance = Connection("tomm2", "lightblue", "192.168.1.138", "65284", "23143, 40921")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
