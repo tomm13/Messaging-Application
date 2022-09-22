@@ -2,9 +2,9 @@
 # V13 Beta
 
 import socket
-from threading import Thread
 import time
 import random
+from threading import Thread
 
 
 class Security:
@@ -227,6 +227,8 @@ class Actions:
                     sendInstance.broadcastDisplay(str(percentage) + "% voted in favour of kicking " +
                                                   self.userToKick)
 
+                self.userToKick = None
+                self.userToKickSocket = None
                 self.hasVoted = []
                 self.hasVotedUsers = []
                 self.voteActive = False
@@ -243,30 +245,33 @@ class Actions:
             clientSocket = connectionInstance.clients[index]
 
             if clientSocket not in self.mods and username not in self.modUsers:
-                if self.modOnline == 0:
-                    self.modUsers.append(username)
-                    self.mods.append(clientSocket)
-                    self.modOnline += 1
+                if not actionsInstance.userToKickSocket == clientSocket and not actionsInstance.userToKick == username:
+                    if self.modOnline == 0:
+                        self.modUsers.append(username)
+                        self.mods.append(clientSocket)
+                        self.modOnline += 1
 
-                    action = "/mod " + username
-                    sendInstance.privateBroadcast(action, clientSocket)
+                        action = "/mod " + username
+                        sendInstance.privateBroadcast(action, clientSocket)
 
-                    message = username + " is now a mod"
-                    sendInstance.broadcastDisplay(message)
+                        message = username + " is now a mod"
+                        sendInstance.broadcastDisplay(message)
 
-                elif modSocket in self.mods and modUsername in self.modUsers:
-                    self.modUsers.append(username)
-                    self.mods.append(clientSocket)
-                    self.modOnline += 1
+                    elif modSocket in self.mods and modUsername in self.modUsers:
+                        self.modUsers.append(username)
+                        self.mods.append(clientSocket)
+                        self.modOnline += 1
 
-                    action = "/mod " + username
-                    sendInstance.privateBroadcast(action, clientSocket)
+                        action = "/mod " + username
+                        sendInstance.privateBroadcast(action, clientSocket)
 
-                    message = username + " is now a mod"
-                    sendInstance.broadcastDisplay(message)
+                        message = username + " is now a mod"
+                        sendInstance.broadcastDisplay(message)
 
+                    else:
+                        sendInstance.privateBroadcastDisplay("You need to be a mod to do this", modSocket)
                 else:
-                    sendInstance.privateBroadcastDisplay("You need to be a mod to do this", modSocket)
+                    sendInstance.privateBroadcastDisplay("You cannot mod this person as they are under review", modSocket)
             else:
                 sendInstance.privateBroadcastDisplay("You are already a mod", modSocket)
         else:
