@@ -129,7 +129,7 @@ class Actions:
                     if clientSocket not in self.mods and username not in self.modUsers:
                         if not self.voteActive:
                             if self.modOnline == 1:
-                                sendInstance.broadcastDisplay(modUsername + " will kick " + username)
+                                sendInstance.broadcastDisplay(modUsername + " has kicked " + username)
                                 connectionInstance.removeUser(username, clientSocket)
 
                             else:
@@ -352,12 +352,13 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = "10.28.206.188"
+        self.host = "192.168.1.138"
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
         self.spaceRemaining = 1000
         self.users = []
         self.clients = []
+        self.recentMessages = []
 
     def connect(self):
         securityInstance.generatePort()
@@ -385,6 +386,11 @@ class Connection:
                 self.userOnline += 1
                 self.spaceRemaining -= 1
 
+                if len(self.recentMessages) > 0:
+                    for text in range(len(self.recentMessages)):
+                        message = "/recentmessage " + self.recentMessages[text]
+                        sendInstance.privateBroadcast(message, clientSocket)
+
                 listeningThread = Thread(target=self.listen, args=[clientSocket])
                 listeningThread.start()
 
@@ -406,6 +412,11 @@ class Connection:
                             sendInstance.command(message, clientSocket)
                     else:
                         sendInstance.broadcast(unifiedmessage)
+                        self.recentMessages.append(unifiedmessage)
+
+                        if len(self.recentMessages) > 15:
+                            self.recentMessages = self.recentMessages[1:]
+
             except ConnectionResetError:
                 self.removeUser(username, clientSocket)
                 break
@@ -437,3 +448,6 @@ securityInstance = Security()
 actionsInstance = Actions()
 connectionInstance = Connection()
 Connection.connect(connectionInstance)
+
+
+
