@@ -1,5 +1,5 @@
 # 21/9/2022
-# V13 Beta 
+# V13 Beta
 
 import platform
 import socket
@@ -464,10 +464,15 @@ class Communication:
                             self.users.append(user)
 
                             message = user + " has connected"
-                            animateThread = Thread(target=animationInstance.animateHeader, args=[message, (124, 252, 0)])
+                            animateThread = Thread(target=animationInstance.animateHeader, args=[message,
+                                                   uiInstance.animationColor])
                             animateThread.start()
                         else:
                             uiInstance.userList.append(user)
+
+                elif message[0:14] == "/recentmessage":
+                    uiInstance.chatHistory.append(message[15:])
+                    uiInstance.linesSent += 1
 
                 elif message[0:7] == "/remove":
                     if message[8:] == connectionInstance.username:
@@ -802,7 +807,7 @@ class UI:
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
 
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "65109", "13457, 22733")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "63697", "411, 667")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
