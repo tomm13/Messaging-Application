@@ -1,4 +1,4 @@
-# 21/9/2022
+# 22/9/2022
 # V13 Beta
 
 import socket
@@ -128,17 +128,21 @@ class Actions:
                 if modSocket in self.mods and modUsername in self.modUsers:
                     if clientSocket not in self.mods and username not in self.modUsers:
                         if not self.voteActive:
-                            self.voteFor = 1
-                            self.voteAgainst = 0
-                            self.hasVoted.append(modSocket)
-                            self.hasVotedUsers.append(modUsername)
-                            self.userToKick = username
-                            self.userToKickSocket = clientSocket
-                            self.voteActive = True
+                            if self.modOnline == 1:
+                                sendInstance.broadcastDisplay(modUsername + " will kick " + username)
+                                connectionInstance.removeUser(username, clientSocket)
 
-                            message = modUsername + " has started a vote to kick " + username
-                            sendInstance.broadcastDisplay(message)
+                            else:
+                                self.voteFor = 1
+                                self.voteAgainst = 0
+                                self.hasVoted.append(modSocket)
+                                self.hasVotedUsers.append(modUsername)
+                                self.userToKick = username
+                                self.userToKickSocket = clientSocket
+                                self.voteActive = True
 
+                                message = modUsername + " has started a vote to kick " + username
+                                sendInstance.broadcastDisplay(message)
                         else:
                             sendInstance.privateBroadcastDisplay("You cannot complete this action at this time",
                                                                  modSocket)
@@ -161,28 +165,32 @@ class Actions:
                                                              " vote needed", modSocket)
                     else:
                         sendInstance.privateBroadcastDisplay(str(self.voteTarget - (self.voteFor + self.voteAgainst)) +
-                                                             " vote needed", modSocket)
+                                                             " votes needed", modSocket)
 
                     time.sleep(0.1)
 
                     percentage = int(100 * self.voteFor / len(self.hasVoted))
 
                     if percentage == 100:
-                        sendInstance.privateBroadcastDisplay("Currently the votes are unanimously in favour of kicking " +
+                        sendInstance.privateBroadcastDisplay("The votes are unanimously in favour of kicking " +
                                                              self.userToKick, modSocket)
                     elif percentage == 0:
-                        sendInstance.privateBroadcastDisplay("Currently the votes are unanimously against kicking " +
+                        sendInstance.privateBroadcastDisplay("The votes are unanimously against kicking " +
                                                              self.userToKick, modSocket)
                     else:
-                        sendInstance.privateBroadcastDisplay(str(percentage) + "% is voting in favour of kicking " +
+                        sendInstance.privateBroadcastDisplay(str(percentage) + "% voted in favour of kicking " +
                                                              self.userToKick, modSocket)
 
                 elif modSocket in self.mods and modUsername in self.modUsers:
                     if modSocket not in self.hasVoted and modUsername not in self.hasVotedUsers:
                         if message[6:] == "for":
+                            self.hasVoted.append(modSocket)
+                            self.hasVotedUsers.append(modUsername)
                             self.voteFor += 1
 
                         elif message[6:] == "against":
+                            self.hasVoted.append(modSocket)
+                            self.hasVotedUsers.append(modUsername)
                             self.voteAgainst += 1
 
                         else:
@@ -195,36 +203,25 @@ class Actions:
                 sendInstance.privateBroadcastDisplay("You cannot do this as there is no ongoing vote", modSocket)
 
         if self.voteActive:
-            if self.voteFor == self.voteTarget:
-                sendInstance.broadcastDisplay(self.userToKick + " will be kicked")
-                connectionInstance.removeUser(self.userToKick, self.userToKickSocket)
+            if self.voteFor == self.voteTarget or self.voteAgainst == self.voteTarget or self.voteFor + \
+                    self.voteAgainst == self.voteTarget:
+
+                if self.voteFor == self.voteTarget:
+                    sendInstance.broadcastDisplay(self.userToKick + " will be kicked")
+                    connectionInstance.removeUser(self.userToKick, self.userToKickSocket)
+
+                elif self.voteAgainst == self.voteTarget or self.voteFor + self.voteAgainst == self.voteTarget:
+                    sendInstance.broadcastDisplay(self.userToKick + " will not be kicked")
+
+                time.sleep(0.1)
 
                 percentage = int(100 * self.voteFor / len(self.hasVoted))
 
                 if percentage == 100:
-                    sendInstance.broadcastDisplay("The votes were unanimously in favour of kicking " +
+                    sendInstance.broadcastDisplay("The votes are unanimously in favour of kicking " +
                                                   self.userToKick)
                 elif percentage == 0:
-                    sendInstance.broadcastDisplay("The votes were unanimously against kicking " +
-                                                  self.userToKick)
-                else:
-                    sendInstance.broadcastDisplay(str(percentage) + "% voted in favour of kicking " +
-                                                  self.userToKick)
-
-                self.hasVoted = []
-                self.hasVotedUsers = []
-                self.voteActive = False
-
-            elif self.voteAgainst == self.voteTarget or self.voteFor + self.voteAgainst == self.voteTarget:
-                sendInstance.broadcastDisplay(self.userToKick + " will not be kicked")
-
-                percentage = (100 * self.voteFor / len(self.hasVoted))
-
-                if percentage == 100:
-                    sendInstance.broadcastDisplay("The votes were unanimously in favour of kicking " +
-                                                  self.userToKick)
-                elif percentage == 0:
-                    sendInstance.broadcastDisplay("The votes were unanimously against kicking " +
+                    sendInstance.broadcastDisplay("The votes are unanimously against kicking " +
                                                   self.userToKick)
                 else:
                     sendInstance.broadcastDisplay(str(percentage) + "% voted in favour of kicking " +
@@ -350,7 +347,7 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = "192.168.1.138"
+        self.host = "10.28.206.188"
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
         self.spaceRemaining = 1000
@@ -435,6 +432,3 @@ securityInstance = Security()
 actionsInstance = Actions()
 connectionInstance = Connection()
 Connection.connect(connectionInstance)
-
-
-
