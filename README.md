@@ -83,7 +83,9 @@ Commands are an essential part of the code, especially with linking animations a
 - `/filler` - When on, displays a useful message every 15 seconds after the last animation. (eg. time, messages sent, commands to use)
 - `/color <color>` - Switches text color to `<color>`
 - `/rate <int>` - Holds animations for `<int>` seconds. Default 1.
-- `/save <location>' - Saves the chat history to `<location>`
+- `/savechat <location>' - Saves the chat history to `<location>`
+- `/savesettings <location>' - Saves your preset to `<location>`. Currently supports darkmode, filler, and text color
+- `/loadsettings <location>' - Loads your preset from `<location>`
 - `/mod <user>` - Sends a request to give the moderator role to `<user>` 
 - `/kick <user>` - Kicks/Starts a vote to kick `<user>`. Only valid if sent by a moderator
 - `/vote <for/against>` - When a vote is active, choose either <for> or <against>. Only valid as a moderator
