@@ -12,28 +12,30 @@ class Security:
         pass
 
     def generateKey(self):
-        Minimum = 10
-        Maximum = 350
-        Primes = []
-        PrimeCandidates = []
-        for Number in range(Minimum, Maximum):
-            IsPrime = True
-            for Factor in range(2, Number):
-                if Number % Factor == 0:
-                    IsPrime = False
-            if IsPrime:
-                Primes.append(Number)
+        N = 0
+        while not len(str(N)) == 6:
+            Minimum = 650
+            Maximum = 1000
+            Primes = []
+            PrimeCandidates = []
+            for Number in range(Minimum, Maximum):
+                IsPrime = True
+                for Factor in range(2, Number):
+                    if Number % Factor == 0:
+                        IsPrime = False
+                if IsPrime:
+                    Primes.append(Number)
 
-        for Prime in range(2):
-            Max = len(Primes) - 1
-            RandomNum = random.randint(0, Max)
-            PrimeCandidates.append(Primes[RandomNum])
-            Primes.pop(RandomNum)
+            for Prime in range(2):
+                Max = len(Primes) - 1
+                RandomNum = random.randint(0, Max)
+                PrimeCandidates.append(Primes[RandomNum])
+                Primes.pop(RandomNum)
 
-        P = PrimeCandidates[0]
-        Q = PrimeCandidates[1]
-        N = P * Q
-        PhiN = (P - 1) * (Q - 1)
+            P = PrimeCandidates[0]
+            Q = PrimeCandidates[1]
+            N = P * Q
+            PhiN = (P - 1) * (Q - 1)
 
         eList = []
         for eCandidate in range(2, PhiN):
@@ -66,11 +68,11 @@ class Security:
 
         for k in range(1, 2 * Maximum):
             if (k * PhiN + 1) % e == 0:
-                if not (k * PhiN + 1) // e == e:
+                if not (k * PhiN + 1) // e == e and len(str((k * PhiN + 1) // e)) == 6:
                     d = (k * PhiN + 1) // e
                     break
 
-        print("[Private] Private Key =", (d, N))
+        print("[Private] Private Key = " + str(d) + str(N))
 
         self.d = d
         self.e = e
@@ -330,7 +332,7 @@ class Send:
         elif message == "/port":
             sendInstance.privateBroadcastDisplay(str(connectionInstance.port), clientSocket)
         elif message == "/key":
-            sendInstance.privateBroadcastDisplay(str(securityInstance.d) + ", " + str(securityInstance.N), clientSocket)
+            sendInstance.privateBroadcastDisplay(str(securityInstance.d) + str(securityInstance.N), clientSocket)
         elif message == "/theme":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:6] == "/color":
@@ -454,6 +456,5 @@ securityInstance = Security()
 actionsInstance = Actions()
 connectionInstance = Connection()
 Connection.connect(connectionInstance)
-
 
 
