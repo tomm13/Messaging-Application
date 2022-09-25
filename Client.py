@@ -571,7 +571,6 @@ class Communication:
                     else:
                         uiInstance.linesSent += 1
                         if uiInstance.linesSent > 15:
-                            print(uiInstance.linesSent)
                             animateThread = Thread(target=animationInstance.animateHeader, args=["You created a new page",
                                                                                                  uiInstance.animationColor])
                             animateThread.start()
@@ -814,11 +813,6 @@ class UI:
             self.chatHistory.text_size = self.fontSize
             self.chatHistory.disable()
 
-            self.sendButton = PushButton(buttonBox, text="Send", command=communicationInstance.sendToServer)
-            self.sendButton.text_color = (0, 0, 0)
-            self.sendButton.bg = (255, 255, 255)
-            self.sendButton.align = "right"
-
             self.messageInput = TextBox(buttonBox, width="fill", height="fill", align="bottom")
             self.messageInput.text_color = connectionInstance.color
             self.messageInput.bg = (255, 255, 255)
@@ -900,6 +894,7 @@ class UI:
         animateThread.start()
 
         self.setupWindow.display()
+
 
 def enterSend(event):
     if event.tk_event.keysym == "Return":
