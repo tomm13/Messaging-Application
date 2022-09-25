@@ -5,6 +5,7 @@ import platform
 import socket
 import colorutils
 import sys
+import tkinter
 from time import sleep, localtime, strftime
 from threading import Thread
 from guizero import *
@@ -822,6 +823,7 @@ class UI:
             self.messageInput.text_color = connectionInstance.color
             self.messageInput.bg = (255, 255, 255)
             self.messageInput.text_size = self.fontSize + 2
+            self.messageInput.when_key_pressed = enterSend
 
             # Threads start here
 
@@ -899,11 +901,16 @@ class UI:
 
         self.setupWindow.display()
 
+def enterSend(event):
+    if event.tk_event.keysym == "Return":
+        communicationInstance.sendToServer()
+
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "50434", "562987846319")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "51905", "607091557993")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
 
 UI.openSetup(uiInstance)
+
