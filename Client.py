@@ -480,6 +480,7 @@ class Communication:
 
                 elif message[0:14] == "/recentmessage":
                     uiInstance.chatHistory.append(message[15:])
+                    self.chatHistory.append("[Old]: " + message[15:])
                     uiInstance.linesSent += 1
 
                 elif message[0:7] == "/remove":
@@ -579,6 +580,10 @@ class Communication:
                     if location and not " " in location:
                         file = open(location, "r")
 
+                        animateThread = Thread(target=animationInstance.animateHeader, args=[
+                            "Your presets are loading", uiInstance.animationColor])
+                        animateThread.start()
+
                         for command in file:
                             sleep(1)
                             if command:
@@ -596,10 +601,6 @@ class Communication:
 
                         file.close()
 
-                        animateThread = Thread(target=animationInstance.animateHeader, args=[
-                            "Your presets have loaded", uiInstance.animationColor])
-                        animateThread.start()
-
                     else:
                         animateThread = Thread(target=animationInstance.animateHeader, args=[
                                                "You can't open your presets here", uiInstance.animationColor])
@@ -614,8 +615,11 @@ class Communication:
                         uiInstance.chatHistory.clear()
                         uiInstance.linesSent = 2
 
-                    self.chatHistory.append(message)
                     uiInstance.chatHistory.append(message)
+                    time = strftime("%H:%M:%S", localtime())
+                    message = time + " " + message
+                    self.chatHistory.append(message)
+
 
         except Exception as e:
             if connectionInstance.connected:
@@ -864,7 +868,7 @@ class UI:
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
 
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "61778", "38189, 96091")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "60301", "5345, 27089")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
