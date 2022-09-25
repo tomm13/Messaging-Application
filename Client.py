@@ -657,7 +657,7 @@ class Communication:
                 file = open(location, "r")
 
                 animateThread = Thread(target=animationInstance.animateHeader, args=[
-                    "Your presets are loading", uiInstance.animationColor])
+                    "Your preset is loading", uiInstance.animationColor])
                 animateThread.start()
 
                 for command in file:
@@ -683,7 +683,7 @@ class Communication:
 
             else:
                 animateThread = Thread(target=animationInstance.animateHeader, args=[
-                    "You can't open your presets here", uiInstance.animationColor])
+                    "You can't open your preset here", uiInstance.animationColor])
                 animateThread.start()
 
         except FileNotFoundError:
