@@ -459,191 +459,195 @@ class Communication:
                 if message:
                     print(message)
 
-                if message[0:4] == "/add":
-                    message = message[5:].split()
-                    message.sort()
+                    if message[0:4] == "/add":
+                        message = message[5:].split()
+                        message.sort()
 
-                    uiInstance.userList.clear()
-                    uiInstance.userList.append("Users Online:")
+                        uiInstance.userList.clear()
+                        uiInstance.userList.append("Users Online:")
 
-                    for user in message:
-                        if user not in self.users:
-                            uiInstance.userList.append(user)
-                            self.users.append(user)
+                        for user in message:
+                            if user not in self.users:
+                                uiInstance.userList.append(user)
+                                self.users.append(user)
 
-                            message = user + " has connected"
-                            animateThread = Thread(target=animationInstance.animateHeader, args=[message,
-                                                   uiInstance.animationColor])
+                                message = user + " has connected"
+                                animateThread = Thread(target=animationInstance.animateHeader, args=[message,
+                                                       uiInstance.animationColor])
+                                animateThread.start()
+                            else:
+                                uiInstance.userList.append(user)
+
+                    elif message[0:14] == "/recentmessage":
+                        uiInstance.chatHistory.append(message[15:])
+                        self.chatHistory.append("[Old]: " + message[15:])
+                        uiInstance.linesSent += 1
+
+                    elif message[0:7] == "/remove":
+                        if message[8:] == connectionInstance.username:
+                            connectionInstance.leave()
+                            break
+                        user = message[8:]
+                        uiInstance.userList.remove(user)
+                        self.users.remove(user)
+                        message = user + " has disconnected"
+                        animateThread = Thread(target=animationInstance.animateHeader,
+                                               args=[message, uiInstance.animationColor])
+                        animateThread.start()
+
+                    elif message[0:8] == "/display":
+                        message = message[9:]
+                        animateThread = Thread(target=animationInstance.animateHeader,
+                                               args=[message, uiInstance.animationColor])
+                        animateThread.start()
+
+                    elif message == "/theme":
+                        animateThread = Thread(target=animationInstance.switchTheme, args=[True])
+                        animateThread.start()
+
+                    elif message[0:4] == "/mod":
+                        if message[5:] == connectionInstance.username and not connectionInstance.mod:
+                            uiInstance.animationColor = (240, 230, 140)
+                            connectionInstance.mod = True
+                            animationInstance.runFiller = True
+                            if not uiInstance.darkMode:
+                                animateThread = Thread(target=animationInstance.switchTheme, args=[False])
+                                animateThread.start()
+                            animateThread = Thread(target=animationInstance.changeBorder)
                             animateThread.start()
-                        else:
-                            uiInstance.userList.append(user)
+                            animateThread = Thread(target=animationInstance.fadeColor, args=["khaki", False])
+                            animateThread.start()
+                            fillerThread = Thread(target=animationInstance.filler)
+                            fillerThread.start()
 
-                elif message[0:14] == "/recentmessage":
-                    uiInstance.chatHistory.append(message[15:])
-                    self.chatHistory.append("[Old]: " + message[15:])
-                    uiInstance.linesSent += 1
+                    elif message[0:6] == "/color":
+                        connectionInstance.newColor = message[7:]
+                        animateThread = Thread(target=animationInstance.fadeColor, args=[connectionInstance.newColor, True])
+                        animateThread.start()
 
-                elif message[0:7] == "/remove":
-                    if message[8:] == connectionInstance.username:
+                    elif message[0:5] == "/save":
+                        self.location = message[6:]
+                        saveChatThread = Thread(target=communicationInstance.saveChatHistory)
+                        saveChatThread.start()
+
+                    elif message == "/disconnect":
+                        print("Your username is used by someone else")
                         connectionInstance.leave()
                         break
-                    user = message[8:]
-                    uiInstance.userList.remove(user)
-                    self.users.remove(user)
-                    message = user + " has disconnected"
-                    animateThread = Thread(target=animationInstance.animateHeader,
-                                           args=[message, uiInstance.animationColor])
-                    animateThread.start()
 
-                elif message[0:8] == "/display":
-                    message = message[9:]
-                    animateThread = Thread(target=animationInstance.animateHeader,
-                                           args=[message, uiInstance.animationColor])
-                    animateThread.start()
+                    elif message == "/filler":
+                        if not animationInstance.runFiller:
+                            animationInstance.runFiller = True
+                            fillerThread = Thread(target=animationInstance.filler, args=[True])
+                            fillerThread.start()
 
-                elif message == "/theme":
-                    animateThread = Thread(target=animationInstance.switchTheme, args=[True])
-                    animateThread.start()
+                        else:
+                            animationInstance.runFiller = False
 
-                elif message[0:4] == "/mod":
-                    if message[5:] == connectionInstance.username and not connectionInstance.mod:
-                        uiInstance.animationColor = (240, 230, 140)
-                        connectionInstance.mod = True
-                        animationInstance.runFiller = True
-                        if not uiInstance.darkMode:
-                            animateThread = Thread(target=animationInstance.switchTheme, args=[False])
+                    elif message[0:5] == "/rate":
+                        animationInstance.readRate = int(message[6:])
+
+                        animateThread = Thread(target=animationInstance.animateHeader, args=[
+                                               "You changed the animation hold to " + str(animationInstance.readRate),
+                                               uiInstance.animationColor])
+                        animateThread.start()
+
+                    elif message[0:9] == "/savesettings":
+                        location = message[10:]
+
+                        if location and not " " in location:
+                            file = open(location, "w")
+                            if uiInstance.darkMode:
+                                file.write("/darkmode\n")
+
+                            if animationInstance.runFiller:
+                                file.write("/filler\n")
+
+                            file.close()
+
+                            animateThread = Thread(target=animationInstance.animateHeader, args=[
+                                                   "Your presets have been saved", uiInstance.animationColor])
                             animateThread.start()
-                        animateThread = Thread(target=animationInstance.changeBorder)
-                        animateThread.start()
-                        animateThread = Thread(target=animationInstance.fadeColor, args=["khaki", False])
-                        animateThread.start()
-                        fillerThread = Thread(target=animationInstance.filler)
-                        fillerThread.start()
 
-                elif message[0:6] == "/color":
-                    connectionInstance.newColor = message[7:]
-                    animateThread = Thread(target=animationInstance.fadeColor, args=[connectionInstance.newColor, True])
-                    animateThread.start()
+                        else:
+                            animateThread = Thread(target=animationInstance.animateHeader, args=[
+                                                   "You can't save your presets here", uiInstance.animationColor])
+                            animateThread.start()
 
-                elif message[0:5] == "/save":
-                    self.location = message[6:]
-                    saveChatThread = Thread(target=communicationInstance.saveChatHistory)
-                    saveChatThread.start()
+                    elif message[0:13] == "/loadsettings":
+                        location = message[14:]
 
-                elif message == "/disconnect":
-                    print("Your username is used by someone else")
-                    connectionInstance.leave()
-                    break
+                        if location and not " " in location:
+                            file = open(location, "r")
 
-                elif message == "/filler":
-                    if not animationInstance.runFiller:
-                        animationInstance.runFiller = True
-                        fillerThread = Thread(target=animationInstance.filler, args=[True])
-                        fillerThread.start()
+                            animateThread = Thread(target=animationInstance.animateHeader, args=[
+                                "Your presets are loading", uiInstance.animationColor])
+                            animateThread.start()
 
-                    else:
-                        animationInstance.runFiller = False
+                            for command in file:
+                                sleep(1)
+                                if command:
+                                    print(command)
+                                    if command[0:9] == "/darkmode":
+                                        if not uiInstance.darkMode:
+                                            animateThread = Thread(target=animationInstance.switchTheme, args=[True])
+                                            animateThread.start()
 
-                elif message[0:5] == "/rate":
-                    animationInstance.readRate = int(message[6:])
+                                    elif command[0:7] == "/filler":
+                                        if not animationInstance.runFiller:
+                                            animationInstance.runFiller = True
+                                            animateThread = Thread(target=animationInstance.filler, args=[True])
+                                            animateThread.start()
 
-                    animateThread = Thread(target=animationInstance.animateHeader, args=[
-                                           "You changed the animation hold to " + str(animationInstance.readRate),
-                                           uiInstance.animationColor])
-                    animateThread.start()
+                            file.close()
 
-                elif message[0:9] == "/savesettings":
-                    location = message[10:]
-
-                    if location and not " " in location:
-                        file = open(location, "w")
-                        if uiInstance.darkMode:
-                            file.write("/darkmode\n")
-
-                        if animationInstance.runFiller:
-                            file.write("/filler\n")
-
-                        file.close()
-
-                        animateThread = Thread(target=animationInstance.animateHeader, args=[
-                                               "Your presets have been saved", uiInstance.animationColor])
-                        animateThread.start()
+                        else:
+                            animateThread = Thread(target=animationInstance.animateHeader, args=[
+                                                   "You can't open your presets here", uiInstance.animationColor])
+                            animateThread.start()
 
                     else:
-                        animateThread = Thread(target=animationInstance.animateHeader, args=[
-                                               "You can't save your presets here", uiInstance.animationColor])
-                        animateThread.start()
+                        uiInstance.linesSent += 1
+                        if uiInstance.linesSent > 15:
+                            print(uiInstance.linesSent)
+                            animateThread = Thread(target=animationInstance.animateHeader, args=["You created a new page",
+                                                                                                 uiInstance.animationColor])
+                            animateThread.start()
+                            uiInstance.chatHistory.clear()
+                            uiInstance.linesSent = 2
 
-                elif message[0:13] == "/loadsettings":
-                    location = message[14:]
+                        uiInstance.chatHistory.append(message)
+                        time = strftime("%H:%M:%S", localtime())
+                        message = time + " " + message
+                        self.chatHistory.append(message)
 
-                    if location and not " " in location:
-                        file = open(location, "r")
-
-                        animateThread = Thread(target=animationInstance.animateHeader, args=[
-                            "Your presets are loading", uiInstance.animationColor])
-                        animateThread.start()
-
-                        for command in file:
-                            sleep(1)
-                            if command:
-                                print(command)
-                                if command[0:9] == "/darkmode":
-                                    if not uiInstance.darkMode:
-                                        animateThread = Thread(target=animationInstance.switchTheme, args=[True])
-                                        animateThread.start()
-
-                                elif command[0:7] == "/filler":
-                                    if not animationInstance.runFiller:
-                                        animationInstance.runFiller = True
-                                        animateThread = Thread(target=animationInstance.filler, args=[True])
-                                        animateThread.start()
-
-                        file.close()
-
-                    else:
-                        animateThread = Thread(target=animationInstance.animateHeader, args=[
-                                               "You can't open your presets here", uiInstance.animationColor])
-                        animateThread.start()
-
-                else:
-                    uiInstance.linesSent += 1
-                    if uiInstance.linesSent > 15:
-                        animateThread = Thread(target=animationInstance.animateHeader, args=["You created a new page",
-                                                                                             uiInstance.animationColor])
-                        animateThread.start()
-                        uiInstance.chatHistory.clear()
-                        uiInstance.linesSent = 2
-
-                    uiInstance.chatHistory.append(message)
-                    time = strftime("%H:%M:%S", localtime())
-                    message = time + " " + message
-                    self.chatHistory.append(message)
-
-
-        except Exception as e:
-            if connectionInstance.connected:
-                print(e)
-            else:
-                print("Closed thread successfully")
+        except ConnectionResetError:
+            connectionInstance.connected = False
+            connectionInstance.leave()
+            print("Closed thread successfully")
 
         finally:
             return
 
     def sendToServer(self):
-        self.message = uiInstance.messageInput.value
-        if self.message:
-            if self.message == "/leave":
-                connectionInstance.leave()
-            else:
-                if len(self.message) + len(connectionInstance.username) + 2 >= 80:
-                    animateThread = Thread(target=animationInstance.animateHeader,
-                                           args=["Your message is too long.", uiInstance.animationColor])
-                    animateThread.start()
-
+        try:
+            self.message = uiInstance.messageInput.value
+            if self.message:
+                if self.message == "/leave":
+                    connectionInstance.leave()
                 else:
-                    connectionInstance.socket.send(self.message.encode())
-                    uiInstance.messageInput.clear()
+                    if len(self.message) + len(connectionInstance.username) + 2 >= 80:
+                        animateThread = Thread(target=animationInstance.animateHeader,
+                                               args=["Your message is too long.", uiInstance.animationColor])
+                        animateThread.start()
+
+                    else:
+                        connectionInstance.socket.send(self.message.encode())
+                        uiInstance.messageInput.clear()
+
+        except BrokenPipeError:
+            connectionInstance.connected = False
+            connectionInstance.leave()
 
     def saveChatHistory(self):
         if self.location and " " not in self.location:
@@ -868,7 +872,7 @@ class UI:
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
 
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "60301", "5345, 27089")
+connectionInstance = Connection("tomm2", "lightblue", "192.168.1.138", "54776", "943, 6767")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
