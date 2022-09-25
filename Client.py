@@ -124,7 +124,7 @@ class Animation:
                 animateThread.start()
                 return
 
-            if uiInstance.color == newColor:
+            if uiInstance.color == newColor and displayMessage:
                 animateThread = Thread(target=self.animateHeader,
                                        args=["You can't change to the same color", uiInstance.animationColor])
                 animateThread.start()
@@ -618,13 +618,14 @@ class Communication:
             file.close()
 
             animateThread = Thread(target=animationInstance.animateHeader,
-                                   args=["Your file has been saved", uiInstance.animationColor])
+                                   args=["Your file has been saved in " + self.location, uiInstance.animationColor])
             animateThread.start()
 
         else:
             animateThread = Thread(target=animationInstance.animateHeader,
                                    args=["You can't save to this location", uiInstance.animationColor])
             animateThread.start()
+
         return
 
     def savePresets(self, location):
@@ -640,7 +641,7 @@ class Communication:
             file.close()
 
             animateThread = Thread(target=animationInstance.animateHeader, args=[
-                "Your presets have been saved", uiInstance.animationColor])
+                "Your presets have been saved in " + location, uiInstance.animationColor])
             animateThread.start()
 
         else:
@@ -648,39 +649,50 @@ class Communication:
                 "You can't save your presets here", uiInstance.animationColor])
             animateThread.start()
 
+        return
+
     def loadPresets(self, location):
-        if location and " " not in location:
-            file = open(location, "r")
+        try:
+            if location and " " not in location:
+                file = open(location, "r")
 
-            animateThread = Thread(target=animationInstance.animateHeader, args=[
-                "Your presets are loading", uiInstance.animationColor])
-            animateThread.start()
+                animateThread = Thread(target=animationInstance.animateHeader, args=[
+                    "Your presets are loading", uiInstance.animationColor])
+                animateThread.start()
 
-            for command in file:
-                sleep(1)
-                if command[0:9] == "/darkmode":
-                    if not uiInstance.darkMode:
-                        animateThread = Thread(target=animationInstance.switchTheme, args=[False])
+                for command in file:
+                    sleep(1)
+                    if command[0:9] == "/darkmode":
+                        if not uiInstance.darkMode:
+                            animateThread = Thread(target=animationInstance.switchTheme, args=[False])
+                            animateThread.start()
+
+                    elif command[0:7] == "/filler":
+                        if not animationInstance.runFiller:
+                            animationInstance.runFiller = True
+                            animateThread = Thread(target=animationInstance.filler, args=[False])
+                            animateThread.start()
+
+                    elif command[0:6] == "/color":
+                        color = colorutils.web_to_rgb(command[7:])
+                        animateThread = Thread(target=animationInstance.fadeColor, args=[color,
+                                                                                         False])
                         animateThread.start()
 
-                elif command[0:7] == "/filler":
-                    if not animationInstance.runFiller:
-                        animationInstance.runFiller = True
-                        animateThread = Thread(target=animationInstance.filler, args=[False])
-                        animateThread.start()
+                file.close()
 
-                elif command[0:6] == "/color":
-                    color = colorutils.web_to_rgb(command[7:])
-                    animateThread = Thread(target=animationInstance.fadeColor, args=[color,
-                                                                                     False])
-                    animateThread.start()
+            else:
+                animateThread = Thread(target=animationInstance.animateHeader, args=[
+                    "You can't open your presets here", uiInstance.animationColor])
+                animateThread.start()
 
-            file.close()
-
-        else:
-            animateThread = Thread(target=animationInstance.animateHeader, args=[
-                "You can't open your presets here", uiInstance.animationColor])
+        except FileNotFoundError:
+            animateThread = Thread(target=animationInstance.animateHeader,
+                                   args=["You have no file or directory named " + location, uiInstance.animationColor])
             animateThread.start()
+
+        finally:
+            return
 
 
 class Connection:
@@ -716,9 +728,6 @@ class Connection:
                         UI.openChat(uiInstance)
 
                         uiInstance.color = colorutils.web_to_rgb(connectionInstance.color)
-
-                        print(self.d)
-                        print(self.N)
 
                     except ConnectionRefusedError:
                         uiInstance.status.value = "Connection Refused"
@@ -892,8 +901,7 @@ class UI:
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-
-connectionInstance = Connection("tomm2", "lightblue", "192.168.1.138", "50434", "562987846319")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "50434", "562987846319")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
