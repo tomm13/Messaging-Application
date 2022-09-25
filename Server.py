@@ -1,4 +1,4 @@
-# 22/9/2022
+# 25/9/2022
 # V13 Beta
 
 import socket
@@ -227,11 +227,14 @@ class Actions:
                     sendInstance.broadcastDisplay(str(percentage) + "% voted in favour of kicking " +
                                                   self.userToKick)
 
-                self.userToKick = None
-                self.userToKickSocket = None
-                self.hasVoted = []
-                self.hasVotedUsers = []
-                self.voteActive = False
+                self.resetVote()
+
+    def resetVote(self):
+        self.userToKick = None
+        self.userToKickSocket = None
+        self.hasVoted = []
+        self.hasVotedUsers = []
+        self.voteActive = False
 
     def mod(self, message, clientSocket):
         modSocket = clientSocket
@@ -332,7 +335,7 @@ class Send:
         elif message == "/key":
             sendInstance.privateBroadcastDisplay(str(securityInstance.d) + ", " + str(securityInstance.N), clientSocket)
         elif message == "/theme":
-            sendInstance.privateBroadcast("/theme", clientSocket)
+            sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:6] == "/color":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:5] == "/save":
@@ -344,6 +347,10 @@ class Send:
         elif message == "/filler":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:5] == "/rate":
+            sendInstance.privateBroadcast(message, clientSocket)
+        elif message[0:9] == "/savesettings":
+            sendInstance.privateBroadcast(message, clientSocket)
+        elif message[0:13] == "/loadsettings":
             sendInstance.privateBroadcast(message, clientSocket)
         else:
             sendInstance.privateBroadcastDisplay("Your command is unknown", clientSocket)
@@ -426,8 +433,10 @@ class Connection:
             if clientSocket in actionsInstance.mods and username in actionsInstance.modUsers:
                 actionsInstance.mods.remove(clientSocket)
                 actionsInstance.modUsers.remove(username)
-
+                actionsInstance.resetVote()
                 actionsInstance.modOnline -= 1
+
+                sendInstance.broadcastDisplay("The vote has been called off as a mod has left")
 
             message = "/remove " + username
             sendInstance.broadcast(message)
