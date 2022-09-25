@@ -30,7 +30,6 @@ class Security:
             PrimeCandidates.append(Primes[RandomNum])
             Primes.pop(RandomNum)
 
-        global P, Q, N, PhiN
         P = PrimeCandidates[0]
         Q = PrimeCandidates[1]
         N = P * Q
@@ -39,8 +38,6 @@ class Security:
         eList = []
         for eCandidate in range(2, PhiN):
             eList.append(eCandidate)
-
-        global e
 
         for e in eList:
             PhiNFactors = []
@@ -94,7 +91,7 @@ class Security:
         RSAEncryptedmessage = []
         for Letter in message:
             Index = ord(Letter)
-            NewIndex = pow(Index, e, N)
+            NewIndex = pow(Index, self.e, self.N)
             RSAEncryptedmessage.append(str(NewIndex))
             RSAEncryptedmessage.append(" ")
 
