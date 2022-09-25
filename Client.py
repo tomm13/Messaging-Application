@@ -658,24 +658,22 @@ class Communication:
 
             for command in file:
                 sleep(1)
-                if command:
-                    print(command)
-                    if command[0:9] == "/darkmode":
-                        if not uiInstance.darkMode:
-                            animateThread = Thread(target=animationInstance.switchTheme, args=[False])
-                            animateThread.start()
-
-                    elif command[0:7] == "/filler":
-                        if not animationInstance.runFiller:
-                            animationInstance.runFiller = True
-                            animateThread = Thread(target=animationInstance.filler, args=[False])
-                            animateThread.start()
-
-                    elif command[0:6] == "/color":
-                        color = colorutils.web_to_rgb(command[7:])
-                        animateThread = Thread(target=animationInstance.fadeColor, args=[color,
-                                                                                         False])
+                if command[0:9] == "/darkmode":
+                    if not uiInstance.darkMode:
+                        animateThread = Thread(target=animationInstance.switchTheme, args=[False])
                         animateThread.start()
+
+                elif command[0:7] == "/filler":
+                    if not animationInstance.runFiller:
+                        animationInstance.runFiller = True
+                        animateThread = Thread(target=animationInstance.filler, args=[False])
+                        animateThread.start()
+
+                elif command[0:6] == "/color":
+                    color = colorutils.web_to_rgb(command[7:])
+                    animateThread = Thread(target=animationInstance.fadeColor, args=[color,
+                                                                                     False])
+                    animateThread.start()
 
             file.close()
 
@@ -702,9 +700,9 @@ class Connection:
             self.color = colorInput.value
             self.host = hostInput.value
             self.port = int(portInput.value, base=10)
-            self.privateKey = privateKeyInput.value.split(", ")
-            self.d = int(self.privateKey[0], base=10)
-            self.N = int(self.privateKey[1], base=10)
+            self.privateKey = privateKeyInput.value
+            self.d = int(str(self.privateKey[0:6]), base=10)
+            self.N = int(str(self.privateKey[6:12]), base=10)
 
             if not self.username == "" and not self.username == "Username" and not " " in self.username:
                 # Checks: if username is not empty, not Username and does not contain spaces
@@ -718,6 +716,9 @@ class Connection:
                         UI.openChat(uiInstance)
 
                         uiInstance.color = colorutils.web_to_rgb(connectionInstance.color)
+
+                        print(self.d)
+                        print(self.N)
 
                     except ConnectionRefusedError:
                         uiInstance.status.value = "Connection Refused"
@@ -892,7 +893,7 @@ class UI:
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
 
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "65015", "3917, 5219")
+connectionInstance = Connection("tomm2", "lightblue", "192.168.1.138", "50434", "562987846319")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
