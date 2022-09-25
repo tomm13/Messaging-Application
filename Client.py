@@ -96,7 +96,7 @@ class Animation:
 
             (R, G, B) = (173, 216, 230)
 
-            while not (R, G, B) == (240, 230, 140):
+            while not (R, G, B) == uiInstance.animationColor:
                 if R < 240:
                     R += 1
                 if G < 230:
@@ -104,7 +104,24 @@ class Animation:
                 if B > 140:
                     B -= 1
 
-                uiInstance.border.set_border(3, (R, G, B))
+                uiInstance.headerTopBorder.bg = (R, G, B)
+                uiInstance.headerRightBorder.bg = (R, G, B)
+                uiInstance.headerBottomBorder.bg = (R, G, B)
+                uiInstance.headerLeftBorder.bg = (R, G, B)
+                uiInstance.chatHistoryTopBorder.bg = (R, G, B)
+                uiInstance.chatHistoryRightBorder.bg = (R, G, B)
+                uiInstance.chatHistoryBottomBorder.bg = (R, G, B)
+                uiInstance.chatHistoryLeftBorder.bg = (R, G, B)
+                uiInstance.userListTopBorder.bg = (R, G, B)
+                uiInstance.userListRightBorder.bg = (R, G, B)
+                uiInstance.userListBottomBorder.bg = (R, G, B)
+                uiInstance.userListLeftBorder.bg = (R, G, B)
+                uiInstance.messageInputTopBorder.bg = (R, G, B)
+                uiInstance.messageInputRightBorder.bg = (R, G, B)
+                uiInstance.messageInputBottomBorder.bg = (R, G, B)
+                uiInstance.messageInputLeftBorder.bg = (R, G, B)
+
+                sleep(uiInstance.rate)
 
         except Exception as e:
             if connectionInstance.connected:
@@ -151,6 +168,7 @@ class Animation:
                 if B < newColor[2]:
                     B += 1
 
+                uiInstance.userList.text_color = (R, G, B)
                 uiInstance.chatHistory.text_color = (R, G, B)
                 uiInstance.messageInput.text_color = (R, G, B)
 
@@ -205,6 +223,7 @@ class Animation:
                     uiInstance.header.text_color = (R, G, B)
                     sleep(uiInstance.rate)
 
+                uiInstance.header.text_size += 4
                 uiInstance.header.value = message
 
                 while not R == color[0] or not G == color[1] or not B == color[2]:
@@ -233,6 +252,7 @@ class Animation:
                     uiInstance.header.bg = (R, G, B)
                     sleep(uiInstance.rate)
 
+                uiInstance.header.text_size -= 4
                 uiInstance.header.value = "Welcome " + connectionInstance.username
 
                 while not R == 0 or not G == 0 or not B == 0:
@@ -250,24 +270,25 @@ class Animation:
             else:
                 (R, G, B) = (255, 255, 255)
 
-                while not R == 70 or not G == 70 or not B == 70:
+                while not R == uiInstance.darkbg[0] or not G == uiInstance.darkbg[1] or not B == uiInstance.darkbg[2]:
                     # Text fades from any colour to black
-                    if R > 70:
+                    if R > uiInstance.darkbg[0]:
                         R -= 1
-                    if G > 70:
+                    if G > uiInstance.darkbg[1]:
                         G -= 1
-                    if B > 70:
+                    if B > uiInstance.darkbg[2]:
                         B -= 1
-                    if R < 70:
+                    if R < uiInstance.darkbg[0]:
                         R += 1
-                    if G < 70:
+                    if G < uiInstance.darkbg[1]:
                         G += 1
-                    if B < 70:
+                    if B < uiInstance.darkbg[2]:
                         B += 1
 
                     uiInstance.header.text_color = (R, G, B)
                     sleep(uiInstance.rate)
 
+                uiInstance.header.text_size += 4
                 uiInstance.header.value = message
 
                 while not R == color[0] or not G == color[1] or not B == color[2]:
@@ -290,24 +311,25 @@ class Animation:
 
                 sleep(self.readRate * waitMultiplier)
 
-                while not R == 70 or not G == 70 or not B == 70:
+                while not R == uiInstance.darkbg[0] or not G == uiInstance.darkbg[1] or not B == uiInstance.darkbg[2]:
                     # Fades background from color to black
-                    if R > 70:
+                    if R > uiInstance.darkbg[0]:
                         R -= 1
-                    if B > 70:
+                    if B > uiInstance.darkbg[1]:
                         B -= 1
-                    if G > 70:
+                    if G > uiInstance.darkbg[2]:
                         G -= 1
-                    if R < 70:
+                    if R < uiInstance.darkbg[0]:
                         R += 1
-                    if B < 70:
+                    if B < uiInstance.darkbg[1]:
                         B += 1
-                    if G < 70:
+                    if G < uiInstance.darkbg[2]:
                         G += 1
 
                     uiInstance.header.bg = (R, G, B)
                     sleep(uiInstance.rate)
 
+                uiInstance.header.text_size -= 4
                 uiInstance.header.value = "Welcome " + connectionInstance.username
 
                 while not R == 255 or not G == 255 or not B == 255:
@@ -349,20 +371,7 @@ class Animation:
                         G -= 1
                         B -= 1
 
-                        uiInstance.userList.text_color = (R, G, B)
                         uiInstance.header.text_color = (R, G, B)
-                        sleep(uiInstance.rate)
-
-                    while not (R, G, B) == (215, 215, 215):
-                        # All backgrounds fade from black to white
-                        R += 1
-                        G += 1
-                        B += 1
-
-                        uiInstance.header.bg = (R, G, B)
-                        uiInstance.chatHistory.bg = (R, G, B)
-                        uiInstance.messageInput.bg = (R, G, B)
-                        uiInstance.userList.bg = (R, G, B)
                         sleep(uiInstance.rate)
 
                     while not (R, G, B) == (255, 255, 255):
@@ -373,6 +382,7 @@ class Animation:
                         uiInstance.header.bg = (R, G, B)
                         uiInstance.chatHistory.bg = (R, G, B)
                         uiInstance.messageInput.bg = (R, G, B)
+                        uiInstance.userList.bg = (R, G, B)
                         sleep(uiInstance.rate)
 
                     uiInstance.darkMode = False
@@ -390,11 +400,9 @@ class Animation:
                         G += 1
                         B += 1
 
-                        uiInstance.userList.text_color = (R, G, B)
                         uiInstance.header.text_color = (R, G, B)
 
-                    while not (R, G, B) == (70, 70, 70):
-                        # All Background fade to grey
+                    while not (R, G, B) == uiInstance.darkbg:
                         R -= 1
                         G -= 1
                         B -= 1
@@ -402,14 +410,6 @@ class Animation:
                         uiInstance.messageInput.bg = (R, G, B)
                         uiInstance.chatHistory.bg = (R, G, B)
                         uiInstance.header.bg = (R, G, B)
-                        uiInstance.userList.bg = (R, G, B)
-                        sleep(uiInstance.rate)
-
-                    while not (R, G, B) == (40, 40, 40):
-                        R -= 1
-                        G -= 1
-                        B -= 1
-
                         uiInstance.userList.bg = (R, G, B)
                         sleep(uiInstance.rate)
 
@@ -521,9 +521,10 @@ class Communication:
                                 animateThread.start()
                             animateThread = Thread(target=animationInstance.changeBorder)
                             animateThread.start()
-                            animateThread = Thread(target=animationInstance.fadeColor, args=["khaki", False])
+                            animateThread = Thread(target=animationInstance.fadeColor, args=[uiInstance.animationColor,
+                                                                                             False])
                             animateThread.start()
-                            fillerThread = Thread(target=animationInstance.filler)
+                            fillerThread = Thread(target=animationInstance.filler, args=[False])
                             fillerThread.start()
 
                     elif message[0:6] == "/color":
@@ -779,7 +780,7 @@ class UI:
 
     def openChat(self):
         try:
-            self.chatWindow = Window(self.setupWindow, width=1200, height=590, title="Chatroom", bg=(70, 70, 70))
+            self.chatWindow = Window(self.setupWindow, width=1280, height=720, title="Chatroom", bg=self.bg)
             self.chatWindow.when_closed = connectionInstance.leave
 
             topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
@@ -788,35 +789,73 @@ class UI:
             bottomPadding = Box(self.chatWindow, width="fill", height=50, align="bottom")
 
             self.border = Box(self.chatWindow, width="fill", height="fill")
-            self.border.set_border(3, (173, 216, 230))
 
-            header = Box(self.border, width="fill", height=40, align="top")
-            buttonBlocker = Box(self.border, width="fill", height=3, align="bottom")
-            buttonBox = Box(self.border, width="fill", height=40, align="bottom")
-            userBlocker = Box(self.border, width="fill", height=3, align="top")
-            userBox = Box(self.border, width="fill", height="fill")
+            header = Box(self.border, width="fill", height=60, align="top")
+            headerBlocker = Box(self.border, width="fill", height=60, align="top")
 
-            self.userList = ListBox(userBox, items=["Users Online:"], width=150, height="fill", align="left")
-            self.userList.text_color = (0, 0, 0)
-            self.userList.bg = (215, 215, 215)
+            userListBox = Box(self.border, width=220, height="fill", align="right")
+            userBox = Box(self.border, width="fill", height="fill", align="left")
+            inputBox = Box(userBox, width="fill", height=120, align="bottom")
+            inputBlocker = Box(inputBox, width=50, height="fill", align="right")
+
+            userListBorder = Box(userListBox, width=60, height="fill", align="left")
+            self.userListTopBorder = Box(userListBox, width="fill", height=10, align="top")
+            self.userListTopBorder.bg = uiInstance.animationColor
+            self.userListRightBorder = Box(userListBox, width=10, height="fill", align="right")
+            self.userListRightBorder.bg = uiInstance.animationColor
+            self.userListBottomBorder = Box(userListBox, width="fill", height=10, align="bottom")
+            self.userListBottomBorder.bg = uiInstance.animationColor
+            self.userListLeftBorder = Box(userListBox, width=10, height="fill", align="left")
+            self.userListLeftBorder.bg = uiInstance.animationColor
+
+            self.userList = ListBox(userListBox, items=["Users Online:"], width=150, height="fill", align="right")
+            self.userList.text_color = connectionInstance.color
+            self.userList.bg = (255, 255, 255)
             self.userList.text_size = self.fontSize - 2
 
-            self.header = Text(header, text=("Welcome " + connectionInstance.username))
-            self.header.text_size = self.fontSize + 8
+            self.headerTopBorder = Box(header, width="fill", height=10, align="top")
+            self.headerTopBorder.bg = uiInstance.animationColor
+            self.headerRightBorder = Box(header, width=10, height="fill", align="right")
+            self.headerRightBorder.bg = uiInstance.animationColor
+            self.headerBottomBorder = Box(header, width="fill", height=10, align="bottom")
+            self.headerBottomBorder.bg = uiInstance.animationColor
+            self.headerLeftBorder = Box(header, width=10, height="fill", align="left")
+            self.headerLeftBorder.bg = uiInstance.animationColor
+
+            self.header = Text(header, text=("Welcome " + connectionInstance.username), width="fill", height=50)
+            self.header.text_size = self.fontSize + 10
             self.header.text_color = (0, 0, 0)
             self.header.bg = (255, 255, 255)
-            self.header.width = "fill"
 
-            self.chatHistory = TextBox(userBox, "Hi!", "fill", height="fill", multiline=True, align="left")
+            self.chatHistoryTopBorder = Box(userBox, width="fill", height=10, align="top")
+            self.chatHistoryTopBorder.bg = uiInstance.animationColor
+            self.chatHistoryRightBorder = Box(userBox, width=10, height="fill", align="right")
+            self.chatHistoryRightBorder.bg = uiInstance.animationColor
+            self.chatHistoryBottomBorder = Box(userBox, width="fill", height=10, align="bottom")
+            self.chatHistoryBottomBorder.bg = uiInstance.animationColor
+            self.chatHistoryLeftBorder = Box(userBox, width=10, height="fill", align="left")
+            self.chatHistoryLeftBorder.bg = uiInstance.animationColor
+
+            self.chatHistory = TextBox(userBox, text="Hi!", width="fill", height="fill", align="top", multiline=True)
             self.chatHistory.text_color = connectionInstance.color
             self.chatHistory.bg = (255, 255, 255)
-            self.chatHistory.text_size = self.fontSize
+            self.chatHistory.text_size = self.fontSize + 2
             self.chatHistory.disable()
 
-            self.messageInput = TextBox(buttonBox, width="fill", height="fill", align="bottom")
+            messageInputBorder = Box(inputBox, width="fill", height=60, align="top")
+            self.messageInputTopBorder = Box(inputBox, width="fill", height=10, align="top")
+            self.messageInputTopBorder.bg = uiInstance.animationColor
+            self.messageInputRightBorder = Box(inputBox, width=10, height="fill", align="right")
+            self.messageInputRightBorder.bg = uiInstance.animationColor
+            self.messageInputBottomBorder = Box(inputBox, width="fill", height=10, align="bottom")
+            self.messageInputBottomBorder.bg = uiInstance.animationColor
+            self.messageInputLeftBorder = Box(inputBox, width=10, height="fill", align="left")
+            self.messageInputLeftBorder.bg = uiInstance.animationColor
+
+            self.messageInput = TextBox(inputBox, width="fill", align="bottom")
             self.messageInput.text_color = connectionInstance.color
             self.messageInput.bg = (255, 255, 255)
-            self.messageInput.text_size = self.fontSize + 2
+            self.messageInput.text_size = self.fontSize + 10
             self.messageInput.when_key_pressed = enterSend
 
             # Threads start here
@@ -833,7 +872,7 @@ class UI:
 
     def openSetup(self):
         self.setupWindow = App(title="Connect", width=800, height=275)
-        self.setupWindow.bg = (70, 70, 70)
+        self.setupWindow.bg = self.bg
         self.setupWindow.font = self.font
 
         topPadding = Box(self.setupWindow, width="fill", height=50, align="top")
@@ -888,7 +927,7 @@ class UI:
 
         attemptConnect.text_size = self.fontSize - 6
 
-        build = Text(bottomPadding, text="development: fixing colors", align="bottom")
+        build = Text(bottomPadding, text="development: new UI", align="bottom")
 
         animateThread = Thread(target=animationInstance.animateStatus)
         animateThread.start()
@@ -902,7 +941,7 @@ def enterSend(event):
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "51905", "607091557993")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "52965", "794263696649")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
