@@ -338,7 +338,7 @@ class Send:
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:6] == "/color":
             sendInstance.privateBroadcast(message, clientSocket)
-        elif message[0:5] == "/save":
+        elif message[0:9] == "/savechat":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:4] == "/mod":
             actionsInstance.mod(message, clientSocket)
@@ -348,7 +348,7 @@ class Send:
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:5] == "/rate":
             sendInstance.privateBroadcast(message, clientSocket)
-        elif message[0:9] == "/savesettings":
+        elif message[0:13] == "/savesettings":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:13] == "/loadsettings":
             sendInstance.privateBroadcast(message, clientSocket)
