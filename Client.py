@@ -1,4 +1,4 @@
-# 21/9/2022
+# 25/9/2022
 # V13 Beta
 
 import platform
@@ -56,18 +56,26 @@ class Animation:
         finally:
             return
 
-    def filler(self):
+    def filler(self, displayMessage):
         try:
+            if displayMessage:
+                animateThread = Thread(target=self.animateHeader,
+                                       args=["You turned filler on", uiInstance.animationColor])
+                animateThread.start()
+
             while animationInstance.runFiller:
                 while animationInstance.animationRunning:
                     sleep(uiInstance.waitTime)
-                animationInstance.runFiller = True
 
                 sleep(60)
 
                 time = strftime("%H:%M", localtime())
                 animateThread = Thread(target=self.animateHeader, args=[str(time), uiInstance.animationColor])
                 animateThread.start()
+
+            animateThread = Thread(target=animationInstance.animateHeader, args=["You turned filler off",
+                                                                                 uiInstance.animationColor])
+            animateThread.start()
 
         except Exception as e:
             if connectionInstance.connected:
@@ -318,7 +326,7 @@ class Animation:
             animationInstance.animationRunning = False
             return
 
-    def switchTheme(self, DisplayMessage):
+    def switchTheme(self, displayMessage):
         try:
             while animationInstance.animationRunning:
                 sleep(uiInstance.waitTime)
@@ -404,7 +412,7 @@ class Animation:
             uiInstance.chatHistory.text_color = connectionInstance.color
             uiInstance.messageInput.text_color = connectionInstance.color
 
-            if DisplayMessage:
+            if displayMessage:
                 if uiInstance.darkMode:
                     animateThread = Thread(target=self.animateHeader,
                                            args=["You turned dark mode on", uiInstance.animationColor])
@@ -529,24 +537,73 @@ class Communication:
                 elif message == "/filler":
                     if not animationInstance.runFiller:
                         animationInstance.runFiller = True
-                        animateThread = Thread(target=animationInstance.animateHeader, args=["You turned filler on",
-                                                                                             uiInstance.animationColor])
-                        animateThread.start()
-                        fillerThread = Thread(target=animationInstance.filler)
+                        fillerThread = Thread(target=animationInstance.filler, args=[True])
                         fillerThread.start()
 
                     else:
                         animationInstance.runFiller = False
-                        animateThread = Thread(target=animationInstance.animateHeader, args=["You turned filler off",
-                                                                                             uiInstance.animationColor])
-                        animateThread.start()
 
                 elif message[0:5] == "/rate":
                     animationInstance.readRate = int(message[6:])
 
-                    animateThread = Thread(target=animationInstance.animateHeader, args=["You changed the animation hold to " + str(animationInstance.readRate),
-                                                                                         uiInstance.animationColor])
+                    animateThread = Thread(target=animationInstance.animateHeader, args=[
+                                           "You changed the animation hold to " + str(animationInstance.readRate),
+                                           uiInstance.animationColor])
                     animateThread.start()
+
+                elif message[0:9] == "/savesettings":
+                    location = message[10:]
+
+                    if location and not " " in location:
+                        file = open(location, "w")
+                        if uiInstance.darkMode:
+                            file.write("/darkmode\n")
+
+                        if animationInstance.runFiller:
+                            file.write("/filler\n")
+
+                        file.close()
+
+                        animateThread = Thread(target=animationInstance.animateHeader, args=[
+                                               "Your presets have been saved", uiInstance.animationColor])
+                        animateThread.start()
+
+                    else:
+                        animateThread = Thread(target=animationInstance.animateHeader, args=[
+                                               "You can't save your presets here", uiInstance.animationColor])
+                        animateThread.start()
+
+                elif message[0:13] == "/loadsettings":
+                    location = message[14:]
+
+                    if location and not " " in location:
+                        file = open(location, "r")
+
+                        for command in file:
+                            sleep(1)
+                            if command:
+                                print(command)
+                                if command[0:9] == "/darkmode":
+                                    if not uiInstance.darkMode:
+                                        animateThread = Thread(target=animationInstance.switchTheme, args=[True])
+                                        animateThread.start()
+
+                                elif command[0:7] == "/filler":
+                                    if not animationInstance.runFiller:
+                                        animationInstance.runFiller = True
+                                        animateThread = Thread(target=animationInstance.filler, args=[True])
+                                        animateThread.start()
+
+                        file.close()
+
+                        animateThread = Thread(target=animationInstance.animateHeader, args=[
+                            "Your presets have loaded", uiInstance.animationColor])
+                        animateThread.start()
+
+                    else:
+                        animateThread = Thread(target=animationInstance.animateHeader, args=[
+                                               "You can't open your presets here", uiInstance.animationColor])
+                        animateThread.start()
 
                 else:
                     uiInstance.linesSent += 1
@@ -797,7 +854,7 @@ class UI:
 
         attemptConnect.text_size = self.fontSize - 6
 
-        build = Text(bottomPadding, text="development: modding and votes", align="bottom")
+        build = Text(bottomPadding, text="development: adding user presets", align="bottom")
 
         animateThread = Thread(target=animationInstance.animateStatus)
         animateThread.start()
@@ -807,7 +864,7 @@ class UI:
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
 
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "63697", "411, 667")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "61778", "38189, 96091")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
