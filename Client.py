@@ -180,6 +180,13 @@ class Animation:
 
     def animateHeader(self, message, color):
         try:
+            if len(message) < 10:
+                waitMultiplier = 1.0
+            elif len(message) < 15:
+                waitMultiplier = 1.5
+            else:
+                waitMultiplier = 2.0
+
             while animationInstance.animationRunning:
                 sleep(uiInstance.waitTime)
             animationInstance.animationRunning = True
@@ -213,7 +220,7 @@ class Animation:
                     uiInstance.header.bg = (R, G, B)
                     sleep(uiInstance.rate)
 
-                sleep(self.readRate)
+                sleep(self.readRate * waitMultiplier)
 
                 while not R == 255 or not G == 255 or not B == 255:
                     # Fades background from color to white
@@ -282,7 +289,7 @@ class Animation:
                     uiInstance.header.bg = (R, G, B)
                     sleep(uiInstance.rate)
 
-                sleep(self.readRate)
+                sleep(self.readRate * waitMultiplier)
 
                 while not R == 70 or not G == 70 or not B == 70:
                     # Fades background from color to black
@@ -545,7 +552,7 @@ class Communication:
                             animationInstance.runFiller = False
 
                     elif message[0:5] == "/rate":
-                        animationInstance.readRate = int(message[6:])
+                        animationInstance.readRate = float(message[6:])
 
                         animateThread = Thread(target=animationInstance.animateHeader, args=[
                                                "You changed the animation hold to " + str(animationInstance.readRate),
@@ -665,8 +672,8 @@ class Communication:
             animateThread = Thread(target=animationInstance.animateHeader,
                                    args=["You can't save to this location", uiInstance.animationColor])
             animateThread.start()
-
         return
+
 
 class Connection:
     def __init__(self, username, color, host, port, privateKey):
@@ -872,7 +879,7 @@ class UI:
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
 
-connectionInstance = Connection("tomm2", "lightblue", "192.168.1.138", "54776", "943, 6767")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "57583", "3197, 5513")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
