@@ -1,5 +1,5 @@
-# 25/9/2022
-# V13 Beta
+# 26/9/2022
+# V13 Beta 2
 
 import socket
 import time
@@ -351,6 +351,8 @@ class Send:
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:13] == "/loadsettings":
             sendInstance.privateBroadcast(message, clientSocket)
+        elif message[0:7] == "/border":
+            sendInstance.privateBroadcast(message, clientSocket)
         else:
             sendInstance.privateBroadcastDisplay("Your command is unknown", clientSocket)
 
@@ -429,14 +431,6 @@ class Connection:
 
     def removeUser(self, username, clientSocket):
         try:
-            if clientSocket in actionsInstance.mods and username in actionsInstance.modUsers:
-                actionsInstance.mods.remove(clientSocket)
-                actionsInstance.modUsers.remove(username)
-                actionsInstance.resetVote()
-                actionsInstance.modOnline -= 1
-
-                sendInstance.broadcastDisplay("The vote has been called off as a mod has left")
-
             message = "/remove " + username
             sendInstance.broadcast(message)
 
@@ -446,6 +440,16 @@ class Connection:
             clientSocket.close()
 
             self.userOnline -= 1
+
+            if clientSocket in actionsInstance.mods and username in actionsInstance.modUsers:
+                actionsInstance.mods.remove(clientSocket)
+                actionsInstance.modUsers.remove(username)
+                actionsInstance.modOnline -= 1
+
+                if actionsInstance.voteActive:
+                    actionsInstance.resetVote()
+
+                    sendInstance.broadcastDisplay("The vote has been called off as a mod has left")
 
         except Exception as e:
             print("[Server] Failed to remove user: " + str(e))
