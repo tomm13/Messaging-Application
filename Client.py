@@ -9,6 +9,7 @@ from time import sleep, localtime, strftime
 from threading import Thread
 from guizero import *
 
+
 class Animation:
     def __init__(self):
         self.runFiller = False
@@ -126,7 +127,7 @@ class Animation:
                     B -= 1
                 if (240, 230, 140) == color or (173, 216, 230) == color:
                     uiInstance.header.bg = (R, G, B)
-                    
+
                 uiInstance.chatHistoryTopBorder.bg = (R, G, B)
                 uiInstance.chatHistoryRightBorder.bg = (R, G, B)
                 uiInstance.chatHistoryBottomBorder.bg = (R, G, B)
@@ -470,6 +471,7 @@ class Animation:
             animationInstance.animationRunning = False
             return
 
+
 class Communication:
     def __init__(self):
         self.users = []
@@ -610,8 +612,8 @@ class Communication:
                     else:
                         uiInstance.linesSent += 1
                         if uiInstance.linesSent > 15:
-                            animateThread = Thread(target=animationInstance.animateHeader, args=["You created a new page",
-                                                                                                 uiInstance.animationColor])
+                            animateThread = Thread(target=animationInstance.animateHeader, args=["You created a new pag\
+                                                   e", uiInstance.animationColor])
                             animateThread.start()
                             uiInstance.chatHistory.clear()
                             uiInstance.linesSent = 2
@@ -671,13 +673,13 @@ class Communication:
         if location and " " not in location:
             file = open(location, "w")
             if uiInstance.darkMode:
-                file.write("/darkmode\n")
+                file.write("/darkmode,")
 
             if animationInstance.runFiller:
-                file.write("/filler\n")
+                file.write("/filler,")
 
-            file.write("/color " + colorutils.rgb_to_web(uiInstance.color) + "\n")
-            file.write("/border " + colorutils.rgb_to_web(uiInstance.borderColor))
+            file.write("/color " + colorutils.rgb_to_web(uiInstance.color) + ",")
+            file.write("/border " + colorutils.rgb_to_web(uiInstance.borderColor) + ",")
             file.close()
 
             animateThread = Thread(target=animationInstance.animateHeader, args=[
@@ -700,31 +702,35 @@ class Communication:
                     "Your preset is loading", uiInstance.animationColor])
                 animateThread.start()
 
-                for command in file:
-                    sleep(1)
-                    if command[0:9] == "/darkmode":
+                commands = file.readline().split(",")
+
+                for message in commands:
+                    if message[0:9] == "/darkmode":
                         if not uiInstance.darkMode:
                             animateThread = Thread(target=animationInstance.switchTheme, args=[False])
                             animateThread.start()
 
-                    elif command[0:7] == "/filler":
+                    elif message[0:7] == "/filler":
                         if not animationInstance.runFiller:
                             animationInstance.runFiller = True
                             animateThread = Thread(target=animationInstance.filler, args=[False])
                             animateThread.start()
 
-                    elif command[0:6] == "/color":
-                        color = colorutils.web_to_rgb(command[7:])
+                    elif message[0:6] == "/color":
+                        color = colorutils.web_to_rgb(message[7:])
                         animateThread = Thread(target=animationInstance.fadeColor, args=[color,
                                                                                          False])
                         animateThread.start()
 
-                    elif command[0:7] == "/border":
-                        print("true")
+                    elif message[0:7] == "/border":
                         if connectionInstance.mod:
-                            color = colorutils.web_to_rgb(command[8:])
-                            animateThread = Thread(target=animationInstance.fadeColor, args=[color,
-                                                                                             False])
+                            color = colorutils.web_to_rgb(message[8:])
+                            animateThread = Thread(target=animationInstance.changeBorder, args=[color,
+                                                                                                False])
+                            animateThread.start()
+                        else:
+                            animateThread = Thread(target=animationInstance.animateHeader, args=["You need to be a mod "
+                                                   "to change the border color", uiInstance.animationColor])
                             animateThread.start()
 
                 file.close()
@@ -764,7 +770,7 @@ class Connection:
             self.d = int(str(self.privateKey[0:6]), base=10)
             self.N = int(str(self.privateKey[6:12]), base=10)
 
-            if not self.username == "" and not self.username == "Username" and not " " in self.username:
+            if not self.username == "" and not self.username == "Username" and " " not in self.username:
                 # Checks: if username is not empty, not Username and does not contain spaces
                 if not self.color.casefold() == "khaki":
                     try:
@@ -905,8 +911,8 @@ class UI:
             self.setupWindow.hide()
             self.chatWindow.show()
 
-        except:
-            print("Your client crashed unexpectedly")
+        except Exception as e:
+            print("Your client crashed unexpectedly due to " + e)
             connectionInstance.leave()
 
     def openSetup(self):
@@ -961,12 +967,12 @@ class UI:
         self.status.text_size = self.fontSize + 12
 
         rightBlocker = Box(verifyBox, width="fill", height=40, align="top")
-        attemptConnect = PushButton(verifyBox, text="Connect", command=connectionInstance.connect, args=
-        [usernameInput, colorInput, hostInput, portInput, keyInput])
+        attemptConnect = PushButton(verifyBox, text="Connect", command=connectionInstance.connect, args=[usernameInput,
+                                    colorInput, hostInput, portInput, keyInput])
 
         attemptConnect.text_size = self.fontSize - 6
 
-        build = Text(bottomPadding, text="development: new UI", align="bottom")
+        build = Text(bottomPadding, text="development: adjusting presets", align="bottom")
 
         animateThread = Thread(target=animationInstance.animateStatus)
         animateThread.start()
@@ -986,4 +992,3 @@ communicationInstance = Communication()
 animationInstance = Animation()
 
 UI.openSetup(uiInstance)
-
