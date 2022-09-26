@@ -1,4 +1,4 @@
-# 25/9/2022
+# 26/9/2022
 # V13 Beta
 
 import platform
@@ -67,11 +67,15 @@ class Animation:
                 while animationInstance.animationRunning:
                     sleep(uiInstance.waitTime)
 
-                sleep(60)
+                for timer in range(60):
+                    sleep(1)
+                    if not animationInstance.runFiller:
+                        break
 
-                time = strftime("%H:%M", localtime())
-                animateThread = Thread(target=self.animateHeader, args=[str(time), uiInstance.animationColor])
-                animateThread.start()
+                if animationInstance.runFiller:
+                    time = strftime("%H:%M", localtime())
+                    animateThread = Thread(target=self.animateHeader, args=[str(time), uiInstance.animationColor])
+                    animateThread.start()
 
             animateThread = Thread(target=animationInstance.animateHeader, args=["You turned filler off",
                                                                                  uiInstance.animationColor])
@@ -103,58 +107,19 @@ class Animation:
                 if B > 140:
                     B -= 1
 
+                uiInstance.header.bg = (R, G, B)
                 uiInstance.chatHistoryTopBorder.bg = (R, G, B)
-                uiInstance.userListTopBorder.bg = (R, G, B)
-                uiInstance.messageInputTopBorder.bg = (R, G, B)
-
-                sleep(uiInstance.rate)
-
-            (R, G, B) = (173, 216, 230)
-
-            while not (R, G, B) == uiInstance.animationColor:
-                if R < 240:
-                    R += 1
-                if G < 230:
-                    G += 1
-                if B > 140:
-                    B -= 1
-
                 uiInstance.chatHistoryRightBorder.bg = (R, G, B)
-                uiInstance.userListRightBorder.bg = (R, G, B)
-                uiInstance.messageInputRightBorder.bg = (R, G, B)
-
-                sleep(uiInstance.rate)
-
-            (R, G, B) = (173, 216, 230)
-
-            while not (R, G, B) == uiInstance.animationColor:
-                if R < 240:
-                    R += 1
-                if G < 230:
-                    G += 1
-                if B > 140:
-                    B -= 1
-
                 uiInstance.chatHistoryBottomBorder.bg = (R, G, B)
-                uiInstance.userListBottomBorder.bg = (R, G, B)
-                uiInstance.messageInputBottomBorder.bg = (R, G, B)
-
-                sleep(uiInstance.rate)
-
-            (R, G, B) = (173, 216, 230)
-
-            while not (R, G, B) == uiInstance.animationColor:
-                if R < 240:
-                    R += 1
-                if G < 230:
-                    G += 1
-                if B > 140:
-                    B -= 1
-
                 uiInstance.chatHistoryLeftBorder.bg = (R, G, B)
+                uiInstance.userListTopBorder.bg = (R, G, B)
+                uiInstance.userListRightBorder.bg = (R, G, B)
+                uiInstance.userListBottomBorder.bg = (R, G, B)
                 uiInstance.userListLeftBorder.bg = (R, G, B)
+                uiInstance.messageInputTopBorder.bg = (R, G, B)
+                uiInstance.messageInputRightBorder.bg = (R, G, B)
+                uiInstance.messageInputBottomBorder.bg = (R, G, B)
                 uiInstance.messageInputLeftBorder.bg = (R, G, B)
-
                 sleep(uiInstance.rate)
 
         except Exception as e:
