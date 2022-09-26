@@ -91,20 +91,33 @@ class Animation:
             animationInstance.runFiller = False
             return
 
-    def changeBorder(self):
+    def changeBorder(self, color, displayMessage):
         try:
+            if not connectionInstance.mod:
+                animateThread = Thread(target=animationInstance.animateHeader, args=["You need to be mod to do this",
+                                                                                     uiInstance.animationColor])
+                animateThread.start()
+
+                return
+
             while animationInstance.animationRunning:
                 sleep(uiInstance.waitTime)
             animationInstance.animationRunning = True
 
-            (R, G, B) = (173, 216, 230)
+            (R, G, B) = uiInstance.borderColor
 
-            while not (R, G, B) == uiInstance.animationColor:
-                if R < 240:
+            while not (R, G, B) == color:
+                if R < color[0]:
                     R += 1
-                if G < 230:
+                if G < color[1]:
                     G += 1
-                if B > 140:
+                if B < color[2]:
+                    B += 1
+                if R > color[0]:
+                    R -= 1
+                if G > color[1]:
+                    G -= 1
+                if B > color[2]:
                     B -= 1
 
                 uiInstance.header.bg = (R, G, B)
@@ -121,6 +134,13 @@ class Animation:
                 uiInstance.messageInputBottomBorder.bg = (R, G, B)
                 uiInstance.messageInputLeftBorder.bg = (R, G, B)
                 sleep(uiInstance.rate)
+
+            uiInstance.borderColor = (R, G, B)
+
+            if displayMessage:
+                animateThread = Thread(target=self.animateHeader,
+                                       args=["You changed the border color", uiInstance.animationColor])
+                animateThread.start()
 
         except Exception as e:
             if connectionInstance.connected:
@@ -525,10 +545,11 @@ class Communication:
                             if not uiInstance.darkMode:
                                 animateThread = Thread(target=animationInstance.switchTheme, args=[False])
                                 animateThread.start()
-                            animateThread = Thread(target=animationInstance.changeBorder)
+                            animateThread = Thread(target=animationInstance.fadeColor,
+                                                   args=[uiInstance.animationColor,
+                                                         False])
                             animateThread.start()
-                            animateThread = Thread(target=animationInstance.fadeColor, args=[uiInstance.animationColor,
-                                                                                             False])
+                            animateThread = Thread(target=animationInstance.changeBorder, args=[(240, 230, 140), False])
                             animateThread.start()
                             fillerThread = Thread(target=animationInstance.filler, args=[False])
                             fillerThread.start()
@@ -574,6 +595,11 @@ class Communication:
                         location = message[14:]
                         loadPresetThread = Thread(target=self.loadPresets, args=[location])
                         loadPresetThread.start()
+
+                    elif message[0:7] == "/border":
+                        color = colorutils.web_to_rgb(message[8:])
+                        animateThread = Thread(target=animationInstance.changeBorder, args=[color, True])
+                        animateThread.start()
 
                     else:
                         uiInstance.linesSent += 1
@@ -773,6 +799,7 @@ class UI:
         self.fontSize = 22
         self.color = None
         self.animationColor = (173, 216, 230)
+        self.borderColor = (173, 216, 230)
         self.bg = (70, 70, 70)
         self.darkbg = (40, 40, 40)
         self.waitTime = 1
@@ -938,7 +965,7 @@ def enterSend(event):
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "54817", "506189634349")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "56593", "455143532459")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
