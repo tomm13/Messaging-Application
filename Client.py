@@ -1,5 +1,5 @@
 # 26/9/2022
-# V13 Beta
+# V13 Beta 2
 
 import platform
 import socket
@@ -97,7 +97,12 @@ class Animation:
                 animateThread = Thread(target=animationInstance.animateHeader, args=["You need to be mod to do this",
                                                                                      uiInstance.animationColor])
                 animateThread.start()
+                return
 
+            if uiInstance.borderColor == color and displayMessage:
+                animateThread = Thread(target=self.animateHeader,
+                                       args=["You can't change to the same border color", uiInstance.animationColor])
+                animateThread.start()
                 return
 
             while animationInstance.animationRunning:
@@ -119,8 +124,9 @@ class Animation:
                     G -= 1
                 if B > color[2]:
                     B -= 1
-
-                uiInstance.header.bg = (R, G, B)
+                if (240, 230, 140) == color or (173, 216, 230) == color:
+                    uiInstance.header.bg = (R, G, B)
+                    
                 uiInstance.chatHistoryTopBorder.bg = (R, G, B)
                 uiInstance.chatHistoryRightBorder.bg = (R, G, B)
                 uiInstance.chatHistoryBottomBorder.bg = (R, G, B)
@@ -670,7 +676,8 @@ class Communication:
             if animationInstance.runFiller:
                 file.write("/filler\n")
 
-            file.write("/color " + colorutils.rgb_to_web(uiInstance.color))
+            file.write("/color " + colorutils.rgb_to_web(uiInstance.color) + "\n")
+            file.write("/border " + colorutils.rgb_to_web(uiInstance.borderColor))
             file.close()
 
             animateThread = Thread(target=animationInstance.animateHeader, args=[
@@ -711,6 +718,14 @@ class Communication:
                         animateThread = Thread(target=animationInstance.fadeColor, args=[color,
                                                                                          False])
                         animateThread.start()
+
+                    elif command[0:7] == "/border":
+                        print("true")
+                        if connectionInstance.mod:
+                            color = colorutils.web_to_rgb(command[8:])
+                            animateThread = Thread(target=animationInstance.fadeColor, args=[color,
+                                                                                             False])
+                            animateThread.start()
 
                 file.close()
 
