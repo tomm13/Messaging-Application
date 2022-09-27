@@ -689,11 +689,8 @@ class Communication:
                         animateThread.start()
 
                     elif message == "/previous":
-                        print("beforepage = " + str(self.page))
-
                         if self.page > 0:
                             self.page -= 1
-                            print("page = " + str(self.page))
 
                             uiInstance.chatHistory.clear()
                             uiInstance.chatHistory.value = self.transcript[self.page][0]
@@ -708,12 +705,8 @@ class Communication:
                             animateThread.start()
 
                     elif message == "/next":
-                        print("beforepage = " + str(self.page))
-
                         if self.page < uiInstance.page:
                             self.page += 1
-
-                            print("page = " + str(self.page))
 
                             uiInstance.chatHistory.clear()
                             uiInstance.chatHistory.value = self.transcript[self.page][0]
@@ -914,8 +907,6 @@ class Communication:
         self.transcript[uiInstance.page].append(message)
         self.chatHistory.append(newMessage)
         uiInstance.linesSent += 1
-
-        print(uiInstance.page, self.page)
 
 
 class Connection:
