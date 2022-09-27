@@ -1,4 +1,4 @@
-# 26/9/2022
+# 27/9/2022
 # V13 Beta 2
 
 import socket
@@ -318,7 +318,7 @@ class Send:
         clientSocket.send(message.encode())
 
     def command(self, message, clientSocket):
-        # Ues list to prevent doubled code
+        # Use list to prevent doubled code
         if message == "/space":
             sendInstance.privateBroadcastDisplay(str(connectionInstance.spaceRemaining), clientSocket)
         elif message == "/online":
@@ -353,6 +353,10 @@ class Send:
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:7] == "/border":
             sendInstance.privateBroadcast(message, clientSocket)
+        elif message == "/previous":
+            sendInstance.privateBroadcast(message, clientSocket)
+        elif message == "/next":
+            sendInstance.privateBroadcast(message, clientSocket)
         else:
             sendInstance.privateBroadcastDisplay("Your command is unknown", clientSocket)
 
@@ -360,7 +364,7 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = "192.168.1.138"
+        self.host = "10.28.206.175"
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
         self.spaceRemaining = 1000
@@ -395,9 +399,7 @@ class Connection:
                 self.spaceRemaining -= 1
 
                 if len(self.recentMessages) > 0:
-                    for text in range(len(self.recentMessages)):
-                        message = "/recentmessage " + self.recentMessages[text]
-                        sendInstance.privateBroadcast(message, clientSocket)
+                    sendInstance.privateBroadcast("/recentmessage " + ", ".join(self.recentMessages), clientSocket)
 
                 listeningThread = Thread(target=self.listen, args=[clientSocket])
                 listeningThread.start()
@@ -429,30 +431,30 @@ class Connection:
                 self.removeUser(username, clientSocket)
                 break
 
+            except OSError:
+                print("[Server] Closed a client thread")
+                break
+
     def removeUser(self, username, clientSocket):
-        try:
-            message = "/remove " + username
-            sendInstance.broadcast(message)
+        connectionInstance.clients.remove(clientSocket)
+        connectionInstance.users.remove(username)
 
-            connectionInstance.clients.remove(clientSocket)
-            connectionInstance.users.remove(username)
+        clientSocket.close()
 
-            clientSocket.close()
+        self.userOnline -= 1
 
-            self.userOnline -= 1
+        if clientSocket in actionsInstance.mods and username in actionsInstance.modUsers:
+            actionsInstance.mods.remove(clientSocket)
+            actionsInstance.modUsers.remove(username)
+            actionsInstance.modOnline -= 1
 
-            if clientSocket in actionsInstance.mods and username in actionsInstance.modUsers:
-                actionsInstance.mods.remove(clientSocket)
-                actionsInstance.modUsers.remove(username)
-                actionsInstance.modOnline -= 1
+            if actionsInstance.voteActive:
+                actionsInstance.resetVote()
 
-                if actionsInstance.voteActive:
-                    actionsInstance.resetVote()
+                sendInstance.broadcastDisplay("The vote has been called off as a mod has left")
 
-                    sendInstance.broadcastDisplay("The vote has been called off as a mod has left")
-
-        except Exception as e:
-            print("[Server] Failed to remove user: " + str(e))
+        message = "/remove " + username
+        sendInstance.broadcast(message)
 
 
 sendInstance = Send()
