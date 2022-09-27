@@ -1,8 +1,7 @@
-# 26/9/2022
+# 27/9/2022
 # V13 Beta 2
 
-import pstats
-import cProfile
+import logging
 import platform
 import socket
 import colorutils
@@ -10,6 +9,9 @@ import sys
 from time import sleep, localtime, strftime
 from threading import Thread
 from guizero import *
+
+
+logging.basicConfig(filename='chat.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
 
 
 class Animation:
@@ -552,6 +554,8 @@ class Communication:
     def __init__(self):
         self.users = []
         self.chatHistory = []
+        self.transcript = [[]]
+        self.page = 0
 
     def decrypt(self, message):
         message = message.split()
@@ -595,9 +599,11 @@ class Communication:
                                 uiInstance.userList.append(user)
 
                     elif message[0:14] == "/recentmessage":
-                        message = message[15:]
-                        self.chatHistory.append("[Old]: " + message)
-                        self.addMessage(message)
+                        recentMessages = message[15:].split(", ")
+
+                        for line in recentMessages:
+                            sleep(uiInstance.rate * 100)
+                            self.addMessage(line)
 
                     elif message[0:7] == "/remove":
                         if message[8:] == connectionInstance.username:
@@ -682,6 +688,44 @@ class Communication:
                         animateThread = Thread(target=animationInstance.changeBorder, args=[color, True])
                         animateThread.start()
 
+                    elif message == "/previous":
+                        print("beforepage = " + str(self.page))
+
+                        if self.page > 0:
+                            self.page -= 1
+                            print("page = " + str(self.page))
+
+                            uiInstance.chatHistory.clear()
+                            uiInstance.chatHistory.value = self.transcript[self.page][0]
+
+                            for line in self.transcript[self.page][1:]:
+                                sleep(uiInstance.rate * 100)
+                                uiInstance.chatHistory.append(line)
+
+                        else:
+                            animateThread = Thread(target=animationInstance.animateHeader,
+                                                   args=["You cannot go below this page", uiInstance.animationColor])
+                            animateThread.start()
+
+                    elif message == "/next":
+                        print("beforepage = " + str(self.page))
+
+                        if self.page < uiInstance.page:
+                            self.page += 1
+
+                            print("page = " + str(self.page))
+
+                            uiInstance.chatHistory.clear()
+                            uiInstance.chatHistory.value = self.transcript[self.page][0]
+
+                            for line in self.transcript[self.page][1:]:
+                                sleep(uiInstance.rate * 100)
+                                uiInstance.chatHistory.append(line)
+
+                        else:
+                            animateThread = Thread(target=animationInstance.animateHeader,
+                                                   args=["You are at the highest page", uiInstance.animationColor])
+                            animateThread.start()
                     else:
                         self.addMessage(message)
 
@@ -854,6 +898,9 @@ class Communication:
 
     def addMessage(self, message):
         if uiInstance.linesSent > 12:
+            self.transcript.append([])
+            self.page += 1
+            uiInstance.page += 1
             uiInstance.chatHistory.clear()
             uiInstance.linesSent = 0
 
@@ -863,9 +910,12 @@ class Communication:
             uiInstance.chatHistory.append(message)
 
         time = strftime("%H:%M:%S", localtime())
-        message = time + " " + message
-        self.chatHistory.append(message)
+        newMessage = time + " " + message
+        self.transcript[uiInstance.page].append(message)
+        self.chatHistory.append(newMessage)
         uiInstance.linesSent += 1
+
+        print(uiInstance.page, self.page)
 
 
 class Connection:
@@ -954,6 +1004,7 @@ class UI:
         self.waitTime = 1
         self.linesSent = 0
         self.darkMode = False
+        self.page = 0
 
         if platform.system() == "Darwin":
             self.rate = 0.00025
@@ -1103,7 +1154,7 @@ class UI:
 
         attemptConnect.text_size = self.fontSize - 6
 
-        build = Text(bottomPadding, text="development: resurrecting rainbow", align="bottom")
+        build = Text(bottomPadding, text="development: previous and next page", align="bottom")
 
         animateThread = Thread(target=animationInstance.animateStatus)
         animateThread.start()
@@ -1117,13 +1168,9 @@ def enterSend(event):
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "rainbow", "192.168.1.138", "59616", "320909804071")
+connectionInstance = Connection("tomm", "rainbow", "10.28.206.175", "56954", "529805663889")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
 
-cProfile.run("UI.openSetup(uiInstance)", "databytomm.txt")
-
-with open("databytomm_time.txt", "w") as f:
-    p = pstats.Stats("databytomm.txt", stream=f)
-    p.sort_stats("time").print_stats()
+UI.openSetup(uiInstance)
