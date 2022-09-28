@@ -1197,6 +1197,7 @@ def keyPressed(event):
                                            uiInstance.hostInput, uiInstance.portInput, uiInstance.keyInput)
         else:
             uiInstance.messageInput.focus()
+            uiInstance.messageInput.append(event.key)
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
