@@ -1,4 +1,4 @@
-# 28/9/2022
+# 29/9/2022
 # V13 Beta 2
 
 import logging
@@ -840,7 +840,7 @@ class Communication:
 
             elif displayMessage:
                 animateThread = Thread(target=animationInstance.animateHeader,
-                                       args=["Your cannot change to rainbow at this time",
+                                       args=["You cannot change to rainbow at this time",
                                              uiInstance.animationColor])
                 animateThread.start()
 
@@ -850,7 +850,7 @@ class Communication:
 
                 if color == (240, 230, 140):
                     animateThread = Thread(target=animationInstance.animateHeader,
-                                           args=["Your cannot use this color",
+                                           args=["You cannot use this color",
                                                  uiInstance.animationColor])
                     animateThread.start()
 
@@ -861,7 +861,7 @@ class Communication:
 
             except ValueError:
                 animateThread = Thread(target=animationInstance.animateHeader,
-                                       args=["Your cannot use this color as it is undefined",
+                                       args=["You cannot use this color as it is undefined",
                                              uiInstance.animationColor])
                 animateThread.start()
 
@@ -876,12 +876,10 @@ class Communication:
 
             uiInstance.chatHistory.clear()
             uiInstance.chatHistory.value = self.transcript[self.page][0]
-            uiInstance.linesSent = 1
 
             for line in self.transcript[self.page][1:]:
                 sleep(uiInstance.rate * 100)
                 uiInstance.chatHistory.append(line)
-                uiInstance.linesSent += 1
 
             animateThread = Thread(target=animationInstance.animateHeader,
                                    args=["You are on page " + str(self.page) + " of " + str(uiInstance.page),
@@ -899,12 +897,10 @@ class Communication:
 
             uiInstance.chatHistory.clear()
             uiInstance.chatHistory.value = self.transcript[self.page][0]
-            uiInstance.linesSent = 1
 
             for line in self.transcript[self.page][1:]:
                 sleep(uiInstance.rate * 100)
                 uiInstance.chatHistory.append(line)
-                uiInstance.linesSent += 1
 
             animateThread = Thread(target=animationInstance.animateHeader,
                                    args=["You are on page " + str(self.page) + " of " + str(uiInstance.page),
@@ -918,12 +914,7 @@ class Communication:
 
     def addMessage(self, message):
         if uiInstance.linesSent >= 13:
-            self.transcript.append([message])
-            self.page += 1
-            uiInstance.chatHistory.clear()
-            uiInstance.chatHistory.value = message
-            uiInstance.page += 1
-            uiInstance.linesSent = 1
+            self.createNewPage(message)
 
         else:
             # Received input
@@ -954,16 +945,27 @@ class Communication:
                         uiInstance.linesSent += 1
 
                     if uiInstance.linesSent >= 13:
-                        self.transcript.append([message])
-                        self.page += 1
-                        uiInstance.chatHistory.clear()
-                        uiInstance.chatHistory.value = message
-                        uiInstance.page += 1
-                        uiInstance.linesSent = 1
+                        # If the current page has no space left
+                        self.createNewPage(message)
 
                     else:
+                        self.transcript[uiInstance.page].append(message)
                         uiInstance.chatHistory.append(message)
                         uiInstance.linesSent += 1
+
+    def createNewPage(self, message):
+        # Sends the client to the new current page and shows input
+        self.transcript.append([message])
+        self.page = uiInstance.page + 1
+        uiInstance.chatHistory.clear()
+        uiInstance.chatHistory.value = message
+        uiInstance.page += 1
+        uiInstance.linesSent = 1
+
+        animateThread = Thread(target=animationInstance.animateHeader,
+                               args=["You are on page " + str(self.page) + " of " + str(uiInstance.page),
+                                     uiInstance.animationColor])
+        animateThread.start()
 
 
 class Connection:
@@ -1259,7 +1261,7 @@ def keyPressed(event):
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "rainbow", "192.168.1.138", "56103", "531341665807")
+connectionInstance = Connection("tomm", "rainbow", "192.168.1.138", "53664", "254285637331")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
