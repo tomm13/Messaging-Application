@@ -1,4 +1,4 @@
-# 27/9/2022
+# 28/9/2022
 # V13 Beta 2
 
 import logging
@@ -36,6 +36,7 @@ class Animation:
                         B -= 1
 
                     uiInstance.status.text_color = (R, G, B)
+                    uiInstance.connectText.text_color = (R, G, B)
                     sleep(uiInstance.rate * 20)
 
                 sleep(self.readRate)
@@ -49,6 +50,7 @@ class Animation:
                         B += 1
 
                     uiInstance.status.text_color = (R, G, B)
+                    uiInstance.connectText.text_color = (R, G, B)
                     sleep(uiInstance.rate * 20)
 
                 sleep(self.readRate)
@@ -694,10 +696,12 @@ class Communication:
 
                             uiInstance.chatHistory.clear()
                             uiInstance.chatHistory.value = self.transcript[self.page][0]
+                            uiInstance.linesSent = 1
 
                             for line in self.transcript[self.page][1:]:
                                 sleep(uiInstance.rate * 100)
                                 uiInstance.chatHistory.append(line)
+                                uiInstance.linesSent += 1
 
                         else:
                             animateThread = Thread(target=animationInstance.animateHeader,
@@ -710,10 +714,12 @@ class Communication:
 
                             uiInstance.chatHistory.clear()
                             uiInstance.chatHistory.value = self.transcript[self.page][0]
+                            uiInstance.linesSent = 1
 
                             for line in self.transcript[self.page][1:]:
                                 sleep(uiInstance.rate * 100)
                                 uiInstance.chatHistory.append(line)
+                                uiInstance.linesSent += 1
 
                         else:
                             animateThread = Thread(target=animationInstance.animateHeader,
@@ -890,23 +896,53 @@ class Communication:
             animateThread.start()
 
     def addMessage(self, message):
-        if uiInstance.linesSent > 12:
-            self.transcript.append([])
+        if uiInstance.linesSent >= 13:
+            self.transcript.append([message])
             self.page += 1
-            uiInstance.page += 1
             uiInstance.chatHistory.clear()
-            uiInstance.linesSent = 0
-
-        if uiInstance.linesSent == 0:
             uiInstance.chatHistory.value = message
-        else:
-            uiInstance.chatHistory.append(message)
+            uiInstance.page += 1
+            uiInstance.linesSent = 1
 
-        time = strftime("%H:%M:%S", localtime())
-        newMessage = time + " " + message
-        self.transcript[uiInstance.page].append(message)
-        self.chatHistory.append(newMessage)
-        uiInstance.linesSent += 1
+        else:
+            # Received input
+            self.chatHistory.append(strftime("%H:%M:%S", localtime()) + " " + message)
+            if uiInstance.linesSent == 0:
+                # Only true for the very first message
+                self.transcript[uiInstance.page].append(message)
+                uiInstance.chatHistory.value = message
+                uiInstance.linesSent += 1
+
+            else:
+                if self.page == uiInstance.page:
+                    # if you are viewing the current page then
+                    self.transcript[uiInstance.page].append(message)
+                    uiInstance.chatHistory.append(message)
+                    uiInstance.linesSent += 1
+
+                else:
+                    # if you are viewing an older page then load current page then show input
+                    self.page = uiInstance.page
+                    uiInstance.chatHistory.clear()
+                    uiInstance.chatHistory.value = self.transcript[self.page][0]
+                    uiInstance.linesSent = 1
+
+                    for line in self.transcript[self.page][1:]:
+                        sleep(uiInstance.rate * 100)
+                        uiInstance.chatHistory.append(line)
+                        uiInstance.linesSent += 1
+
+                    if uiInstance.linesSent >= 13:
+                        self.transcript.append([message])
+                        self.page += 1
+                        uiInstance.chatHistory.clear()
+                        uiInstance.chatHistory.value = message
+                        uiInstance.page += 1
+                        uiInstance.linesSent = 1
+
+                    else:
+                        uiInstance.chatHistory.append(message)
+                        uiInstance.linesSent += 1
 
 
 class Connection:
@@ -1006,6 +1042,7 @@ class UI:
         try:
             self.chatWindow = Window(self.setupWindow, width=1280, height=720, title="Chatroom", bg=self.bg)
             self.chatWindow.when_closed = connectionInstance.leave
+            self.chatWindow.when_key_pressed = keyPressed
 
             topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
             leftPadding = Box(self.chatWindow, width=50, height="fill", align="left")
@@ -1071,7 +1108,7 @@ class UI:
             self.messageInput.text_color = connectionInstance.color
             self.messageInput.bg = (255, 255, 255)
             self.messageInput.text_size = self.fontSize + 10
-            self.messageInput.when_key_pressed = enterSend
+            self.messageInput.when_key_pressed = keyPressed
 
             # Threads start here
 
@@ -1089,6 +1126,7 @@ class UI:
         self.setupWindow = App(title="Connect", width=800, height=275)
         self.setupWindow.bg = self.bg
         self.setupWindow.font = self.font
+        self.setupWindow.when_key_pressed = keyPressed
 
         topPadding = Box(self.setupWindow, width="fill", height=50, align="top")
         bottomPadding = Box(self.setupWindow, width="fill", height=50, align="bottom")
@@ -1109,41 +1147,37 @@ class UI:
         keyBlocker = Box(inputBox, width=15, height=30, align="right")
         keyInputBox = Box(inputBox, width=215, height=30)
 
-        usernameInput = TextBox(usernameInputBox, text=connectionInstance.username, width="fill")
-        colorInput = TextBox(colorInputBox, text=connectionInstance.color, width="fill")
-        hostInput = TextBox(hostInputBox, text=connectionInstance.host, width="fill")
-        portInput = TextBox(portInputBox, text=connectionInstance.port, width="fill")
-        keyInput = TextBox(keyInputBox, text=connectionInstance.privateKey, width="fill")
+        self.usernameInput = TextBox(usernameInputBox, text=connectionInstance.username, width="fill")
+        self.colorInput = TextBox(colorInputBox, text=connectionInstance.color, width="fill")
+        self.hostInput = TextBox(hostInputBox, text=connectionInstance.host, width="fill")
+        self.portInput = TextBox(portInputBox, text=connectionInstance.port, width="fill")
+        self.keyInput = TextBox(keyInputBox, text=connectionInstance.privateKey, width="fill")
 
-        usernameInput.text_color = self.animationColor
-        colorInput.text_color = self.animationColor
-        hostInput.text_color = self.animationColor
-        portInput.text_color = self.animationColor
-        keyInput.text_color = self.animationColor
+        self.usernameInput.text_color = self.animationColor
+        self.colorInput.text_color = self.animationColor
+        self.hostInput.text_color = self.animationColor
+        self.portInput.text_color = self.animationColor
+        self.keyInput.text_color = self.animationColor
 
-        usernameInput.text_size = self.fontSize - 6
-        colorInput.text_size = self.fontSize - 6
-        hostInput.text_size = self.fontSize - 6
-        portInput.text_size = self.fontSize - 6
-        keyInput.text_size = self.fontSize - 6
+        self.usernameInput.text_size = self.fontSize - 6
+        self.colorInput.text_size = self.fontSize - 6
+        self.hostInput.text_size = self.fontSize - 6
+        self.portInput.text_size = self.fontSize - 6
+        self.keyInput.text_size = self.fontSize - 6
 
-        usernameInput.bg = self.darkbg
-        colorInput.bg = self.darkbg
-        hostInput.bg = self.darkbg
-        portInput.bg = self.darkbg
-        keyInput.bg = self.darkbg
+        self.usernameInput.bg = self.darkbg
+        self.colorInput.bg = self.darkbg
+        self.hostInput.bg = self.darkbg
+        self.portInput.bg = self.darkbg
+        self.keyInput.bg = self.darkbg
 
         self.status = Text(verifyBox, text="Not Connected")
         self.status.text_size = self.fontSize + 12
 
-        rightBlocker = Box(verifyBox, width="fill", height=40, align="top")
-        attemptConnect = PushButton(verifyBox, text="Connect", command=connectionInstance.connect, args=[usernameInput,
-                                                                                                         colorInput,
-                                                                                                         hostInput,
-                                                                                                         portInput,
-                                                                                                         keyInput])
+        verifyBoxBlocker = Box(verifyBox, width="fill", height=64, align="top")
 
-        attemptConnect.text_size = self.fontSize - 6
+        self.connectText = Text(verifyBox, text="Enter to continue")
+        self.connectText.text_size = self.fontSize + 2
 
         build = Text(bottomPadding, text="development: previous and next page", align="bottom")
 
@@ -1153,13 +1187,20 @@ class UI:
         self.setupWindow.display()
 
 
-def enterSend(event):
-    if event.tk_event.keysym == "Return":
-        communicationInstance.sendToServer()
+def keyPressed(event):
+    if event:
+        if event.tk_event.keysym == "Return":
+            if connectionInstance.connected:
+                communicationInstance.sendToServer()
+            else:
+                connectionInstance.connect(uiInstance.usernameInput, uiInstance.colorInput,
+                                           uiInstance.hostInput, uiInstance.portInput, uiInstance.keyInput)
+        else:
+            uiInstance.messageInput.focus()
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "rainbow", "10.28.206.175", "56954", "529805663889")
+connectionInstance = Connection("tomm", "rainbow", "192.168.1.138", "60727", "127181637501")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
