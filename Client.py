@@ -11,7 +11,7 @@ from threading import Thread
 from guizero import *
 
 
-logging.basicConfig(filename='chat.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='chat.log', filemode='w', format='%(name)s - %(levelness)s - %(message)s')
 
 
 class Animation:
@@ -156,7 +156,6 @@ class Animation:
                     time = strftime("%H:%M", localtime())
                     animateThread = Thread(target=self.animateHeader, args=[str(time), uiInstance.animationColor])
                     animateThread.start()
-
 
             if displayMessage:
                 animateThread = Thread(target=animationInstance.animateHeader, args=["You turned filler off",
@@ -554,12 +553,14 @@ class Animation:
 
 class Communication:
     def __init__(self):
+        self.location = None
         self.users = []
         self.chatHistory = []
         self.transcript = [[]]
         self.page = 0
 
-    def decrypt(self, message):
+    @staticmethod
+    def decrypt(message):
         message = message.split()
         decryptedMessage = []
 
@@ -690,41 +691,12 @@ class Communication:
                         animateThread = Thread(target=animationInstance.changeBorder, args=[color, True])
                         animateThread.start()
 
-                    elif message == "/previous":
-                        if self.page > 0:
-                            self.page -= 1
-
-                            uiInstance.chatHistory.clear()
-                            uiInstance.chatHistory.value = self.transcript[self.page][0]
-                            uiInstance.linesSent = 1
-
-                            for line in self.transcript[self.page][1:]:
-                                sleep(uiInstance.rate * 100)
-                                uiInstance.chatHistory.append(line)
-                                uiInstance.linesSent += 1
-
-                        else:
-                            animateThread = Thread(target=animationInstance.animateHeader,
-                                                   args=["You cannot go below this page", uiInstance.animationColor])
-                            animateThread.start()
-
                     elif message == "/next":
-                        if self.page < uiInstance.page:
-                            self.page += 1
+                        self.nextPage()
 
-                            uiInstance.chatHistory.clear()
-                            uiInstance.chatHistory.value = self.transcript[self.page][0]
-                            uiInstance.linesSent = 1
+                    elif message == "/previous":
+                        self.previousPage()
 
-                            for line in self.transcript[self.page][1:]:
-                                sleep(uiInstance.rate * 100)
-                                uiInstance.chatHistory.append(line)
-                                uiInstance.linesSent += 1
-
-                        else:
-                            animateThread = Thread(target=animationInstance.animateHeader,
-                                                   args=["You are at the highest page", uiInstance.animationColor])
-                            animateThread.start()
                     else:
                         self.addMessage(message)
 
@@ -736,20 +708,21 @@ class Communication:
         finally:
             return
 
-    def sendToServer(self):
+    @staticmethod
+    def sendToServer():
         try:
-            self.message = uiInstance.messageInput.value
-            if self.message:
-                if self.message == "/leave":
+            message = uiInstance.messageInput.value
+            if message:
+                if message == "/leave":
                     connectionInstance.leave()
                 else:
-                    if len(self.message) + len(connectionInstance.username) + 2 >= 80:
+                    if len(message) + len(connectionInstance.username) + 2 >= 45:
                         animateThread = Thread(target=animationInstance.animateHeader,
                                                args=["Your message is too long.", uiInstance.animationColor])
                         animateThread.start()
 
                     else:
-                        connectionInstance.socket.send(self.message.encode())
+                        connectionInstance.socket.send(message.encode())
                         uiInstance.messageInput.clear()
 
         except BrokenPipeError:
@@ -774,7 +747,8 @@ class Communication:
 
         return
 
-    def savePresets(self, location):
+    @staticmethod
+    def savePresets(location):
         if location and " " not in location:
             file = open(location, "w")
             if uiInstance.darkMode:
@@ -854,7 +828,8 @@ class Communication:
         finally:
             return
 
-    def chooseColor(self, message, displayMessage):
+    @staticmethod
+    def chooseColor(message, displayMessage):
         if message == "rainbow":
             if animationInstance.stopRainbowThread:
                 animationInstance.stopRainbowThread = False
@@ -895,6 +870,52 @@ class Communication:
                                    args=["Your choice of color is invalid", uiInstance.animationColor])
             animateThread.start()
 
+    def previousPage(self):
+        if self.page > 0:
+            self.page -= 1
+
+            uiInstance.chatHistory.clear()
+            uiInstance.chatHistory.value = self.transcript[self.page][0]
+            uiInstance.linesSent = 1
+
+            for line in self.transcript[self.page][1:]:
+                sleep(uiInstance.rate * 100)
+                uiInstance.chatHistory.append(line)
+                uiInstance.linesSent += 1
+
+            animateThread = Thread(target=animationInstance.animateHeader,
+                                   args=["You are on page " + str(self.page) + " of " + str(uiInstance.page),
+                                         uiInstance.animationColor])
+            animateThread.start()
+
+        else:
+            animateThread = Thread(target=animationInstance.animateHeader,
+                                   args=["You cannot go below this page", uiInstance.animationColor])
+            animateThread.start()
+
+    def nextPage(self):
+        if self.page < uiInstance.page:
+            self.page += 1
+
+            uiInstance.chatHistory.clear()
+            uiInstance.chatHistory.value = self.transcript[self.page][0]
+            uiInstance.linesSent = 1
+
+            for line in self.transcript[self.page][1:]:
+                sleep(uiInstance.rate * 100)
+                uiInstance.chatHistory.append(line)
+                uiInstance.linesSent += 1
+
+            animateThread = Thread(target=animationInstance.animateHeader,
+                                   args=["You are on page " + str(self.page) + " of " + str(uiInstance.page),
+                                         uiInstance.animationColor])
+            animateThread.start()
+
+        else:
+            animateThread = Thread(target=animationInstance.animateHeader,
+                                   args=["You are at the highest page", uiInstance.animationColor])
+            animateThread.start()
+
     def addMessage(self, message):
         if uiInstance.linesSent >= 13:
             self.transcript.append([message])
@@ -915,13 +936,13 @@ class Communication:
 
             else:
                 if self.page == uiInstance.page:
-                    # if you are viewing the current page then
+                    # If you are viewing the current page then
                     self.transcript[uiInstance.page].append(message)
                     uiInstance.chatHistory.append(message)
                     uiInstance.linesSent += 1
 
                 else:
-                    # if you are viewing an older page then load current page then show input
+                    # If you are viewing an older page then load current page then show input
                     self.page = uiInstance.page
                     uiInstance.chatHistory.clear()
                     uiInstance.chatHistory.value = self.transcript[self.page][0]
@@ -952,6 +973,8 @@ class Connection:
         self.host = host
         self.port = port
         self.privateKey = privateKey
+        self.d = None
+        self.N = None
         self.socket = socket.socket()
         self.connected = False
         self.mod = False
@@ -992,7 +1015,7 @@ class Connection:
                         uiInstance.status.value = "Connection Refused"
 
                     except OSError:
-                        uiInstance.status.value = "Restart Client"
+                        connectionInstance.leave()
 
                     except BrokenPipeError:
                         uiInstance.status.value = "Broken Pipe"
@@ -1011,8 +1034,9 @@ class Connection:
             self.socket.send("/leave".encode())
             self.connected = False
 
+            uiInstance.chatWindow.hide()
+
         uiInstance.setupWindow.hide()
-        uiInstance.chatWindow.hide()
 
         self.socket.close()
         print("You have disconnected")
@@ -1021,6 +1045,39 @@ class Connection:
 
 class UI:
     def __init__(self):
+        # UI elements (setup)
+        self.setupWindow = None
+        self.usernameInput = None
+        self.colorInput = None
+        self.hostInput = None
+        self.portInput = None
+        self.keyInput = None
+        self.status = None
+        self.connectText = None
+
+        # UI elements (chatWindow)
+        self.chatWindow = None
+        self.header = None
+        self.border = None
+        self.userList = None
+        self.chatHistory = None
+        self.messageInput = None
+
+        # UI Borders (chatWindow)
+        self.userListTopBorder = None
+        self.userListRightBorder = None
+        self.userListBottomBorder = None
+        self.userListLeftBorder = None
+        self.chatHistoryTopBorder = None
+        self.chatHistoryRightBorder = None
+        self.chatHistoryBottomBorder = None
+        self.chatHistoryLeftBorder = None
+        self.messageInputTopBorder = None
+        self.messageInputRightBorder = None
+        self.messageInputBottomBorder = None
+        self.messageInputLeftBorder = None
+
+        # Attributes
         self.font = "San Francisco"
         self.fontSize = 22
         self.color = None
@@ -1195,12 +1252,14 @@ def keyPressed(event):
             else:
                 connectionInstance.connect(uiInstance.usernameInput, uiInstance.colorInput,
                                            uiInstance.hostInput, uiInstance.portInput, uiInstance.keyInput)
+
         else:
-            uiInstance.messageInput.focus()
+            if connectionInstance.connected:
+                uiInstance.messageInput.focus()
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "rainbow", "192.168.1.138", "60727", "127181637501")
+connectionInstance = Connection("tomm", "rainbow", "192.168.1.138", "56103", "531341665807")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
