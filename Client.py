@@ -335,11 +335,11 @@ class Animation:
                 # Check for animation code
                 if self.queue[0][0] == 1:
                     if len(str(self.queue[0][0])) < 10:
-                        self.waitMultiplier = 1.2
+                        self.waitMultiplier = 1.4
                     elif len(str(self.queue[0][0])) < 15:
-                        self.waitMultiplier = 1.7
+                        self.waitMultiplier = 1.9
                     else:
-                        self.waitMultiplier = 2.2
+                        self.waitMultiplier = 2.4
 
                     self.animateHeader(self.queue[0][1], self.queue[0][2])
 
@@ -443,8 +443,10 @@ class Communication:
 
                     elif message[0:7] == "/remove":
                         if message[8:] == connectionInstance.username:
-                            connectionInstance.leave()
-                            break
+                            while True:
+                                animationInstance.queue.append([1, "You have been kicked / disconnected", (255, 0, 0)])
+                                sleep(1)
+
                         user = message[8:]
                         uiInstance.userList.remove(user)
                         self.users.remove(user)
@@ -476,9 +478,10 @@ class Communication:
                         saveChatThread.start()
 
                     elif message == "/disconnect":
-                        print("Your username is used by someone else")
-                        connectionInstance.leave()
-                        break
+                        while True:
+                            animationInstance.queue.append([1,
+                            "You cannot use this username, please rejoin under a different username", (255, 0, 0)])
+                            sleep(1)
 
                     elif message[0:5] == "/rate":
                         animationInstance.readRate = float(message[6:])
@@ -826,11 +829,11 @@ class UI:
 
         if platform.system() == "Darwin":
             self.fontSize = 22
-            self.rate = 0.00045
+            self.rate = 0.00035
             self.linesLimit = 13
         elif platform.system() == "Windows":
             self.fontSize = 18
-            self.rate = 0.00045
+            self.rate = 0.00000
             self.linesLimit = 9
 
     def openChat(self):
