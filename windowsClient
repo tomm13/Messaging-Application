@@ -3,7 +3,6 @@
 # Windows Client
 
 # import logging
-import platform
 import socket
 import colorutils
 import sys
