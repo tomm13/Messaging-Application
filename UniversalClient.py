@@ -1,5 +1,6 @@
 # 1/10/2022
 # V13 Beta 2
+# macOS Client
 
 # import logging
 import platform
@@ -17,6 +18,7 @@ class Animation:
         self.queue = []
         self.readRate = 1
         self.waitMultiplier = 1
+        self.freeze = False
 
     def animateHeader(self, message, color):
         # Code 1
@@ -63,6 +65,9 @@ class Animation:
                 sleep(uiInstance.rate)
 
             sleep(self.readRate * self.waitMultiplier)
+
+            if self.freeze:
+                return
 
             while not R == color[0] or not G == color[1] or not B == color[2]:
                 # Fades background from white to color
@@ -443,16 +448,12 @@ class Communication:
                             self.addMessage(line)
 
                     elif message[0:7] == "/remove":
-                        if message[8:] == connectionInstance.username:
-                            while True:
-                                animationInstance.queue.append([1, "You have been kicked / disconnected", (255, 0, 0)])
-                                sleep(1)
-
-                        user = message[8:]
-                        uiInstance.userList.remove(user)
-                        self.users.remove(user)
-                        message = user + " has disconnected"
-                        animationInstance.queue.append([1, message, uiInstance.animationColor])
+                        if not message[8:] == connectionInstance.username:
+                            user = message[8:]
+                            uiInstance.userList.remove(user)
+                            self.users.remove(user)
+                            message = user + " has disconnected"
+                            animationInstance.queue.append([1, message, uiInstance.animationColor])
 
                     elif message[0:8] == "/display":
                         animationInstance.queue.append([1, message[9:], uiInstance.animationColor])
@@ -479,10 +480,10 @@ class Communication:
                         saveChatThread.start()
 
                     elif message == "/disconnect":
-                        while True:
-                            animationInstance.queue.append([1, "You cannot use this username, "
-                                                            "please rejoin under a different username", (255, 0, 0)])
-                            sleep(1)
+                        uiInstance.header.value = "You are not connected"
+                        animationInstance.freeze = True
+                        animationInstance.queue.append([1, "You cannot use this username, "
+                                                           "try a different/shorter username", (255, 0, 0)])
 
                     elif message[0:5] == "/rate":
                         animationInstance.readRate = float(message[6:])
@@ -1010,7 +1011,7 @@ def keyPressed(event):
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "51840", "421227633439")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "60145", "638955960391")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
