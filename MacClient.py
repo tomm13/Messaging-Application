@@ -1,5 +1,6 @@
 # 30/9/2022
 # V13 Beta 2
+# macOS
 
 # import logging
 import platform
