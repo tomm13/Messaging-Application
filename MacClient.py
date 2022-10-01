@@ -1,9 +1,8 @@
-# 30/9/2022
+# 1/10/2022
 # V13 Beta 2
-# macOS
+# macOS Client
 
 # import logging
-import platform
 import socket
 import colorutils
 import sys
@@ -818,6 +817,7 @@ class UI:
 
         # Attributes
         self.font = "San Francisco"
+        self.fontSize = 22
         self.color = None
         self.animationColor = (173, 216, 230)
         self.borderColor = (173, 216, 230)
@@ -827,15 +827,8 @@ class UI:
         self.linesSent = 0
         self.darkMode = False
         self.page = 0
-
-        if platform.system() == "Darwin":
-            self.fontSize = 22
-            self.rate = 0.00035
-            self.linesLimit = 13
-        elif platform.system() == "Windows":
-            self.fontSize = 18
-            self.rate = 0.00000
-            self.linesLimit = 9
+        self.rate = 0.00035
+        self.linesLimit = 13
 
     def openChat(self):
         try:
@@ -1003,7 +996,7 @@ def keyPressed(event):
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "coral", "10.28.206.224", "63094", "620023544003")
+connectionInstance = Connection("tomm", "coral", "192.168.1.138", "61420", "184423647123")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
