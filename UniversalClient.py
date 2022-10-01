@@ -1,8 +1,8 @@
 # 1/10/2022
 # V13 Beta 2
-# macOS Client
 
 # import logging
+import platform
 import socket
 import colorutils
 import sys
@@ -13,6 +13,7 @@ from guizero import *
 
 class Animation:
     def __init__(self):
+        self.hasLoadedSettings = False
         self.queue = []
         self.readRate = 1
         self.waitMultiplier = 1
@@ -421,7 +422,7 @@ class Communication:
                         message.sort()
 
                         uiInstance.userList.clear()
-                        uiInstance.userList.append("Users Online:")
+                        uiInstance.userList.append("Users online:")
 
                         for user in message:
                             if user not in self.users:
@@ -438,7 +439,7 @@ class Communication:
                         recentMessages = message[15:].split(", ")
 
                         for line in recentMessages:
-                            sleep(uiInstance.rate * 100)
+                            sleep(uiInstance.rate * 50)
                             self.addMessage(line)
 
                     elif message[0:7] == "/remove":
@@ -461,16 +462,16 @@ class Communication:
 
                     elif message[0:4] == "/mod":
                         if message[5:] == connectionInstance.username and not connectionInstance.mod:
-                            uiInstance.animationColor = (240, 230, 140)
                             connectionInstance.mod = True
-                            animationInstance.runFiller = True
-                            if not uiInstance.darkMode:
-                                animationInstance.queue.append([2, False])
-                            animationInstance.queue.append([3, uiInstance.animationColor, False])
+                            uiInstance.animationColor = (240, 230, 140)
                             animationInstance.queue.append([4, (240, 230, 140), False])
+                            if not animationInstance.hasLoadedSettings:
+                                animationInstance.queue.append([3, uiInstance.animationColor, False])
+                                if not uiInstance.darkMode:
+                                    animationInstance.queue.append([2, False])
 
                     elif message[0:6] == "/color":
-                        self.chooseColor(message[7:], 3)
+                        self.chooseColor(message[7:], 3, True)
 
                     elif message[0:9] == "/savechat":
                         self.location = message[10:]
@@ -479,8 +480,8 @@ class Communication:
 
                     elif message == "/disconnect":
                         while True:
-                            animationInstance.queue.append([1,
-                            "You cannot use this username, please rejoin under a different username", (255, 0, 0)])
+                            animationInstance.queue.append([1, "You cannot use this username, "
+                                                            "please rejoin under a different username", (255, 0, 0)])
                             sleep(1)
 
                     elif message[0:5] == "/rate":
@@ -500,7 +501,7 @@ class Communication:
                         loadPresetThread.start()
 
                     elif message[0:7] == "/border":
-                        self.chooseColor(message[8:], 4)
+                        self.chooseColor(message[8:], 4, True)
 
                     elif message == "/next":
                         self.nextPage()
@@ -587,18 +588,18 @@ class Communication:
                             animationInstance.queue.append([2, False])
 
                     elif message[0:6] == "/color":
-                        self.chooseColor(message[7:])
+                        self.chooseColor(message[7:], 3, False)
 
                     elif message[0:7] == "/border":
                         if connectionInstance.mod:
-                            color = colorutils.web_to_rgb(message[8:])
-                            animationInstance.queue.append([3, color, False])
+                            self.chooseColor(message[8:], 4, False)
 
                         else:
                             animationInstance.queue.append([1, "You need to be a mod to change the border color",
                                                             uiInstance.animationColor])
 
                 file.close()
+                animationInstance.hasLoadedSettings = True
 
             else:
                 animationInstance.queue.append([1, "You can't open your preset here", uiInstance.animationColor])
@@ -611,16 +612,16 @@ class Communication:
             return
 
     @staticmethod
-    def chooseColor(message, code):
+    def chooseColor(message, code, displayMessage):
         if message:
             try:
                 color = colorutils.web_to_rgb(message)
 
-                if color == (240, 230, 140):
+                if color == (240, 230, 140) and not connectionInstance.mod:
                     animationInstance.queue.append([1, "You cannot use this color", uiInstance.animationColor])
 
                 else:
-                    animationInstance.queue.append([code, color, True])
+                    animationInstance.queue.append([code, color, displayMessage])
 
             except ValueError:
                 animationInstance.queue.append([1, "You cannot use this color as it is undefined",
@@ -636,11 +637,11 @@ class Communication:
             uiInstance.chatHistory.value = self.transcript[self.page][0]
 
             for line in self.transcript[self.page][1:]:
-                sleep(uiInstance.rate * 100)
+                sleep(uiInstance.rate * 50)
                 uiInstance.chatHistory.append(line)
 
-            animationInstance.queue.append([1, "You are on page " + str(self.page) + " of " + str(uiInstance.page),
-                                            uiInstance.animationColor])
+            animationInstance.queue.append([1, "You are on page " + str(self.page + 1) + " of " +
+                                            str(uiInstance.page + 1), uiInstance.animationColor])
         else:
             animationInstance.queue.append([1, "You cannot go below this page", uiInstance.animationColor])
 
@@ -652,11 +653,11 @@ class Communication:
             uiInstance.chatHistory.value = self.transcript[self.page][0]
 
             for line in self.transcript[self.page][1:]:
-                sleep(uiInstance.rate * 100)
+                sleep(uiInstance.rate * 50)
                 uiInstance.chatHistory.append(line)
 
-            animationInstance.queue.append([1, "You are on page " + str(self.page) + " of " + str(uiInstance.page),
-                                           uiInstance.animationColor])
+            animationInstance.queue.append([1, "You are on page " + str(self.page + 1) + " of " +
+                                            str(uiInstance.page + 1), uiInstance.animationColor])
         else:
             animationInstance.queue.append([1, "You are at the highest page", uiInstance.animationColor])
 
@@ -688,7 +689,7 @@ class Communication:
                     uiInstance.linesSent = 1
 
                     for line in self.transcript[self.page][1:]:
-                        sleep(uiInstance.rate * 100)
+                        sleep(uiInstance.rate * 50)
                         uiInstance.chatHistory.append(line)
                         uiInstance.linesSent += 1
 
@@ -816,8 +817,16 @@ class UI:
         self.messageInputLeftBorder = None
 
         # Attributes
+        if platform.system() == "Darwin":
+            self.fontSize = 36
+            self.rate = 0.00035
+            self.linesLimit = 13
+        elif platform.system() == "Windows":
+            self.fontSize = 32
+            self.rate = 0.00000
+            self.linesLimit = 12
+
         self.font = "San Francisco"
-        self.fontSize = 22
         self.color = None
         self.animationColor = (173, 216, 230)
         self.borderColor = (173, 216, 230)
@@ -827,8 +836,6 @@ class UI:
         self.linesSent = 0
         self.darkMode = False
         self.page = 0
-        self.rate = 0.00035
-        self.linesLimit = 13
 
     def openChat(self):
         try:
@@ -861,13 +868,15 @@ class UI:
             self.userListLeftBorder = Box(userListBox, width=10, height="fill", align="left")
             self.userListLeftBorder.bg = uiInstance.animationColor
 
-            self.userList = ListBox(userListBox, items=["Users Online:"], width=150, height="fill", align="right")
+            # Windows 16, Mac 22
+            self.userList = ListBox(userListBox, items=["Users online:"], width=150, height="fill", align="right")
             self.userList.text_color = connectionInstance.color
             self.userList.bg = (255, 255, 255)
-            self.userList.text_size = self.fontSize
+            self.userList.text_size = self.fontSize - 14
 
+            # Windows 32, Mac 36
             self.header = Text(header, text="Your client is loading...", width="fill", height=50)
-            self.header.text_size = self.fontSize + 14
+            self.header.text_size = self.fontSize
             self.header.text_color = (255, 255, 255)
             self.header.bg = uiInstance.animationColor
 
@@ -880,10 +889,11 @@ class UI:
             self.chatHistoryLeftBorder = Box(userBox, width=10, height="fill", align="left")
             self.chatHistoryLeftBorder.bg = uiInstance.animationColor
 
+            # Windows 20, Mac 24
             self.chatHistory = TextBox(userBox, width="fill", height="fill", align="top", multiline=True)
             self.chatHistory.text_color = connectionInstance.color
             self.chatHistory.bg = (255, 255, 255)
-            self.chatHistory.text_size = self.fontSize + 2
+            self.chatHistory.text_size = self.fontSize - 12
             self.chatHistory.disable()
 
             messageInputBorder = Box(inputBox, width="fill", height=50, align="top")
@@ -896,10 +906,11 @@ class UI:
             self.messageInputLeftBorder = Box(inputBox, width=10, height="fill", align="left")
             self.messageInputLeftBorder.bg = uiInstance.animationColor
 
+            # Windows 28, Mac 32
             self.messageInput = TextBox(inputBox, width="fill", align="bottom")
             self.messageInput.text_color = connectionInstance.color
             self.messageInput.bg = (255, 255, 255)
-            self.messageInput.text_size = self.fontSize + 10
+            self.messageInput.text_size = self.fontSize - 4
             self.messageInput.when_key_pressed = keyPressed
 
             # Threads start here
@@ -917,7 +928,7 @@ class UI:
     def openSetup(self):
         self.setupWindow = App(title="Connect", width=800, height=275)
         self.setupWindow.bg = self.bg
-        self.setupWindow.font = self.font
+        self.setupWindow.font = self.fontSize - 14
         self.setupWindow.when_key_pressed = keyPressed
 
         topPadding = Box(self.setupWindow, width="fill", height=50, align="top")
@@ -951,11 +962,13 @@ class UI:
         self.portInput.text_color = self.animationColor
         self.keyInput.text_color = self.animationColor
 
-        self.usernameInput.text_size = self.fontSize - 6
-        self.colorInput.text_size = self.fontSize - 6
-        self.hostInput.text_size = self.fontSize - 6
-        self.portInput.text_size = self.fontSize - 6
-        self.keyInput.text_size = self.fontSize - 6
+        # Windows 16, Mac 16
+
+        self.usernameInput.text_size = self.fontSize - 20
+        self.colorInput.text_size = self.fontSize - 20
+        self.hostInput.text_size = self.fontSize - 20
+        self.portInput.text_size = self.fontSize - 20
+        self.keyInput.text_size = self.fontSize - 20
 
         self.usernameInput.bg = self.darkbg
         self.colorInput.bg = self.darkbg
@@ -963,13 +976,14 @@ class UI:
         self.portInput.bg = self.darkbg
         self.keyInput.bg = self.darkbg
 
+        # Windows 20, Mac 34
         self.status = Text(verifyBox, text="Not Connected")
-        self.status.text_size = self.fontSize + 12
+        self.status.text_size = self.fontSize - 2
 
         verifyBoxBlocker = Box(verifyBox, width="fill", height=64, align="top")
 
         self.connectText = Text(verifyBox, text="Enter to continue")
-        self.connectText.text_size = self.fontSize + 2
+        self.connectText.text_size = self.fontSize - 12
 
         build = Text(bottomPadding, text="rework animations", align="bottom")
 
@@ -996,7 +1010,7 @@ def keyPressed(event):
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "54649", "351389880351")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "51840", "421227633439")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
