@@ -470,7 +470,7 @@ class Communication:
                             animationInstance.queue.append([4, (240, 230, 140), False])
 
                     elif message[0:6] == "/color":
-                        self.chooseColor(message[7:])
+                        self.chooseColor(message[7:], 3)
 
                     elif message[0:9] == "/savechat":
                         self.location = message[10:]
@@ -500,8 +500,8 @@ class Communication:
                         loadPresetThread.start()
 
                     elif message[0:7] == "/border":
-                        color = colorutils.web_to_rgb(message[8:])
-                        animationInstance.queue.append([4, color, True])
+                        self.chooseColor(message[8:], 4)
+
                     elif message == "/next":
                         self.nextPage()
 
@@ -611,7 +611,7 @@ class Communication:
             return
 
     @staticmethod
-    def chooseColor(message):
+    def chooseColor(message, code):
         if message:
             try:
                 color = colorutils.web_to_rgb(message)
@@ -620,7 +620,7 @@ class Communication:
                     animationInstance.queue.append([1, "You cannot use this color", uiInstance.animationColor])
 
                 else:
-                    animationInstance.queue.append([3, color, True])
+                    animationInstance.queue.append([code, color, True])
 
             except ValueError:
                 animationInstance.queue.append([1, "You cannot use this color as it is undefined",
@@ -996,7 +996,7 @@ def keyPressed(event):
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "coral", "192.168.1.138", "61420", "184423647123")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "54649", "351389880351")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
