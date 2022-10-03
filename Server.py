@@ -1,4 +1,4 @@
-# 27/9/2022
+# 3/10/2022
 # V13 Beta 2
 
 import socket
@@ -9,7 +9,9 @@ from threading import Thread
 
 class Security:
     def __init__(self):
-        pass
+        self.d = None
+        self.e = None
+        self.N = None
 
     def generateKey(self):
         N = 0
@@ -100,6 +102,7 @@ class Security:
         message = str("".join(RSAEncryptedmessage))
         return message
 
+
 class Actions:
     def __init__(self):
         self.modOnline = 0
@@ -108,6 +111,8 @@ class Actions:
         self.hasVoted = []
         self.hasVotedUsers = []
         self.voteTarget = 2
+        self.voteFor = 0
+        self.voteAgainst = 0
         self.voteActive = False
         self.userToKick = None
         self.userToKickSocket = None
@@ -279,8 +284,10 @@ class Actions:
         else:
             sendInstance.privateBroadcastDisplay("You cannot mod this person", modSocket)
 
+
 class Send:
-    def broadcast(self, message):
+    @staticmethod
+    def broadcast(message):
         # Send a public message to every client, not for animating purposes.
         time.sleep(0.1)
         print("[Client] " + message)
@@ -289,7 +296,8 @@ class Send:
         for client in connectionInstance.clients:
             client.send(message.encode())
 
-    def broadcastDisplay(self, message):
+    @staticmethod
+    def broadcastDisplay(message):
         # Send "/display" + a message to every client.
         time.sleep(0.1)
         print("[PublicDisplay] " + message)
@@ -300,7 +308,8 @@ class Send:
         for client in connectionInstance.clients:
             client.send(message.encode())
 
-    def privateBroadcast(self, message, clientSocket):
+    @staticmethod
+    def privateBroadcast(message, clientSocket):
         # Send a private message to 1 specific client, not for animating purposes.
         time.sleep(0.1)
         print("[Private] "+ message)
@@ -308,7 +317,8 @@ class Send:
         message = securityInstance.encrypt(message)
         clientSocket.send(message.encode())
 
-    def privateBroadcastDisplay(self, message, clientSocket):
+    @staticmethod
+    def privateBroadcastDisplay(message, clientSocket):
         # Send "/display" + a message to 1 specific client.
         time.sleep(0.1)
         print("[PrivateDisplay] " + message)
@@ -317,7 +327,8 @@ class Send:
         message = securityInstance.encrypt(message)
         clientSocket.send(message.encode())
 
-    def command(self, message, clientSocket):
+    @staticmethod
+    def command(message, clientSocket):
         # Use list to prevent doubled code
         if message == "/space":
             sendInstance.privateBroadcastDisplay(str(connectionInstance.spaceRemaining), clientSocket)
@@ -364,10 +375,10 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = "10.28.206.175"
+        self.host = "192.168.1.138"
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
-        self.spaceRemaining = 1000
+        self.spaceRemaining = 50
         self.users = []
         self.clients = []
         self.recentMessages = []
@@ -389,6 +400,10 @@ class Connection:
                 sendInstance.privateBroadcast("/disconnect", clientSocket)
                 self.clients.remove(clientSocket)
 
+            elif len(username) > 10:
+                sendInstance.privateBroadcast("/disconnect", clientSocket)
+                self.clients.remove(clientSocket)
+
             else:
                 self.users.append(username)
 
@@ -407,6 +422,8 @@ class Connection:
     def listen(self, clientSocket):
         index = self.clients.index(clientSocket)
         username = self.users[index]
+        messagesSentRecently = 0
+        lastMessageSentTime = time.time()
         while True:
             try:
                 message = clientSocket.recv(1024).decode()
@@ -421,11 +438,26 @@ class Connection:
                         else:
                             sendInstance.command(message, clientSocket)
                     else:
-                        sendInstance.broadcast(unifiedmessage)
-                        self.recentMessages.append(unifiedmessage)
+                        if messagesSentRecently >= 3:
+                            sendInstance.privateBroadcastDisplay("You are sending messages too quickly.", clientSocket)
 
-                        if len(self.recentMessages) > 15:
-                            self.recentMessages = self.recentMessages[1:]
+                            if time.time() > lastMessageSentTime + 5:
+                                messagesSentRecently = 0
+
+                        else:
+                            sendInstance.broadcast(unifiedmessage)
+                            self.recentMessages.append(unifiedmessage)
+
+                            if lastMessageSentTime + 1 > time.time():
+                                messagesSentRecently += 1
+
+                            elif messagesSentRecently > 0:
+                                messagesSentRecently -= 1
+
+                            if len(self.recentMessages) > 15:
+                                self.recentMessages = self.recentMessages[1:]
+
+                            lastMessageSentTime = time.time()
 
             except ConnectionResetError:
                 self.removeUser(username, clientSocket)
@@ -462,5 +494,4 @@ securityInstance = Security()
 actionsInstance = Actions()
 connectionInstance = Connection()
 Connection.connect(connectionInstance)
-
 
