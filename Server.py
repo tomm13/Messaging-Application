@@ -424,6 +424,7 @@ class Connection:
         username = self.users[index]
         messagesSentRecently = 0
         lastMessageSentTime = time.time()
+        warnUser = False
         while True:
             try:
                 message = clientSocket.recv(1024).decode()
@@ -439,10 +440,14 @@ class Connection:
                             sendInstance.command(message, clientSocket)
                     else:
                         if messagesSentRecently >= 3:
-                            sendInstance.privateBroadcastDisplay("You are sending messages too quickly.", clientSocket)
+                            if not warnUser:
+                                sendInstance.privateBroadcastDisplay("You are sending messages too quickly.",
+                                                                     clientSocket)
+                                warnUser = True
 
                             if time.time() > lastMessageSentTime + 5:
                                 messagesSentRecently = 0
+                                warnUser = False
 
                         else:
                             sendInstance.broadcast(unifiedmessage)
