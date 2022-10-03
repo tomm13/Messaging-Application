@@ -79,8 +79,9 @@ class Security:
         self.d = d
         self.e = e
         self.N = N
-
-    def generatePort(self):
+    
+    @staticmethod
+    def generatePort():
         while True:
             try:
                 connectionInstance.socket.bind((connectionInstance.host, connectionInstance.port))
@@ -499,4 +500,3 @@ securityInstance = Security()
 actionsInstance = Actions()
 connectionInstance = Connection()
 Connection.connect(connectionInstance)
-
