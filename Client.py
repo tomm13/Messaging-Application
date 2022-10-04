@@ -428,7 +428,7 @@ class Communication:
                         message.sort()
 
                         uiInstance.userList.clear()
-                        uiInstance.userList.append("Users Online:")
+                        uiInstance.userList.append("Users online:")
 
                         for user in message:
                             if user not in self.users:
@@ -881,7 +881,7 @@ class UI:
             self.userListLeftBorder = Box(userListBox, width=10, height="fill", align="left")
             self.userListLeftBorder.bg = uiInstance.animationColor
 
-            self.userList = ListBox(userListBox, items=["Users Online:"], width=150, height="fill", align="right")
+            self.userList = ListBox(userListBox, items=["Users online:"], width=150, height="fill", align="right")
             self.userList.text_color = connectionInstance.color
             self.userList.bg = (255, 255, 255)
             self.userList.text_size = self.fontSize
