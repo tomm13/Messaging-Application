@@ -832,14 +832,13 @@ class UI:
         self.font = "San Francisco"
         self.color = None
         self.animationColor = (173, 216, 230)
-        self.borderColor = (173, 216, 230)
         self.bg = (70, 70, 70)
         self.darkbg = (40, 40, 40)
         self.waitTime = 1
         self.linesSent = 0
         self.darkMode = False
+        self.LDM = False
         self.page = 0
-        self.LDM = True
 
         if platform.system() == "Darwin":
             self.fontSize = 22
@@ -1016,7 +1015,7 @@ def keyPressed(event):
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "10.28.205.230", "58987", "588517639187")
+connectionInstance = Connection("tomm", "lightblue", "10.28.205.230", "52727", "517627778207")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
