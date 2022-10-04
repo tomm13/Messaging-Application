@@ -652,8 +652,8 @@ class Communication:
                 sleep(uiInstance.rate * 100)
                 uiInstance.chatHistory.append(line)
 
-            animationInstance.queue.append([1, "You are on page " + str(self.page) + " of " + str(uiInstance.page),
-                                            uiInstance.animationColor])
+            animationInstance.queue.append([1, "You are on page " + str(self.page + 1) + " of " + str(uiInstance.page +
+                                           1), uiInstance.animationColor])
         else:
             animationInstance.queue.append([1, "You cannot go below this page", uiInstance.animationColor])
 
@@ -668,8 +668,8 @@ class Communication:
                 sleep(uiInstance.rate * 100)
                 uiInstance.chatHistory.append(line)
 
-            animationInstance.queue.append([1, "You are on page " + str(self.page) + " of " + str(uiInstance.page),
-                                           uiInstance.animationColor])
+            animationInstance.queue.append([1, "You are on page " + str(self.page + 1) + " of " + str(uiInstance.page +
+                                           1), uiInstance.animationColor])
         else:
             animationInstance.queue.append([1, "You are at the highest page", uiInstance.animationColor])
 
@@ -723,7 +723,7 @@ class Communication:
         uiInstance.page += 1
         uiInstance.linesSent = 1
 
-        animationInstance.queue.append([1, "You are on page " + str(self.page) + " of " + str(uiInstance.page),
+        animationInstance.queue.append([1, "You are on page " + str(self.page + 1) + " of " + str(uiInstance.page + 1),
                                        uiInstance.animationColor])
 
 
@@ -990,7 +990,7 @@ class UI:
         self.connectText = Text(verifyBox, text="Enter to continue")
         self.connectText.text_size = self.fontSize + 2
 
-        build = Text(bottomPadding, text="LDM", align="bottom")
+        build = Text(bottomPadding, text="Optimisation", align="bottom")
 
         animationInstance.queue.append([5])
 
