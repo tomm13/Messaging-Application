@@ -418,7 +418,7 @@ class Connection:
                     else:
                         if messagesSentRecently >= 3:
                             if not warnUser:
-                                sendInstance.privateBroadcastDisplay("You are sending messages too quickly.",
+                                sendInstance.privateBroadcastDisplay("You are sending messages too quickly",
                                                                      clientSocket)
                                 warnUser = True
 
