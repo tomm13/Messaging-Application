@@ -331,17 +331,23 @@ class Animation:
 
         while True:
             if self.queue:
-                print(self.queue)
                 # Check for animation code
-                if self.queue[0][0] == 1:
-                    if len(str(self.queue[0][0])) < 10:
-                        self.waitMultiplier = 1.4
-                    elif len(str(self.queue[0][0])) < 15:
-                        self.waitMultiplier = 1.9
-                    else:
-                        self.waitMultiplier = 2.4
+                if uiInstance.LDM and connectionInstance.connected:
+                    uiInstance.header.value = "Welcome " + connectionInstance.username
 
-                    self.animateHeader(self.queue[0][1], self.queue[0][2])
+                if self.queue[0][0] == 1:
+                    if not uiInstance.LDM:
+                        if len(str(self.queue[0][0])) < 10:
+                            self.waitMultiplier = 1.4
+                        elif len(str(self.queue[0][0])) < 15:
+                            self.waitMultiplier = 1.9
+                        else:
+                            self.waitMultiplier = 2.4
+
+                        self.animateHeader(self.queue[0][1], self.queue[0][2])
+
+                    else:
+                        communicationInstance.addMessage(self.queue[0][1])
 
                 elif self.queue[0][0] == 2:
                     self.switchTheme()
@@ -383,6 +389,7 @@ class Animation:
                     self.animateStatus()
 
                 self.queue.pop(0)
+                sleep(0.5)
 
 
 class Communication:
@@ -435,11 +442,7 @@ class Communication:
                                 uiInstance.userList.append(user)
 
                     elif message[0:14] == "/recentmessage":
-                        recentMessages = message[15:].split(", ")
-
-                        for line in recentMessages:
-                            sleep(uiInstance.rate * 100)
-                            self.addMessage(line)
+                        self.addMessage(message[15:])
 
                     elif message[0:7] == "/remove":
                         if message[8:] == connectionInstance.username:
@@ -507,6 +510,16 @@ class Communication:
 
                     elif message == "/previous":
                         self.previousPage()
+
+                    elif message == "/ldm":
+                        if uiInstance.LDM:
+                            uiInstance.LDM = False
+                            animationInstance.queue.append([1, "You turned LDM off", uiInstance.animationColor])
+
+                        else:
+                            uiInstance.LDM = True
+                            animationInstance.queue.append([1, "You turned LDM on", uiInstance.animationColor])
+
 
                     else:
                         self.addMessage(message)
@@ -826,6 +839,7 @@ class UI:
         self.linesSent = 0
         self.darkMode = False
         self.page = 0
+        self.LDM = True
 
         if platform.system() == "Darwin":
             self.fontSize = 22
@@ -977,7 +991,7 @@ class UI:
         self.connectText = Text(verifyBox, text="Enter to continue")
         self.connectText.text_size = self.fontSize + 2
 
-        build = Text(bottomPadding, text="rework animations", align="bottom")
+        build = Text(bottomPadding, text="LDM", align="bottom")
 
         animationInstance.queue.append([5])
 
@@ -1002,7 +1016,7 @@ def keyPressed(event):
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "coral", "10.28.206.224", "63094", "620023544003")
+connectionInstance = Connection("tomm", "lightblue", "10.28.205.230", "58987", "588517639187")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
