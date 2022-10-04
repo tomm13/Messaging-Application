@@ -1,4 +1,4 @@
-# 3/10/2022
+# 4/10/2022
 # V13 Beta 2
 
 import socket
@@ -79,7 +79,7 @@ class Security:
         self.d = d
         self.e = e
         self.N = N
-    
+
     @staticmethod
     def generatePort():
         while True:
@@ -108,7 +108,7 @@ class Actions:
     def __init__(self):
         self.modOnline = 0
         self.mods = []
-        self.modUsers= []
+        self.modUsers = []
         self.hasVoted = []
         self.hasVotedUsers = []
         self.voteTarget = 2
@@ -172,20 +172,6 @@ class Actions:
                         sendInstance.privateBroadcastDisplay(str(self.voteTarget - (self.voteFor + self.voteAgainst)) +
                                                              " votes needed", modSocket)
 
-                    time.sleep(0.1)
-
-                    percentage = int(100 * self.voteFor / len(self.hasVoted))
-
-                    if percentage == 100:
-                        sendInstance.privateBroadcastDisplay("The votes are unanimously in favour of kicking " +
-                                                             self.userToKick, modSocket)
-                    elif percentage == 0:
-                        sendInstance.privateBroadcastDisplay("The votes are unanimously against kicking " +
-                                                             self.userToKick, modSocket)
-                    else:
-                        sendInstance.privateBroadcastDisplay(str(percentage) + "% voted in favour of kicking " +
-                                                             self.userToKick, modSocket)
-
                 elif modSocket in self.mods and modUsername in self.modUsers:
                     if modSocket not in self.hasVoted and modUsername not in self.hasVotedUsers:
                         if message[6:] == "for":
@@ -217,20 +203,6 @@ class Actions:
 
                 elif self.voteAgainst == self.voteTarget or self.voteFor + self.voteAgainst == self.voteTarget:
                     sendInstance.broadcastDisplay(self.userToKick + " will not be kicked")
-
-                time.sleep(0.1)
-
-                percentage = int(100 * self.voteFor / len(self.hasVoted))
-
-                if percentage == 100:
-                    sendInstance.broadcastDisplay("The votes are unanimously in favour of kicking " +
-                                                  self.userToKick)
-                elif percentage == 0:
-                    sendInstance.broadcastDisplay("The votes are unanimously against kicking " +
-                                                  self.userToKick)
-                else:
-                    sendInstance.broadcastDisplay(str(percentage) + "% voted in favour of kicking " +
-                                                  self.userToKick)
 
                 self.resetVote()
 
@@ -279,7 +251,8 @@ class Actions:
                     else:
                         sendInstance.privateBroadcastDisplay("You need to be a mod to do this", modSocket)
                 else:
-                    sendInstance.privateBroadcastDisplay("You cannot mod this person as they are under review", modSocket)
+                    sendInstance.privateBroadcastDisplay("You cannot mod this person as they are under review",
+                                                         modSocket)
             else:
                 sendInstance.privateBroadcastDisplay("You are already a mod", modSocket)
         else:
@@ -313,7 +286,7 @@ class Send:
     def privateBroadcast(message, clientSocket):
         # Send a private message to 1 specific client, not for animating purposes.
         time.sleep(0.1)
-        print("[Private] "+ message)
+        print("[Private] " + message)
 
         message = securityInstance.encrypt(message)
         clientSocket.send(message.encode())
@@ -369,6 +342,8 @@ class Send:
             sendInstance.privateBroadcast(message, clientSocket)
         elif message == "/next":
             sendInstance.privateBroadcast(message, clientSocket)
+        elif message == "/ldm":
+            sendInstance.privateBroadcast(message, clientSocket)
         else:
             sendInstance.privateBroadcastDisplay("Your command is unknown", clientSocket)
 
@@ -376,7 +351,7 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = "192.168.1.138"
+        self.host = "10.28.205.230"
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
         self.spaceRemaining = 50
@@ -415,7 +390,8 @@ class Connection:
                 self.spaceRemaining -= 1
 
                 if len(self.recentMessages) > 0:
-                    sendInstance.privateBroadcast("/recentmessage " + ", ".join(self.recentMessages), clientSocket)
+                    for message in self.recentMessages:
+                        sendInstance.privateBroadcast(message, clientSocket)
 
                 listeningThread = Thread(target=self.listen, args=[clientSocket])
                 listeningThread.start()
