@@ -1,4 +1,4 @@
-# 4/1/2022
+# 12/10/2022
 # V13 Beta 2
 
 # import logging
@@ -257,7 +257,7 @@ class Animation:
     def changeBorder(color):
         # Code 4
 
-        (R, G, B) = uiInstance.borderColor
+        (R, G, B) = uiInstance.animationColor
 
         while not (R, G, B) == color:
             if R < color[0]:
@@ -288,7 +288,7 @@ class Animation:
             uiInstance.messageInputLeftBorder.bg = (R, G, B)
             sleep(uiInstance.rate)
 
-        uiInstance.borderColor = (R, G, B)
+        uiInstance.animationColor = (R, G, B)
 
     def animateStatus(self):
         # Code 5
@@ -375,7 +375,7 @@ class Animation:
                     if not connectionInstance.mod:
                         self.queue.append([1, "You need to be mod to do this", uiInstance.animationColor])
 
-                    elif uiInstance.borderColor == self.queue[0][1] and self.queue[0][2]:
+                    elif uiInstance.animationColor == self.queue[0][1] and self.queue[0][2]:
                         self.queue.append([1, "You can't change to the same border color", uiInstance.animationColor])
 
                     else:
@@ -470,10 +470,10 @@ class Communication:
                             if not uiInstance.darkMode:
                                 animationInstance.queue.append([2, False])
                             animationInstance.queue.append([3, uiInstance.animationColor, False])
-                            animationInstance.queue.append([4, (240, 230, 140), False])
+                            self.chooseColor(4, (240, 230, 140))
 
                     elif message[0:6] == "/color":
-                        self.chooseColor(message[7:])
+                        self.chooseColor(3, message[7:])
 
                     elif message[0:9] == "/savechat":
                         self.location = message[10:]
@@ -482,8 +482,8 @@ class Communication:
 
                     elif message == "/disconnect":
                         while True:
-                            animationInstance.queue.append([1,
-                            "You cannot use this username, please rejoin under a different username", (255, 0, 0)])
+                            animationInstance.queue.append([1, "You cannot use this username, "
+                                                           "please rejoin under a different username", (255, 0, 0)])
                             sleep(1)
 
                     elif message[0:5] == "/rate":
@@ -503,8 +503,8 @@ class Communication:
                         loadPresetThread.start()
 
                     elif message[0:7] == "/border":
-                        color = colorutils.web_to_rgb(message[8:])
-                        animationInstance.queue.append([4, color, True])
+                        self.chooseColor(4, message[8:])
+
                     elif message == "/next":
                         self.nextPage()
 
@@ -519,7 +519,6 @@ class Communication:
                         else:
                             uiInstance.LDM = True
                             animationInstance.queue.append([1, "You turned LDM on", uiInstance.animationColor])
-
 
                     else:
                         self.addMessage(message)
@@ -567,64 +566,7 @@ class Communication:
         return
 
     @staticmethod
-    def savePresets(location):
-        if location and " " not in location:
-            file = open(location, "w")
-            if uiInstance.darkMode:
-                file.write("/darkmode,")
-
-            file.write("/color " + colorutils.rgb_to_web(uiInstance.color) + ",")
-            file.write("/border " + colorutils.rgb_to_web(uiInstance.borderColor) + ",")
-            file.close()
-
-            animationInstance.queue.append([1, "Your presets have been saved in " + location,
-                                            uiInstance.animationColor])
-
-        else:
-            animationInstance.queue.append([1, "You can't save your presets here", uiInstance.animationColor])
-
-        return
-
-    def loadPresets(self, location):
-        try:
-            if location and " " not in location:
-                file = open(location, "r")
-
-                animationInstance.queue.append([1, "Your preset is loading", uiInstance.animationColor])
-
-                commands = file.readline().split(",")
-
-                for message in commands:
-                    if message[0:9] == "/darkmode":
-                        if not uiInstance.darkMode:
-                            animationInstance.queue.append([2, False])
-
-                    elif message[0:6] == "/color":
-                        self.chooseColor(message[7:])
-
-                    elif message[0:7] == "/border":
-                        if connectionInstance.mod:
-                            color = colorutils.web_to_rgb(message[8:])
-                            animationInstance.queue.append([3, color, False])
-
-                        else:
-                            animationInstance.queue.append([1, "You need to be a mod to change the border color",
-                                                            uiInstance.animationColor])
-
-                file.close()
-
-            else:
-                animationInstance.queue.append([1, "You can't open your preset here", uiInstance.animationColor])
-
-        except FileNotFoundError:
-            animationInstance.queue.append([1, "You have no file or directory named " + location,
-                                            uiInstance.animationColor])
-
-        finally:
-            return
-
-    @staticmethod
-    def chooseColor(message):
+    def chooseColor(code, message):
         if message:
             try:
                 color = colorutils.web_to_rgb(message)
@@ -633,7 +575,7 @@ class Communication:
                     animationInstance.queue.append([1, "You cannot use this color", uiInstance.animationColor])
 
                 else:
-                    animationInstance.queue.append([3, color, True])
+                    animationInstance.queue.append([code, color, True])
 
             except ValueError:
                 animationInstance.queue.append([1, "You cannot use this color as it is undefined",
