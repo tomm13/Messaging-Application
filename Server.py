@@ -1,4 +1,4 @@
-# 4/10/2022
+# 12/10/2022
 # V13 Beta 2
 
 import socket
@@ -331,10 +331,6 @@ class Send:
         elif message == "/filler":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:5] == "/rate":
-            sendInstance.privateBroadcast(message, clientSocket)
-        elif message[0:13] == "/savesettings":
-            sendInstance.privateBroadcast(message, clientSocket)
-        elif message[0:13] == "/loadsettings":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:7] == "/border":
             sendInstance.privateBroadcast(message, clientSocket)
