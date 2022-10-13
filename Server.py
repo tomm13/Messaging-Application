@@ -1,4 +1,4 @@
-# 12/10/2022
+# 14/10/2022
 # V13 Beta 2
 
 import socket
@@ -347,7 +347,7 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = "10.28.205.230"
+        self.host = "192.168.1.138"
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
         self.spaceRemaining = 50
@@ -379,7 +379,14 @@ class Connection:
             else:
                 self.users.append(username)
 
-                message = "/add " + " ".join(self.users)
+                message = "/add "
+
+                for user in self.users:
+                    if user in actionsInstance.modUsers:
+                        message += user + "[Mod] "
+                    else:
+                        message += user + " "
+
                 sendInstance.broadcast(message)
 
                 self.userOnline += 1
