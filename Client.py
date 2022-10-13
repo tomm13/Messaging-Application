@@ -1,4 +1,4 @@
-# 12/10/2022
+# 14/10/2022
 # V13 Beta 2
 
 # import logging
@@ -17,25 +17,26 @@ class Animation:
         self.readRate = 1
         self.waitMultiplier = 1
 
-    def animateHeader(self, message, color):
+    def animateHeader(self, message):
         # Code 1
 
         if not uiInstance.darkMode:
             (R, G, B) = (255, 255, 255)
 
-            while not R == color[0] or not G == color[1] or not B == color[2]:
+            while not R == uiInstance.animationColor[0] or not G == uiInstance.animationColor[1] \
+                    or not B == uiInstance.animationColor[2]:
                 # Text fades from white to color
-                if R < color[0]:
+                if R < uiInstance.animationColor[0]:
                     R += 1
-                if G < color[1]:
+                if G < uiInstance.animationColor[1]:
                     G += 1
-                if B < color[2]:
+                if B < uiInstance.animationColor[2]:
                     B += 1
-                if R > color[0]:
+                if R > uiInstance.animationColor[0]:
                     R -= 1
-                if G > color[1]:
+                if G > uiInstance.animationColor[1]:
                     G -= 1
-                if B > color[2]:
+                if B > uiInstance.animationColor[2]:
                     B -= 1
 
                 uiInstance.header.text_color = (R, G, B)
@@ -63,19 +64,20 @@ class Animation:
 
             sleep(self.readRate * self.waitMultiplier)
 
-            while not R == color[0] or not G == color[1] or not B == color[2]:
+            while not R == uiInstance.animationColor[0] or not G == uiInstance.animationColor[1] \
+                    or not B == uiInstance.animationColor[2]:
                 # Fades background from white to color
-                if R < color[0]:
+                if R < uiInstance.animationColor[0]:
                     R += 1
-                if G < color[1]:
+                if G < uiInstance.animationColor[1]:
                     G += 1
-                if B < color[2]:
+                if B < uiInstance.animationColor[2]:
                     B += 1
-                if R > color[0]:
+                if R > uiInstance.animationColor[0]:
                     R -= 1
-                if G > color[1]:
+                if G > uiInstance.animationColor[1]:
                     G -= 1
-                if B > color[2]:
+                if B > uiInstance.animationColor[2]:
                     B -= 1
 
                 uiInstance.header.bg = (R, G, B)
@@ -104,19 +106,20 @@ class Animation:
         else:
             (R, G, B) = uiInstance.darkbg
 
-            while not R == color[0] or not G == color[1] or not B == color[2]:
+            while not R == uiInstance.animationColor[0] or not G == uiInstance.animationColor[1] \
+                    or not B == uiInstance.animationColor[2]:
                 # Text fades from black to color
-                if R < color[0]:
+                if R < uiInstance.animationColor[0]:
                     R += 1
-                if G < color[1]:
+                if G < uiInstance.animationColor[1]:
                     G += 1
-                if B < color[2]:
+                if B < uiInstance.animationColor[2]:
                     B += 1
-                if R > color[0]:
+                if R > uiInstance.animationColor[0]:
                     R -= 1
-                if G > color[1]:
+                if G > uiInstance.animationColor[1]:
                     G -= 1
-                if B > color[2]:
+                if B > uiInstance.animationColor[2]:
                     B -= 1
 
                 uiInstance.header.text_color = (R, G, B)
@@ -144,19 +147,20 @@ class Animation:
 
             sleep(self.readRate * self.waitMultiplier)
 
-            while not R == color[0] or not G == color[1] or not B == color[2]:
+            while not R == uiInstance.animationColor[0] or not G == uiInstance.animationColor[1] \
+                    or not B == uiInstance.animationColor[2]:
                 # Fades background from black to color
-                if R > color[0]:
+                if R > uiInstance.animationColor[0]:
                     R -= 1
-                if G > color[1]:
+                if G > uiInstance.animationColor[1]:
                     G -= 1
-                if B > color[2]:
+                if B > uiInstance.animationColor[2]:
                     B -= 1
-                if R < color[0]:
+                if R < uiInstance.animationColor[0]:
                     R += 1
-                if G < color[1]:
+                if G < uiInstance.animationColor[1]:
                     G += 1
-                if B < color[2]:
+                if B < uiInstance.animationColor[2]:
                     B += 1
 
                 uiInstance.header.bg = (R, G, B)
@@ -181,6 +185,8 @@ class Animation:
 
                 uiInstance.header.text_color = (R, G, B)
                 sleep(uiInstance.rate)
+
+        return
 
     @staticmethod
     def switchTheme():
@@ -221,8 +227,7 @@ class Animation:
 
                 uiInstance.darkMode = True
 
-        uiInstance.chatHistory.text_color = uiInstance.color
-        uiInstance.messageInput.text_color = uiInstance.color
+        return
 
     @staticmethod
     def fadeColor(newColor):
@@ -250,27 +255,28 @@ class Animation:
 
             sleep(uiInstance.rate)
 
-        # Once completed
         uiInstance.color = newColor
 
+        return
+
     @staticmethod
-    def changeBorder(color):
+    def fadeBorder(newColor):
         # Code 4
 
         (R, G, B) = uiInstance.animationColor
 
-        while not (R, G, B) == color:
-            if R < color[0]:
+        while not (R, G, B) == newColor:
+            if R < newColor[0]:
                 R += 1
-            if G < color[1]:
+            if G < newColor[1]:
                 G += 1
-            if B < color[2]:
+            if B < newColor[2]:
                 B += 1
-            if R > color[0]:
+            if R > newColor[0]:
                 R -= 1
-            if G > color[1]:
+            if G > newColor[1]:
                 G -= 1
-            if B > color[2]:
+            if B > newColor[2]:
                 B -= 1
 
             uiInstance.header.bg = (R, G, B)
@@ -288,7 +294,9 @@ class Animation:
             uiInstance.messageInputLeftBorder.bg = (R, G, B)
             sleep(uiInstance.rate)
 
-        uiInstance.animationColor = (R, G, B)
+        uiInstance.animationColor = newColor
+
+        return
 
     def animateStatus(self):
         # Code 5
@@ -325,26 +333,29 @@ class Animation:
 
             sleep(self.readRate)
 
+        return
+
     def animationThread(self):
         # This is the new thread in place of the hundreds of unterminated threads called before
         # The format for this thread is [[Class animation method code, *args]]
 
         while True:
             if self.queue:
-                # Check for animation code
+                print("Animation queue: " + str(self.queue))
+                # Check if queue has items
                 if uiInstance.LDM and connectionInstance.connected:
                     uiInstance.header.value = "Welcome " + connectionInstance.username
 
                 if self.queue[0][0] == 1:
                     if not uiInstance.LDM:
                         if len(str(self.queue[0][0])) < 10:
-                            self.waitMultiplier = 1.4
+                            self.waitMultiplier = 2.0
                         elif len(str(self.queue[0][0])) < 15:
-                            self.waitMultiplier = 1.9
+                            self.waitMultiplier = 2.5
                         else:
-                            self.waitMultiplier = 2.4
+                            self.waitMultiplier = 3.0
 
-                        self.animateHeader(self.queue[0][1], self.queue[0][2])
+                        self.animateHeader(self.queue[0][1])
 
                     else:
                         communicationInstance.addMessage(self.queue[0][1])
@@ -354,42 +365,40 @@ class Animation:
 
                     if self.queue[0][1]:
                         if uiInstance.darkMode:
-                            self.queue.append([1, "You turned dark mode on", uiInstance.animationColor])
+                            self.queue.append([1, "You turned dark mode on"])
                         else:
-                            self.queue.append([1, "You turned light mode on", uiInstance.animationColor])
+                            self.queue.append([1, "You turned light mode on"])
 
                 elif self.queue[0][0] == 3:
                     if self.queue[0][1] == (240, 230, 140) and not connectionInstance.mod:
-                        self.queue.append([1, "You don't have the power to use this color", uiInstance.animationColor])
+                        self.queue.append([1, "You don't have the power to use this color"])
 
-                    elif uiInstance.color == self.queue[0][1] and self.queue[0][2]:
-                        self.queue.append([1, "You can't change to the same color", uiInstance.animationColor])
+                    elif self.queue[0][1] == uiInstance.color and self.queue[0][2]:
+                        self.queue.append([1, "You can't change to the same color"])
 
                     else:
                         self.fadeColor(self.queue[0][1])
 
                         if self.queue[0][2]:
-                            self.queue.append([1, "You changed the text color", uiInstance.animationColor])
+                            self.queue.append([1, "You changed the text color"])
 
                 elif self.queue[0][0] == 4:
-                    if not connectionInstance.mod:
-                        self.queue.append([1, "You need to be mod to do this", uiInstance.animationColor])
+                    if uiInstance.animationColor == (240, 230, 140) and not connectionInstance.mod:
+                        self.queue.append([1, "You don't have the power to use this color"])
 
-                    elif uiInstance.animationColor == self.queue[0][1] and self.queue[0][2]:
-                        self.queue.append([1, "You can't change to the same border color", uiInstance.animationColor])
+                    elif self.queue[0][1] == uiInstance.color and self.queue[0][2]:
+                        self.queue.append([1, "You can't change to the same color"])
 
                     else:
-                        self.changeBorder(self.queue[0][1])
-                        uiInstance.animationColor = self.queue[0][1]
+                        self.fadeBorder(self.queue[0][1])
 
                         if self.queue[0][2]:
-                            self.queue.append([1, "You changed the border color", uiInstance.animationColor])
+                            self.queue.append([1, "You changed the border color"])
 
                 elif self.queue[0][0] == 5:
                     self.animateStatus()
 
                 self.queue.pop(0)
-                sleep(0.5)
 
 
 class Communication:
@@ -414,123 +423,6 @@ class Communication:
         message = str("".join(decryptedMessage))
         return message
 
-    def updateThread(self):
-        try:
-            while connectionInstance.connected:
-                message = connectionInstance.socket.recv(1024).decode()
-                message = self.decrypt(message)
-
-                if message:
-                    print(message)
-
-                    if message[0:4] == "/add":
-                        message = message[5:].split()
-                        message.sort()
-
-                        uiInstance.userList.clear()
-                        uiInstance.userList.append("Users online:")
-
-                        for user in message:
-                            if user not in self.users:
-                                uiInstance.userList.append(user)
-                                self.users.append(user)
-
-                                message = user + " has connected"
-                                animationInstance.queue.append([1, message, uiInstance.animationColor])
-
-                            else:
-                                uiInstance.userList.append(user)
-
-                    elif message[0:14] == "/recentmessage":
-                        self.addMessage(message[15:])
-
-                    elif message[0:7] == "/remove":
-                        if message[8:] == connectionInstance.username:
-                            while True:
-                                animationInstance.queue.append([1, "You have been kicked / disconnected", (255, 0, 0)])
-                                sleep(1)
-
-                        user = message[8:]
-                        uiInstance.userList.remove(user)
-                        self.users.remove(user)
-                        message = user + " has disconnected"
-                        animationInstance.queue.append([1, message, uiInstance.animationColor])
-
-                    elif message[0:8] == "/display":
-                        animationInstance.queue.append([1, message[9:], uiInstance.animationColor])
-
-                    elif message == "/theme":
-                        animationInstance.queue.append([2, True])
-
-                    elif message[0:4] == "/mod":
-                        if message[5:] == connectionInstance.username and not connectionInstance.mod:
-                            uiInstance.animationColor = (240, 230, 140)
-                            connectionInstance.mod = True
-                            animationInstance.runFiller = True
-                            if not uiInstance.darkMode:
-                                animationInstance.queue.append([2, False])
-                            animationInstance.queue.append([3, uiInstance.animationColor, False])
-                            self.chooseColor(4, (240, 230, 140))
-
-                    elif message[0:6] == "/color":
-                        self.chooseColor(3, message[7:])
-
-                    elif message[0:9] == "/savechat":
-                        self.location = message[10:]
-                        saveChatThread = Thread(target=communicationInstance.saveChatHistory)
-                        saveChatThread.start()
-
-                    elif message == "/disconnect":
-                        while True:
-                            animationInstance.queue.append([1, "You cannot use this username, "
-                                                           "please rejoin under a different username", (255, 0, 0)])
-                            sleep(1)
-
-                    elif message[0:5] == "/rate":
-                        animationInstance.readRate = float(message[6:])
-
-                        animationInstance.queue.append([1, "You changed the animation hold to " +
-                                                        str(animationInstance.readRate), uiInstance.animationColor])
-
-                    elif message[0:13] == "/savesettings":
-                        location = message[14:]
-                        savePresetThread = Thread(target=self.savePresets, args=[location])
-                        savePresetThread.start()
-
-                    elif message[0:13] == "/loadsettings":
-                        location = message[14:]
-                        loadPresetThread = Thread(target=self.loadPresets, args=[location])
-                        loadPresetThread.start()
-
-                    elif message[0:7] == "/border":
-                        self.chooseColor(4, message[8:])
-
-                    elif message == "/next":
-                        self.nextPage()
-
-                    elif message == "/previous":
-                        self.previousPage()
-
-                    elif message == "/ldm":
-                        if uiInstance.LDM:
-                            uiInstance.LDM = False
-                            animationInstance.queue.append([1, "You turned LDM off", uiInstance.animationColor])
-
-                        else:
-                            uiInstance.LDM = True
-                            animationInstance.queue.append([1, "You turned LDM on", uiInstance.animationColor])
-
-                    else:
-                        self.addMessage(message)
-
-        except ConnectionResetError:
-            connectionInstance.connected = False
-            connectionInstance.leave()
-            print("Closed thread successfully")
-
-        finally:
-            return
-
     @staticmethod
     def sendToServer():
         try:
@@ -540,7 +432,7 @@ class Communication:
                     connectionInstance.leave()
                 else:
                     if len(message) + len(connectionInstance.username) + 2 >= 45:
-                        animationInstance.queue.append([1, "Your message is too long.", uiInstance.animationColor])
+                        animationInstance.queue.append([1, "Your message is too long."])
 
                     else:
                         connectionInstance.socket.send(message.encode())
@@ -552,36 +444,31 @@ class Communication:
 
     def saveChatHistory(self):
         if self.location and " " not in self.location:
-            file = open(self.location, "w")
-            for chatLine in communicationInstance.chatHistory:
-                file.write(chatLine + "\n")
-            file.close()
+            with open(self.location, "w") as file:
+                for chatLine in communicationInstance.chatHistory:
+                    file.write(chatLine + "\n")
+                file.close()
 
-            animationInstance.queue.append([1, "Your file has been saved in " + self.location,
-                                            uiInstance.animationColor])
+                animationInstance.queue.append([1, "Your file has been saved in " + self.location])
 
         else:
-            animationInstance.queue.append([1, "You can't save to this location", uiInstance.animationColor])
+            animationInstance.queue.append([1, "You can't save to this location"])
 
         return
 
     @staticmethod
-    def chooseColor(code, message):
-        if message:
-            try:
-                color = colorutils.web_to_rgb(message)
+    def chooseColor(code, message, displayMessage):
+        try:
+            color = colorutils.web_to_rgb(message)
 
-                if color == (240, 230, 140):
-                    animationInstance.queue.append([1, "You cannot use this color", uiInstance.animationColor])
+            if color == (240, 230, 140) and not connectionInstance.mod:
+                animationInstance.queue.append([1, "You cannot use this color"])
 
-                else:
-                    animationInstance.queue.append([code, color, True])
+            else:
+                animationInstance.queue.append([code, color, displayMessage])
 
-            except ValueError:
-                animationInstance.queue.append([1, "You cannot use this color as it is undefined",
-                                               uiInstance.animationColor])
-        else:
-            animationInstance.queue.append([1, "Your choice of color is invalid", uiInstance.animationColor])
+        except ValueError:
+            animationInstance.queue.append([1, "You cannot use this color as it is undefined"])
 
     def previousPage(self):
         if self.page > 0:
@@ -591,13 +478,13 @@ class Communication:
             uiInstance.chatHistory.value = self.transcript[self.page][0]
 
             for line in self.transcript[self.page][1:]:
-                sleep(uiInstance.rate * 100)
                 uiInstance.chatHistory.append(line)
 
-            animationInstance.queue.append([1, "You are on page " + str(self.page + 1) + " of " + str(uiInstance.page +
-                                           1), uiInstance.animationColor])
+            if not uiInstance.LDM:
+                animationInstance.queue.append([1, "You are on page " + str(self.page + 1) + " of " +
+                                                str(uiInstance.page + 1)])
         else:
-            animationInstance.queue.append([1, "You cannot go below this page", uiInstance.animationColor])
+            animationInstance.queue.append([1, "You cannot go below this page"])
 
     def nextPage(self):
         if self.page < uiInstance.page:
@@ -607,13 +494,13 @@ class Communication:
             uiInstance.chatHistory.value = self.transcript[self.page][0]
 
             for line in self.transcript[self.page][1:]:
-                sleep(uiInstance.rate * 100)
                 uiInstance.chatHistory.append(line)
 
-            animationInstance.queue.append([1, "You are on page " + str(self.page + 1) + " of " + str(uiInstance.page +
-                                           1), uiInstance.animationColor])
+            if not uiInstance.LDM:
+                animationInstance.queue.append([1, "You are on page " + str(self.page + 1) + " of " +
+                                                str(uiInstance.page + 1)])
         else:
-            animationInstance.queue.append([1, "You are at the highest page", uiInstance.animationColor])
+            animationInstance.queue.append([1, "You are at the highest page"])
 
     def addMessage(self, message):
         if uiInstance.linesSent >= uiInstance.linesLimit:
@@ -643,7 +530,6 @@ class Communication:
                     uiInstance.linesSent = 1
 
                     for line in self.transcript[self.page][1:]:
-                        sleep(uiInstance.rate * 100)
                         uiInstance.chatHistory.append(line)
                         uiInstance.linesSent += 1
 
@@ -665,8 +551,114 @@ class Communication:
         uiInstance.page += 1
         uiInstance.linesSent = 1
 
-        animationInstance.queue.append([1, "You are on page " + str(self.page + 1) + " of " + str(uiInstance.page + 1),
-                                       uiInstance.animationColor])
+        animationInstance.queue.append([1, "You are on page " + str(self.page + 1) + " of " + str(uiInstance.page + 1)])
+
+    def updateThread(self):
+        try:
+            while connectionInstance.connected:
+                message = self.decrypt(connectionInstance.socket.recv(1024).decode())
+
+                if message:
+                    print("Received message: " + message)
+
+                    if message[0:4] == "/add":
+                        message = message[5:].split()
+                        message.sort()
+
+                        uiInstance.userList.clear()
+                        uiInstance.userList.append("Users online:")
+
+                        for user in message:
+                            if user not in self.users:
+                                uiInstance.userList.append(user)
+                                self.users.append(user)
+
+                                message = user + " has connected"
+                                animationInstance.queue.append([1, message])
+
+                            else:
+                                uiInstance.userList.append(user)
+
+                    elif message[0:14] == "/recentmessage":
+                        self.addMessage(message[15:])
+
+                    elif message[0:7] == "/remove":
+                        if message[8:] == connectionInstance.username:
+                            while True:
+                                uiInstance.animationColor = (255, 0, 0)
+                                animationInstance.queue.append([1, "You have been kicked / disconnected"])
+                                sleep(1)
+
+                        uiInstance.userList.remove(message[8:])
+                        self.users.remove(message[8:])
+                        message = message[8:] + " has disconnected"
+                        animationInstance.queue.append([1, message])
+
+                    elif message[0:8] == "/display":
+                        animationInstance.queue.append([1, message[9:]])
+
+                    elif message == "/theme":
+                        animationInstance.queue.append([2, True])
+
+                    elif message[0:4] == "/mod":
+                        if message[5:] == connectionInstance.username and not connectionInstance.mod:
+                            if not uiInstance.darkMode:
+                                animationInstance.queue.append([2, False])
+
+                            connectionInstance.mod = True
+
+                            self.chooseColor(3, "khaki", False)
+                            self.chooseColor(4, "khaki", False)
+
+                    elif message[0:6] == "/color":
+                        self.chooseColor(3, message[7:], True)
+
+                    elif message[0:7] == "/border":
+                        self.chooseColor(4, message[8:], True)
+
+                    elif message[0:9] == "/savechat":
+                        self.location = message[10:]
+                        communicationInstance.saveChatHistory()
+
+                    elif message == "/disconnect":
+                        uiInstance.animationColor = (255, 0, 0)
+
+                        while True:
+                            animationInstance.queue.append([1, "You cannot use this username, "
+                                                           "please rejoin under a different username"])
+                            sleep(1)
+
+                    elif message[0:5] == "/rate":
+                        animationInstance.readRate = float(message[6:])
+
+                        animationInstance.queue.append([1, "You changed the animation hold to " +
+                                                        str(animationInstance.readRate)])
+
+                    elif message == "/next":
+                        self.nextPage()
+
+                    elif message == "/previous":
+                        self.previousPage()
+
+                    elif message == "/ldm":
+                        if uiInstance.LDM:
+                            uiInstance.LDM = False
+                            animationInstance.queue.append([1, "You turned LDM off"])
+
+                        else:
+                            uiInstance.LDM = True
+                            animationInstance.queue.append([1, "You turned LDM on"])
+
+                    else:
+                        self.addMessage(message)
+
+        except ConnectionResetError:
+            connectionInstance.connected = False
+            connectionInstance.leave()
+            print("Closed thread successfully")
+
+        finally:
+            return
 
 
 class Connection:
@@ -696,12 +688,13 @@ class Connection:
                 # Checks: if username is not empty, not Username and does not contain spaces
                 if not self.color.casefold() == "khaki":
                     try:
+                        uiInstance.color = colorutils.web_to_rgb(connectionInstance.color)
+                        uiInstance.status.value = "Connection Success"
+
                         self.socket.connect((self.host, self.port))
                         self.socket.send(self.username.encode())
                         self.connected = True
 
-                        uiInstance.color = colorutils.web_to_rgb(connectionInstance.color)
-                        uiInstance.status.value = "Connection Success"
                         UI.openChat(uiInstance)
 
                     except ConnectionRefusedError:
@@ -712,10 +705,12 @@ class Connection:
 
                     except BrokenPipeError:
                         uiInstance.status.value = "Broken Pipe"
+
                 else:
                     uiInstance.status.value = "Invalid Color"
             else:
                 uiInstance.status.value = "Invalid Username"
+
         except ValueError:
             uiInstance.status.value = "Invalid Values"
 
@@ -732,8 +727,7 @@ class Connection:
         uiInstance.setupWindow.hide()
 
         self.socket.close()
-        print("You have disconnected")
-        sys.exit("Terminated process")
+        sys.exit("You have disconnected")
 
 
 class UI:
@@ -772,7 +766,7 @@ class UI:
 
         # Attributes
         self.font = "San Francisco"
-        self.color = None
+        self.color = (173, 216, 230)
         self.animationColor = (173, 216, 230)
         self.bg = (70, 70, 70)
         self.darkbg = (40, 40, 40)
@@ -932,7 +926,7 @@ class UI:
         self.connectText = Text(verifyBox, text="Enter to continue")
         self.connectText.text_size = self.fontSize + 2
 
-        build = Text(bottomPadding, text="Optimisation", align="bottom")
+        build = Text(bottomPadding, text="Optimisation part 2", align="bottom")
 
         animationInstance.queue.append([5])
 
@@ -952,12 +946,12 @@ def keyPressed(event):
                                            uiInstance.hostInput, uiInstance.portInput, uiInstance.keyInput)
 
         else:
-            if connectionInstance.connected:
+            if connectionInstance.connected and event.tk_event.keysym.isalnum():
                 uiInstance.messageInput.focus()
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "10.28.205.230", "52727", "517627778207")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "57127", "738103647467")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
