@@ -344,10 +344,7 @@ class Animation:
                 print("Animation queue: " + str(self.queue))
                 # Check if queue has items
                 while len(self.queue) > 1 and self.queue[0] == self.queue[1]:
-                    try:
-                        self.queue.pop(0)
-                    except Exception as e:
-                        print(e)
+                    self.queue.pop(0)
 
                 if self.queue[0][0] == 1:
                     if not uiInstance.LDM:
