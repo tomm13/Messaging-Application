@@ -629,10 +629,13 @@ class Communication:
                             sleep(1)
 
                     elif message[0:5] == "/rate":
-                        animationInstance.readRate = float(message[6:])
+                        try:
+                            animationInstance.readRate = float(message[6:])
 
-                        animationInstance.queue.append([1, "You changed the animation hold to " +
-                                                        str(animationInstance.readRate)])
+                            animationInstance.queue.append([1, "You changed the animation hold to " +
+                                                            str(animationInstance.readRate)])
+                        except ValueError:
+                            animationInstance.queue.append([1, "You cannot use this value"])
 
                     elif message == "/next":
                         self.nextPage()
@@ -951,9 +954,10 @@ def keyPressed(event):
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "57127", "738103647467")
+connectionInstance = Connection("tomm", "lightblue", "10.28.206.185", "56161", "416153695273")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
 
 UI.openSetup(uiInstance)
+            
