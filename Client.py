@@ -6,7 +6,7 @@ import platform
 import socket
 import colorutils
 import sys
-from time import sleep, localtime, strftime
+from time import sleep, localtime, strftime, time
 from threading import Thread
 from guizero import *
 
@@ -343,8 +343,11 @@ class Animation:
             if self.queue:
                 print("Animation queue: " + str(self.queue))
                 # Check if queue has items
-                if uiInstance.LDM and connectionInstance.connected:
-                    uiInstance.header.value = "Welcome " + connectionInstance.username
+                while len(self.queue) > 1 and self.queue[0] == self.queue[1]:
+                    try:
+                        self.queue.pop(0)
+                    except Exception as e:
+                        print(e)
 
                 if self.queue[0][0] == 1:
                     if not uiInstance.LDM:
@@ -403,7 +406,9 @@ class Animation:
 
 class Communication:
     def __init__(self):
+        self.warningTimer = None
         self.location = None
+        self.messageTooLongWarning = False
         self.users = []
         self.chatHistory = []
         self.transcript = [[]]
@@ -423,8 +428,7 @@ class Communication:
         message = str("".join(decryptedMessage))
         return message
 
-    @staticmethod
-    def sendToServer():
+    def sendToServer(self):
         try:
             message = uiInstance.messageInput.value
             if message:
@@ -432,7 +436,16 @@ class Communication:
                     connectionInstance.leave()
                 else:
                     if len(message) + len(connectionInstance.username) + 2 >= 45:
-                        animationInstance.queue.append([1, "Your message is too long."])
+                        if not self.messageTooLongWarning:
+                            print("Set timer as True")
+                            animationInstance.queue.append([1, "Your message is too long."])
+                            self.messageTooLongWarning = True
+                            self.warningTimer = time()
+
+                        else:
+                            if time() > self.warningTimer + 5:
+                                print("Set timer as False")
+                                self.messageTooLongWarning = False
 
                     else:
                         connectionInstance.socket.send(message.encode())
@@ -954,10 +967,9 @@ def keyPressed(event):
 
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "10.28.206.185", "56161", "416153695273")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "63969", "545351668197")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
 
 UI.openSetup(uiInstance)
-            
