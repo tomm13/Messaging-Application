@@ -10,8 +10,4 @@ The purpose of this branch is to achieve the following:
 
 In almost every case this branch should be held off from being merged as testing is still required.
 
-
-
-
-
-
+This README will be updated shortly...
