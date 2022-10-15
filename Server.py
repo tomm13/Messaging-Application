@@ -1,4 +1,4 @@
-# 14/10/2022
+# 15/10/2022
 # V13 Beta 2
 
 import socket
@@ -12,6 +12,18 @@ class Security:
         self.d = None
         self.e = None
         self.N = None
+
+    @staticmethod
+    def generatePort():
+        while True:
+            try:
+                connectionInstance.socket.bind((connectionInstance.host, connectionInstance.port))
+                print("[Server] Server Hosted on " + str(connectionInstance.host) + " with Port " +
+                      str(connectionInstance.port))
+                break
+
+            except ConnectionError:
+                connectionInstance.port = random.randint(49125, 65536)
 
     def generateKey(self):
         N = 0
@@ -79,18 +91,6 @@ class Security:
         self.d = d
         self.e = e
         self.N = N
-
-    @staticmethod
-    def generatePort():
-        while True:
-            try:
-                connectionInstance.socket.bind((connectionInstance.host, connectionInstance.port))
-                print("[Server] Server Hosted on " + str(connectionInstance.host) + " with Port " +
-                      str(connectionInstance.port))
-                break
-
-            except ConnectionError:
-                connectionInstance.port = random.randint(49125, 65536)
 
     def encrypt(self, message):
         RSAEncryptedmessage = []
@@ -383,7 +383,7 @@ class Connection:
 
                 for user in self.users:
                     if user in actionsInstance.modUsers:
-                        message += user + "[Mod] "
+                        message += user + "-[mod] "
                     else:
                         message += user + " "
 
@@ -419,30 +419,30 @@ class Connection:
                         else:
                             sendInstance.command(message, clientSocket)
                     else:
-                        if messagesSentRecently >= 3:
-                            if not warnUser:
-                                sendInstance.privateBroadcastDisplay("You are sending messages too quickly",
-                                                                     clientSocket)
-                                warnUser = True
+                        #if messagesSentRecently >= 3:
+                        #    if not warnUser:
+                        #        sendInstance.privateBroadcastDisplay("You are sending messages too quickly",
+                        #                                             clientSocket)
+                        #        warnUser = True
 
-                            if time.time() > lastMessageSentTime + 5:
-                                messagesSentRecently = 0
-                                warnUser = False
+                        #    if time.time() > lastMessageSentTime + 5:
+                        #        messagesSentRecently = 0
+                        #        warnUser = False
 
-                        else:
-                            sendInstance.broadcast(unifiedmessage)
-                            self.recentMessages.append(unifiedmessage)
+                        #else:
+                        sendInstance.broadcast(unifiedmessage)
+                        self.recentMessages.append(unifiedmessage)
 
-                            if lastMessageSentTime + 1 > time.time():
-                                messagesSentRecently += 1
+                        if lastMessageSentTime + 1 > time.time():
+                            messagesSentRecently += 1
 
-                            elif messagesSentRecently > 0:
-                                messagesSentRecently -= 1
+                        elif messagesSentRecently > 0:
+                            messagesSentRecently -= 1
 
-                            if len(self.recentMessages) > 15:
-                                self.recentMessages = self.recentMessages[1:]
+                        if len(self.recentMessages) > 15:
+                            self.recentMessages = self.recentMessages[1:]
 
-                            lastMessageSentTime = time.time()
+                        lastMessageSentTime = time.time()
 
             except ConnectionResetError:
                 self.removeUser(username, clientSocket)
