@@ -1,19 +1,13 @@
-# Chat-Application-Dev-Branch
+# Chat-Application-Optimise-Branch
 A chat application made with guizero, asymmetric encryption and sockets.
 
-This is the developmental branch. 
+This is the optimise branch. 
 
 The purpose of this branch is to achieve the following:
-- Rename every variable with camelCase formatting unless it's a class
-- Remove any use of global variables
-- Add more functionality and features 
-- Fix issues in the issues tab
-- Develop without interfering with the stable build
+- Improve code quality by generalising logic used in code (threading queues, selection and iteration)
+- Generalise where selection and iteration is used in threads, be it in functions or elsewhere
+- Improve UX by elimininating overcomplicated factors such as unnecessary features. These features should be replaced in favour of a simplier experience for the user, 1 of the 3 main goals
 
-In most cases this branch should be held off from being merged as testing is still required.
+In almost every case this branch should be held off from being merged as testing is still required.
 
-
-
-
-
-
+This README will be updated shortly...
