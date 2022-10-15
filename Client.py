@@ -1,4 +1,4 @@
-# 14/10/2022
+# 15/10/2022
 # V13 Beta 2
 
 # import logging
@@ -338,11 +338,11 @@ class Animation:
     def animationThread(self):
         # This is the new thread in place of the hundreds of unterminated threads called before
         # The format for this thread is [[Class animation method code, *args]]
-
+        print("Started animation thread at {}".format(str(time())))
         while True:
             if self.queue:
-                print("Animation queue: " + str(self.queue))
-                # Check if queue has items
+                print("Animation queue at {}:".format(str(time())), str(self.queue))
+                # Check if queue has duplicate items
                 while len(self.queue) > 1 and self.queue[0] == self.queue[1]:
                     self.queue.pop(0)
 
@@ -361,7 +361,16 @@ class Animation:
                         communicationInstance.addMessage(self.queue[0][1])
 
                 elif self.queue[0][0] == 2:
-                    self.switchTheme()
+                    if (uiInstance.darkMode and uiInstance.color == (255, 255, 255)) \
+                            or (not uiInstance.darkMode and uiInstance.color == (0, 0, 0)):
+                        self.queue.append([1, "You cannot change the theme due to contrast"])
+
+                    elif (uiInstance.darkMode and uiInstance.animationColor == (255, 255, 255)) \
+                            or (not uiInstance.darkMode and uiInstance.animationColor == (0, 0, 0)):
+                        self.queue.append([1, "You cannot change the theme due to contrast"])
+
+                    else:
+                        self.switchTheme()
 
                     if self.queue[0][1]:
                         if uiInstance.darkMode:
@@ -386,7 +395,7 @@ class Animation:
                     if uiInstance.animationColor == (240, 230, 140) and not connectionInstance.mod:
                         self.queue.append([1, "You don't have the power to use this color"])
 
-                    elif self.queue[0][1] == uiInstance.color and self.queue[0][2]:
+                    elif self.queue[0][1] == uiInstance.animationColor and self.queue[0][2]:
                         self.queue.append([1, "You can't change to the same color"])
 
                     else:
@@ -403,8 +412,8 @@ class Animation:
 
 class Communication:
     def __init__(self):
-        self.warningTimer = None
         self.location = None
+        self.warningTimer = None
         self.messageTooLongWarning = False
         self.users = []
         self.chatHistory = []
@@ -434,14 +443,12 @@ class Communication:
                 else:
                     if len(message) + len(connectionInstance.username) + 2 >= 45:
                         if not self.messageTooLongWarning:
-                            print("Set timer as True")
                             animationInstance.queue.append([1, "Your message is too long."])
                             self.messageTooLongWarning = True
                             self.warningTimer = time()
 
                         else:
                             if time() > self.warningTimer + 5:
-                                print("Set timer as False")
                                 self.messageTooLongWarning = False
 
                     else:
@@ -475,7 +482,11 @@ class Communication:
                 animationInstance.queue.append([1, "You cannot use this color"])
 
             else:
-                animationInstance.queue.append([code, color, displayMessage])
+                if (not uiInstance.darkMode and color == (255, 255, 255)) or (uiInstance.darkMode and color == (0, 0, 0)):
+                    animationInstance.queue.append([1, "You cannot do this due to contrast"])
+
+                else:
+                    animationInstance.queue.append([code, color, displayMessage])
 
         except ValueError:
             animationInstance.queue.append([1, "You cannot use this color as it is undefined"])
@@ -561,10 +572,9 @@ class Communication:
         uiInstance.page += 1
         uiInstance.linesSent = 1
 
-        animationInstance.queue.append([1, "You are on page " + str(self.page + 1) + " of " + str(uiInstance.page + 1)])
-
     def updateThread(self):
         try:
+            print("Started update thread at {}".format(time()))
             while connectionInstance.connected:
                 message = self.decrypt(connectionInstance.socket.recv(1024).decode())
 
@@ -585,6 +595,7 @@ class Communication:
 
                                 message = user + " has connected"
                                 animationInstance.queue.append([1, message])
+                                print("Appended /add user at {}".format(time()))
 
                             else:
                                 uiInstance.userList.append(user)
@@ -640,10 +651,15 @@ class Communication:
 
                     elif message[0:5] == "/rate":
                         try:
-                            animationInstance.readRate = float(message[6:])
+                            rate = float(message[6:])
+                            if 0 < rate < 3:
+                                animationInstance.readRate = rate
+                                animationInstance.queue.append([1, "You changed the animation hold to " +
+                                                                str(animationInstance.readRate)])
 
-                            animationInstance.queue.append([1, "You changed the animation hold to " +
-                                                            str(animationInstance.readRate)])
+                            else:
+                                animationInstance.queue.append([1, "You can only use a rate value between 0-3"])
+
                         except ValueError:
                             animationInstance.queue.append([1, "You cannot use this value"])
 
@@ -697,8 +713,9 @@ class Connection:
             self.d = int(str(self.privateKey[0:6]), base=10)
             self.N = int(str(self.privateKey[6:12]), base=10)
 
-            if not self.username == "" and not self.username == "Username" and " " not in self.username:
-                # Checks: if username is not empty, not Username and does not contain spaces
+            if not self.username == "" and not self.username == "Username" and " " not in self.username and "[" not in \
+                    self.username and "]" not in self.username:
+                # Checks: if username is not empty, not Username and does not contain spaces or [ and ]
                 if not self.color.casefold() == "khaki":
                     try:
                         uiInstance.color = colorutils.web_to_rgb(connectionInstance.color)
@@ -963,8 +980,10 @@ def keyPressed(event):
                 uiInstance.messageInput.focus()
 
 
+print("Started code at {}".format(str(time())))
+
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "63969", "545351668197")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "57735", "517709648749")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
