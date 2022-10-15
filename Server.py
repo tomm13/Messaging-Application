@@ -419,30 +419,30 @@ class Connection:
                         else:
                             sendInstance.command(message, clientSocket)
                     else:
-                        #if messagesSentRecently >= 3:
-                        #    if not warnUser:
-                        #        sendInstance.privateBroadcastDisplay("You are sending messages too quickly",
-                        #                                             clientSocket)
-                        #        warnUser = True
+                        if messagesSentRecently >= 3:
+                            if not warnUser:
+                                sendInstance.privateBroadcastDisplay("You are sending messages too quickly",
+                                                                     clientSocket)
+                                warnUser = True
 
-                        #    if time.time() > lastMessageSentTime + 5:
-                        #        messagesSentRecently = 0
-                        #        warnUser = False
+                            if time.time() > lastMessageSentTime + 5:
+                                messagesSentRecently = 0
+                                warnUser = False
 
-                        #else:
-                        sendInstance.broadcast(unifiedmessage)
-                        self.recentMessages.append(unifiedmessage)
+                        else:
+                            sendInstance.broadcast(unifiedmessage)
+                            self.recentMessages.append(unifiedmessage)
 
-                        if lastMessageSentTime + 1 > time.time():
-                            messagesSentRecently += 1
+                            if lastMessageSentTime + 1 > time.time():
+                                messagesSentRecently += 1
 
-                        elif messagesSentRecently > 0:
-                            messagesSentRecently -= 1
+                            elif messagesSentRecently > 0:
+                                messagesSentRecently -= 1
 
-                        if len(self.recentMessages) > 15:
-                            self.recentMessages = self.recentMessages[1:]
+                            if len(self.recentMessages) > 15:
+                                self.recentMessages = self.recentMessages[1:]
 
-                        lastMessageSentTime = time.time()
+                            lastMessageSentTime = time.time()
 
             except ConnectionResetError:
                 self.removeUser(username, clientSocket)
