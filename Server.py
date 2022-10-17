@@ -368,8 +368,8 @@ class Connection:
             self.clients.append(clientSocket)
 
             username = clientSocket.recv(1024).decode()
-            if username == "" or username == "Username" or " " in username or "[" in username or "]" in username or \
-                    len(username) > 10:
+            if username in self.users or username == "" or username == "Username" or " " in username or "[" in username\
+                    or "]" in username or len(username) > 10:
                 sendInstance.privateBroadcast("/disconnect", clientSocket)
                 self.clients.remove(clientSocket)
 
