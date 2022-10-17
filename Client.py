@@ -362,11 +362,10 @@ class Animation:
 
                 elif self.queue[0][0] == 2:
                     if (uiInstance.darkMode and uiInstance.color == (255, 255, 255)) \
-                            or (not uiInstance.darkMode and uiInstance.color == (0, 0, 0)):
-                        self.queue.append([1, "You cannot change the theme due to contrast"])
-
-                    elif (uiInstance.darkMode and uiInstance.animationColor == (255, 255, 255)) \
+                            or (uiInstance.darkMode and uiInstance.animationColor == (255, 255, 255)) \
+                            or (not uiInstance.darkMode and uiInstance.color == (0, 0, 0)) \
                             or (not uiInstance.darkMode and uiInstance.animationColor == (0, 0, 0)):
+
                         self.queue.append([1, "You cannot change the theme due to contrast"])
 
                     else:
@@ -482,7 +481,8 @@ class Communication:
                 animationInstance.queue.append([1, "You cannot use this color"])
 
             else:
-                if (uiInstance.darkMode and color == (0, 0, 0)) or (not uiInstance.darkMode and color == (255, 255, 255)):
+                if (uiInstance.darkMode and color == (0, 0, 0)) or (
+                        not uiInstance.darkMode and color == (255, 255, 255)):
                     animationInstance.queue.append([1, "You cannot do this due to contrast"])
 
                 else:
@@ -646,7 +646,7 @@ class Communication:
 
                         while True:
                             animationInstance.queue.append([1, "You cannot use this username, "
-                                                           "please rejoin under a different username"])
+                                                               "please rejoin under a different username"])
                             sleep(1)
 
                     elif message[0:5] == "/rate":
@@ -983,7 +983,7 @@ def keyPressed(event):
 print("Started code at {}".format(str(time())))
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "10.28.206.254", "62977", "595747895513")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.122", "64947", "259663607459")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
