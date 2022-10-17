@@ -1,4 +1,4 @@
-# 15/10/2022
+# 17/10/2022
 # V13 Beta 2
 
 import socket
@@ -347,7 +347,7 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = "192.168.1.138"
+        self.host = "10.28.206.254"
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
         self.spaceRemaining = 50
@@ -368,11 +368,8 @@ class Connection:
             self.clients.append(clientSocket)
 
             username = clientSocket.recv(1024).decode()
-            if username in self.users:
-                sendInstance.privateBroadcast("/disconnect", clientSocket)
-                self.clients.remove(clientSocket)
-
-            elif len(username) > 10:
+            if username == "" or username == "Username" or " " in username or "[" in username or "]" in username or \
+                    len(username) > 10:
                 sendInstance.privateBroadcast("/disconnect", clientSocket)
                 self.clients.remove(clientSocket)
 
@@ -432,16 +429,16 @@ class Connection:
                         else:
                             sendInstance.broadcast(unifiedmessage)
                             self.recentMessages.append(unifiedmessage)
-    
+
                             if lastMessageSentTime + 1 > time.time():
                                 messagesSentRecently += 1
-    
+
                             elif messagesSentRecently > 0:
                                 messagesSentRecently -= 1
-    
+
                             if len(self.recentMessages) > 15:
                                 self.recentMessages = self.recentMessages[1:]
-    
+
                             lastMessageSentTime = time.time()
 
             except ConnectionResetError:
