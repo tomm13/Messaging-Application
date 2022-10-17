@@ -1,4 +1,4 @@
-# 15/10/2022
+# 17/10/2022
 # V13 Beta 2
 
 # import logging
@@ -372,11 +372,11 @@ class Animation:
                     else:
                         self.switchTheme()
 
-                    if self.queue[0][1]:
-                        if uiInstance.darkMode:
-                            self.queue.append([1, "You turned dark mode on"])
-                        else:
-                            self.queue.append([1, "You turned light mode on"])
+                        if self.queue[0][1]:
+                            if uiInstance.darkMode:
+                                self.queue.append([1, "You turned dark mode on"])
+                            else:
+                                self.queue.append([1, "You turned light mode on"])
 
                 elif self.queue[0][0] == 3:
                     if self.queue[0][1] == (240, 230, 140) and not connectionInstance.mod:
@@ -482,7 +482,7 @@ class Communication:
                 animationInstance.queue.append([1, "You cannot use this color"])
 
             else:
-                if (not uiInstance.darkMode and color == (255, 255, 255)) or (uiInstance.darkMode and color == (0, 0, 0)):
+                if (uiInstance.darkMode and color == (0, 0, 0)) or (not uiInstance.darkMode and color == (255, 255, 255)):
                     animationInstance.queue.append([1, "You cannot do this due to contrast"])
 
                 else:
@@ -983,7 +983,7 @@ def keyPressed(event):
 print("Started code at {}".format(str(time())))
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "57735", "517709648749")
+connectionInstance = Connection("tomm", "lightblue", "10.28.206.254", "62977", "595747895513")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
