@@ -338,10 +338,10 @@ class Animation:
     def animationThread(self):
         # This is the new thread in place of the hundreds of unterminated threads called before
         # The format for this thread is [[Class animation method code, *args]]
-        print("Started animation thread at {}".format(str(time())))
+        print("Started animation thread at : " + str(time()))
         while True:
             if self.queue:
-                print("Animation queue at {}:".format(str(time())), str(self.queue))
+                print("Animation queue at : " + str(time()), str(self.queue))
                 # Check if queue has duplicate items
                 while len(self.queue) > 1 and self.queue[0] == self.queue[1]:
                     self.queue.pop(0)
@@ -362,11 +362,10 @@ class Animation:
 
                 elif self.queue[0][0] == 2:
                     if (uiInstance.darkMode and uiInstance.color == (255, 255, 255)) \
-                            or (not uiInstance.darkMode and uiInstance.color == (0, 0, 0)):
-                        self.queue.append([1, "You cannot change the theme due to contrast"])
-
-                    elif (uiInstance.darkMode and uiInstance.animationColor == (255, 255, 255)) \
+                            or (uiInstance.darkMode and uiInstance.animationColor == (255, 255, 255)) \
+                            or (not uiInstance.darkMode and uiInstance.color == (0, 0, 0)) \
                             or (not uiInstance.darkMode and uiInstance.animationColor == (0, 0, 0)):
+
                         self.queue.append([1, "You cannot change the theme due to contrast"])
 
                     else:
@@ -482,7 +481,8 @@ class Communication:
                 animationInstance.queue.append([1, "You cannot use this color"])
 
             else:
-                if (uiInstance.darkMode and color == (0, 0, 0)) or (not uiInstance.darkMode and color == (255, 255, 255)):
+                if (uiInstance.darkMode and color == (0, 0, 0)) or (
+                        not uiInstance.darkMode and color == (255, 255, 255)):
                     animationInstance.queue.append([1, "You cannot do this due to contrast"])
 
                 else:
@@ -574,7 +574,7 @@ class Communication:
 
     def updateThread(self):
         try:
-            print("Started update thread at {}".format(time()))
+            print("Started update thread at : " + str(time()))
             while connectionInstance.connected:
                 message = self.decrypt(connectionInstance.socket.recv(1024).decode())
 
@@ -595,7 +595,7 @@ class Communication:
 
                                 message = user + " has connected"
                                 animationInstance.queue.append([1, message])
-                                print("Appended /add user at {}".format(time()))
+                                print("Appended /add user at : " + str(time()))
 
                             else:
                                 uiInstance.userList.append(user)
@@ -646,7 +646,7 @@ class Communication:
 
                         while True:
                             animationInstance.queue.append([1, "You cannot use this username, "
-                                                           "please rejoin under a different username"])
+                                                               "please rejoin under a different username"])
                             sleep(1)
 
                     elif message[0:5] == "/rate":
@@ -980,10 +980,10 @@ def keyPressed(event):
                 uiInstance.messageInput.focus()
 
 
-print("Started code at {}".format(str(time())))
+print("Started code at " + str(time()))
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "10.28.206.254", "62977", "595747895513")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.122", "64947", "259663607459")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
