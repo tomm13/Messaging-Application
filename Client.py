@@ -1,4 +1,4 @@
-# 17/10/2022
+# 1/11/2022
 # V13 Beta 2
 
 # import logging
@@ -371,12 +371,6 @@ class Animation:
                     else:
                         self.switchTheme()
 
-                        if self.queue[0][1]:
-                            if uiInstance.darkMode:
-                                self.queue.append([1, "You turned dark mode on"])
-                            else:
-                                self.queue.append([1, "You turned light mode on"])
-
                 elif self.queue[0][0] == 3:
                     if self.queue[0][1] == (240, 230, 140) and not connectionInstance.mod:
                         self.queue.append([1, "You don't have the power to use this color"])
@@ -387,9 +381,6 @@ class Animation:
                     else:
                         self.fadeColor(self.queue[0][1])
 
-                        if self.queue[0][2]:
-                            self.queue.append([1, "You changed the text color"])
-
                 elif self.queue[0][0] == 4:
                     if uiInstance.animationColor == (240, 230, 140) and not connectionInstance.mod:
                         self.queue.append([1, "You don't have the power to use this color"])
@@ -399,9 +390,6 @@ class Animation:
 
                     else:
                         self.fadeBorder(self.queue[0][1])
-
-                        if self.queue[0][2]:
-                            self.queue.append([1, "You changed the border color"])
 
                 elif self.queue[0][0] == 5:
                     self.animateStatus()
@@ -473,7 +461,7 @@ class Communication:
         return
 
     @staticmethod
-    def chooseColor(code, message, displayMessage):
+    def chooseColor(code, message):
         try:
             color = colorutils.web_to_rgb(message)
 
@@ -486,7 +474,7 @@ class Communication:
                     animationInstance.queue.append([1, "You cannot do this due to contrast"])
 
                 else:
-                    animationInstance.queue.append([code, color, displayMessage])
+                    animationInstance.queue.append([code, color])
 
         except ValueError:
             animationInstance.queue.append([1, "You cannot use this color as it is undefined"])
@@ -619,7 +607,7 @@ class Communication:
                         animationInstance.queue.append([1, message[9:]])
 
                     elif message == "/theme":
-                        animationInstance.queue.append([2, True])
+                        animationInstance.queue.append([2])
 
                     elif message[0:4] == "/mod":
                         if message[5:] == connectionInstance.username and not connectionInstance.mod:
@@ -628,14 +616,14 @@ class Communication:
 
                             connectionInstance.mod = True
 
-                            self.chooseColor(3, "khaki", False)
-                            self.chooseColor(4, "khaki", False)
+                            self.chooseColor(3, "khaki")
+                            self.chooseColor(4, "khaki")
 
                     elif message[0:6] == "/color":
-                        self.chooseColor(3, message[7:], True)
+                        self.chooseColor(3, message[7:])
 
                     elif message[0:7] == "/border":
-                        self.chooseColor(4, message[8:], True)
+                        self.chooseColor(4, message[8:])
 
                     elif message[0:9] == "/savechat":
                         self.location = message[10:]
@@ -983,7 +971,7 @@ def keyPressed(event):
 print("Started code at " + str(time()))
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "192.168.1.122", "64947", "259663607459")
+connectionInstance = Connection("tomm", "lightblue", "10.28.206.175", "62494", "439085550339")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
