@@ -596,12 +596,12 @@ class Communication:
 
                     elif message[0:9] == "/savechat":
                         communicationInstance.saveChatHistory(message[10:])
+                
+                    elif message == "/ldm":
+                        uiInstance.setLDM()
 
                     elif message[0:4] == "/mod":
                         uiInstance.setMod(message[5:])
-
-                    elif message == "/ldm":
-                        uiInstance.setLDM()
 
                     elif message[0:5] == "/rate":
                         uiInstance.setRate(message[6:])
@@ -621,14 +621,14 @@ class Communication:
                     elif message[0:14] == "/recentmessage":
                         self.addMessage(message[15:])
 
-                    elif message == "/disconnect":
-                        self.disconnectLoop()
-
                     elif message == "/next":
                         self.nextPage()
 
                     elif message == "/previous":
                         self.previousPage()
+                        
+                    elif message == "/disconnect":
+                        self.disconnectLoop()
 
                     else:
                         self.addMessage(message)
