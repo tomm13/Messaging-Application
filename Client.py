@@ -1,4 +1,4 @@
-# 1/11/2022
+# 3/11/2022
 # V13 Beta 2
 
 # import logging
@@ -335,6 +335,25 @@ class Animation:
 
         return
 
+    @staticmethod
+    def chooseColor(code, message):
+        try:
+            color = colorutils.web_to_rgb(message)
+
+            if color == (240, 230, 140) and not connectionInstance.mod:
+                animationInstance.queue.append([1, "You cannot use this color"])
+
+            else:
+                if (uiInstance.darkMode and color == (0, 0, 0)) or (
+                        not uiInstance.darkMode and color == (255, 255, 255)):
+                    animationInstance.queue.append([1, "You cannot do this due to contrast"])
+
+                else:
+                    animationInstance.queue.append([code, color])
+
+        except ValueError:
+            animationInstance.queue.append([1, "You cannot use this color as it is undefined"])
+
     def animationThread(self):
         # This is the new thread in place of the hundreds of unterminated threads called before
         # The format for this thread is [[Class animation method code, *args]]
@@ -459,25 +478,6 @@ class Communication:
             animationInstance.queue.append([1, "You can't save to this location"])
 
         return
-
-    @staticmethod
-    def chooseColor(code, message):
-        try:
-            color = colorutils.web_to_rgb(message)
-
-            if color == (240, 230, 140) and not connectionInstance.mod:
-                animationInstance.queue.append([1, "You cannot use this color"])
-
-            else:
-                if (uiInstance.darkMode and color == (0, 0, 0)) or (
-                        not uiInstance.darkMode and color == (255, 255, 255)):
-                    animationInstance.queue.append([1, "You cannot do this due to contrast"])
-
-                else:
-                    animationInstance.queue.append([code, color])
-
-        except ValueError:
-            animationInstance.queue.append([1, "You cannot use this color as it is undefined"])
 
     def previousPage(self):
         if self.page > 0:
@@ -616,14 +616,14 @@ class Communication:
 
                             connectionInstance.mod = True
 
-                            self.chooseColor(3, "khaki")
-                            self.chooseColor(4, "khaki")
+                            animationInstance.chooseColor(3, "khaki")
+                            animationInstance.chooseColor(4, "khaki")
 
                     elif message[0:6] == "/color":
-                        self.chooseColor(3, message[7:])
+                        animationInstance.chooseColor(3, message[7:])
 
                     elif message[0:7] == "/border":
-                        self.chooseColor(4, message[8:])
+                        animationInstance.chooseColor(4, message[8:])
 
                     elif message[0:9] == "/savechat":
                         self.location = message[10:]
@@ -971,7 +971,7 @@ def keyPressed(event):
 print("Started code at " + str(time()))
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "10.28.206.175", "62494", "439085550339")
+connectionInstance = Connection("tomm", "lightblue", "10.28.206.165", "52935", "285223667169")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
