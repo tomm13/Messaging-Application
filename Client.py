@@ -529,6 +529,15 @@ class Communication:
                                                 str(uiInstance.page + 1)])
         else:
             animationInstance.queue.append([1, "You are at the highest page"])
+            
+    def createNewPage(self, message):
+        # Sends the client to the new current page and shows input
+        self.transcript.append([message])
+        self.page = uiInstance.page + 1
+        uiInstance.chatHistory.clear()
+        uiInstance.chatHistory.value = message
+        uiInstance.page += 1
+        uiInstance.linesSent = 1
 
     def addMessage(self, message):
         if uiInstance.linesSent >= uiInstance.linesLimit:
@@ -569,15 +578,6 @@ class Communication:
                         self.transcript[uiInstance.page].append(message)
                         uiInstance.chatHistory.append(message)
                         uiInstance.linesSent += 1
-
-    def createNewPage(self, message):
-        # Sends the client to the new current page and shows input
-        self.transcript.append([message])
-        self.page = uiInstance.page + 1
-        uiInstance.chatHistory.clear()
-        uiInstance.chatHistory.value = message
-        uiInstance.page += 1
-        uiInstance.linesSent = 1
 
     def updateThread(self):
         try:
