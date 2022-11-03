@@ -335,25 +335,6 @@ class Animation:
 
         return
 
-    @staticmethod
-    def chooseColor(code, message):
-        try:
-            color = colorutils.web_to_rgb(message)
-
-            if color == (240, 230, 140) and not connectionInstance.mod:
-                animationInstance.queue.append([1, "You cannot use this color"])
-
-            else:
-                if (uiInstance.darkMode and color == (0, 0, 0)) or (
-                        not uiInstance.darkMode and color == (255, 255, 255)):
-                    animationInstance.queue.append([1, "You cannot do this due to contrast"])
-
-                else:
-                    animationInstance.queue.append([code, color])
-
-        except ValueError:
-            animationInstance.queue.append([1, "You cannot use this color as it is undefined"])
-
     def animationThread(self):
         # This is the new thread in place of the hundreds of unterminated threads called before
         # The format for this thread is [[Class animation method code, *args]]
@@ -418,7 +399,6 @@ class Animation:
 
 class Communication:
     def __init__(self):
-        self.location = None
         self.warningTimer = None
         self.messageTooLongWarning = False
         self.users = []
@@ -439,6 +419,28 @@ class Communication:
 
         message = str("".join(decryptedMessage))
         return message
+
+    @staticmethod
+    def saveChatHistory(location):
+        if location and " " not in location:
+            with open(location, "w") as file:
+                for chatLine in communicationInstance.chatHistory:
+                    file.write(chatLine + "\n")
+                file.close()
+
+                animationInstance.queue.append([1, "Your file has been saved in " + location])
+
+        else:
+            animationInstance.queue.append([1, "You can't save to this location"])
+
+    @staticmethod
+    def disconnectLoop():
+        uiInstance.animationColor = (255, 0, 0)
+
+        while True:
+            animationInstance.queue.append([1, "You cannot use this username, "
+                                               "please rejoin under a different username"])
+            sleep(1)
 
     def sendToServer(self):
         try:
@@ -465,19 +467,36 @@ class Communication:
             connectionInstance.connected = False
             connectionInstance.leave()
 
-    def saveChatHistory(self):
-        if self.location and " " not in self.location:
-            with open(self.location, "w") as file:
-                for chatLine in communicationInstance.chatHistory:
-                    file.write(chatLine + "\n")
-                file.close()
+    def setUsers(self, message):
+        message = message.split()
+        message.sort()
 
-                animationInstance.queue.append([1, "Your file has been saved in " + self.location])
+        uiInstance.userList.clear()
+        uiInstance.userList.append("Users online:")
 
-        else:
-            animationInstance.queue.append([1, "You can't save to this location"])
+        for user in message:
+            if user not in self.users:
+                uiInstance.userList.append(user)
+                self.users.append(user)
 
-        return
+                message = user + " has connected"
+                animationInstance.queue.append([1, message])
+                print("Appended /add user at : " + str(time()))
+
+            else:
+                uiInstance.userList.append(user)
+
+    def removeUsers(self, message):
+        if message == connectionInstance.username:
+            while True:
+                uiInstance.animationColor = (255, 0, 0)
+                animationInstance.queue.append([1, "You have been kicked / disconnected"])
+                sleep(1)
+
+        uiInstance.userList.remove(message[8:])
+        self.users.remove(message[8:])
+        message = message[8:] + " has disconnected"
+        animationInstance.queue.append([1, message])
 
     def previousPage(self):
         if self.page > 0:
@@ -569,102 +588,47 @@ class Communication:
                 if message:
                     print("Received message: " + message)
 
-                    if message[0:4] == "/add":
-                        message = message[5:].split()
-                        message.sort()
-
-                        uiInstance.userList.clear()
-                        uiInstance.userList.append("Users online:")
-
-                        for user in message:
-                            if user not in self.users:
-                                uiInstance.userList.append(user)
-                                self.users.append(user)
-
-                                message = user + " has connected"
-                                animationInstance.queue.append([1, message])
-                                print("Appended /add user at : " + str(time()))
-
-                            else:
-                                uiInstance.userList.append(user)
-
-                    elif message[0:14] == "/recentmessage":
-                        self.addMessage(message[15:])
-
-                    elif message[0:7] == "/remove":
-                        if message[8:] == connectionInstance.username:
-                            while True:
-                                uiInstance.animationColor = (255, 0, 0)
-                                animationInstance.queue.append([1, "You have been kicked / disconnected"])
-                                sleep(1)
-
-                        uiInstance.userList.remove(message[8:])
-                        self.users.remove(message[8:])
-                        message = message[8:] + " has disconnected"
-                        animationInstance.queue.append([1, message])
-
-                    elif message[0:8] == "/display":
+                    if message[0:8] == "/display":
                         animationInstance.queue.append([1, message[9:]])
 
                     elif message == "/theme":
                         animationInstance.queue.append([2])
 
-                    elif message[0:4] == "/mod":
-                        if message[5:] == connectionInstance.username and not connectionInstance.mod:
-                            if not uiInstance.darkMode:
-                                animationInstance.queue.append([2, False])
-
-                            connectionInstance.mod = True
-
-                            animationInstance.chooseColor(3, "khaki")
-                            animationInstance.chooseColor(4, "khaki")
-
-                    elif message[0:6] == "/color":
-                        animationInstance.chooseColor(3, message[7:])
-
-                    elif message[0:7] == "/border":
-                        animationInstance.chooseColor(4, message[8:])
-
                     elif message[0:9] == "/savechat":
-                        self.location = message[10:]
-                        communicationInstance.saveChatHistory()
+                        communicationInstance.saveChatHistory(message[10:])
 
-                    elif message == "/disconnect":
-                        uiInstance.animationColor = (255, 0, 0)
+                    elif message[0:4] == "/mod":
+                        uiInstance.setMod(message[5:])
 
-                        while True:
-                            animationInstance.queue.append([1, "You cannot use this username, "
-                                                               "please rejoin under a different username"])
-                            sleep(1)
+                    elif message == "/ldm":
+                        uiInstance.setLDM()
 
                     elif message[0:5] == "/rate":
-                        try:
-                            rate = float(message[6:])
-                            if 0 < rate < 3:
-                                animationInstance.readRate = rate
-                                animationInstance.queue.append([1, "You changed the animation hold to " +
-                                                                str(animationInstance.readRate)])
+                        uiInstance.setRate(message[6:])
 
-                            else:
-                                animationInstance.queue.append([1, "You can only use a rate value between 0-3"])
+                    elif message[0:6] == "/color":
+                        uiInstance.chooseColor(3, message[7:])
 
-                        except ValueError:
-                            animationInstance.queue.append([1, "You cannot use this value"])
+                    elif message[0:7] == "/border":
+                        uiInstance.chooseColor(4, message[8:])
+
+                    elif message[0:4] == "/add":
+                        self.setUsers(message[5:])
+
+                    elif message[0:7] == "/remove":
+                        self.removeUsers(message[8:])
+
+                    elif message[0:14] == "/recentmessage":
+                        self.addMessage(message[15:])
+
+                    elif message == "/disconnect":
+                        self.disconnectLoop()
 
                     elif message == "/next":
                         self.nextPage()
 
                     elif message == "/previous":
                         self.previousPage()
-
-                    elif message == "/ldm":
-                        if uiInstance.LDM:
-                            uiInstance.LDM = False
-                            animationInstance.queue.append([1, "You turned LDM off"])
-
-                        else:
-                            uiInstance.LDM = True
-                            animationInstance.queue.append([1, "You turned LDM on"])
 
                     else:
                         self.addMessage(message)
@@ -803,6 +767,64 @@ class UI:
             self.rate = 0.00000
             self.linesLimit = 9
 
+    # Methods below alter UI attributes
+
+    @staticmethod
+    def chooseColor(code, message):
+        try:
+            color = colorutils.web_to_rgb(message)
+
+            if color == (240, 230, 140) and not connectionInstance.mod:
+                animationInstance.queue.append([1, "You cannot use this color"])
+
+            else:
+                if (uiInstance.darkMode and color == (0, 0, 0)) or (
+                        not uiInstance.darkMode and color == (255, 255, 255)):
+                    animationInstance.queue.append([1, "You cannot do this due to contrast"])
+
+                else:
+                    animationInstance.queue.append([code, color])
+
+        except ValueError:
+            animationInstance.queue.append([1, "You cannot use this color as it is undefined"])
+
+    @staticmethod
+    def setMod(message):
+        if message == connectionInstance.username and not connectionInstance.mod:
+            if not uiInstance.darkMode:
+                animationInstance.queue.append([2, False])
+
+            connectionInstance.mod = True
+
+            uiInstance.chooseColor(3, "khaki")
+            uiInstance.chooseColor(4, "khaki")
+
+    @staticmethod
+    def setRate(rate):
+        try:
+            rate = float(rate[6:])
+            if 0 < rate < 3:
+                animationInstance.readRate = rate
+                animationInstance.queue.append([1, "You changed the animation hold to " +
+                                                str(animationInstance.readRate)])
+
+            else:
+                animationInstance.queue.append([1, "You can only use a rate value between 0-3"])
+
+        except ValueError:
+            animationInstance.queue.append([1, "You cannot use this value"])
+
+    @staticmethod
+    def setLDM():
+        if uiInstance.LDM:
+            uiInstance.LDM = False
+            animationInstance.queue.append([1, "You turned LDM off"])
+
+        else:
+            uiInstance.LDM = True
+            animationInstance.queue.append([1, "You turned LDM on"])
+
+    # Methods below create the UI
     def openChat(self):
         try:
             self.chatWindow = Window(self.setupWindow, width=1280, height=720, title="Chatroom", bg=self.bg)
