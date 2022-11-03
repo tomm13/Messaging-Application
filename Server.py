@@ -1,4 +1,4 @@
-# 17/10/2022
+# 3/11/2022
 # V13 Beta 2
 
 import socket
@@ -86,7 +86,7 @@ class Security:
                     d = (k * PhiN + 1) // e
                     break
 
-        print("[Private] Private Key = " + str(d) + str(N))
+        print("[Server] Private Key = " + str(d) + str(N))
 
         self.d = d
         self.e = e
@@ -347,7 +347,7 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = "10.28.206.254"
+        self.host = "10.28.206.165"
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
         self.spaceRemaining = 50
