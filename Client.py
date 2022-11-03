@@ -166,7 +166,7 @@ class Animation:
                 uiInstance.header.bg = (R, G, B)
                 sleep(uiInstance.rate)
 
-            uiInstance.header.value = "Welcome " + connectionInstance.username
+            uiInstance.header.value = f"Welcome {connectionInstance.username}"
 
             while not R == uiInstance.darkbg[0] or not G == uiInstance.darkbg[1] or not B == uiInstance.darkbg[2]:
                 # Text fades from any color to black
@@ -338,10 +338,10 @@ class Animation:
     def animationThread(self):
         # This is the new thread in place of the hundreds of unterminated threads called before
         # The format for this thread is [[Class animation method code, *args]]
-        print("Started animation thread at : " + str(time()))
+        print(f"Started animation thread at : {str(time())}")
         while True:
             if self.queue:
-                print("Animation queue at : " + str(time()), str(self.queue))
+                print(f"Animation queue at {str(time())}: {str(self.queue)}")
                 # Check if queue has duplicate items
                 while len(self.queue) > 1 and self.queue[0] == self.queue[1]:
                     self.queue.pop(0)
@@ -428,7 +428,7 @@ class Communication:
                     file.write(chatLine + "\n")
                 file.close()
 
-                animationInstance.queue.append([1, "Your file has been saved in " + location])
+                animationInstance.queue.append([1, f"Your file has been saved in {str(location)}"])
 
         else:
             animationInstance.queue.append([1, "You can't save to this location"])
@@ -479,9 +479,9 @@ class Communication:
                 uiInstance.userList.append(user)
                 self.users.append(user)
 
-                message = user + " has connected"
+                message = f"{str(user)} has connected"
                 animationInstance.queue.append([1, message])
-                print("Appended /add user at : " + str(time()))
+                print(f"Appended /add user at {str(time())}")
 
             else:
                 uiInstance.userList.append(user)
@@ -495,7 +495,7 @@ class Communication:
 
         uiInstance.userList.remove(message[8:])
         self.users.remove(message[8:])
-        message = message[8:] + " has disconnected"
+        message = f"{message[8:]} has disconnected"
         animationInstance.queue.append([1, message])
 
     def previousPage(self):
@@ -509,8 +509,8 @@ class Communication:
                 uiInstance.chatHistory.append(line)
 
             if not uiInstance.LDM:
-                animationInstance.queue.append([1, "You are on page " + str(self.page + 1) + " of " +
-                                                str(uiInstance.page + 1)])
+                animationInstance.queue.append([1, f"You are on page {str(self.page + 1)} of {str(uiInstance.page + 1)}"
+                                                ])
         else:
             animationInstance.queue.append([1, "You cannot go below this page"])
 
@@ -525,11 +525,11 @@ class Communication:
                 uiInstance.chatHistory.append(line)
 
             if not uiInstance.LDM:
-                animationInstance.queue.append([1, "You are on page " + str(self.page + 1) + " of " +
-                                                str(uiInstance.page + 1)])
+                animationInstance.queue.append([1, f"You are on page {str(self.page + 1)} of {str(uiInstance.page + 1)}"
+                                                ])
         else:
             animationInstance.queue.append([1, "You are at the highest page"])
-            
+
     def createNewPage(self, message):
         # Sends the client to the new current page and shows input
         self.transcript.append([message])
@@ -545,7 +545,7 @@ class Communication:
 
         else:
             # Received input
-            self.chatHistory.append(strftime("%H:%M:%S", localtime()) + " " + message)
+            self.chatHistory.append(strftime("%H:%M:%S", localtime()) + f" {message}")
             if uiInstance.linesSent == 0:
                 # Only true for the very first message
                 self.transcript[uiInstance.page].append(message)
@@ -581,12 +581,12 @@ class Communication:
 
     def updateThread(self):
         try:
-            print("Started update thread at : " + str(time()))
+            print(f"Started update thread at {str(time())}")
             while connectionInstance.connected:
                 message = self.decrypt(connectionInstance.socket.recv(1024).decode())
 
                 if message:
-                    print("Received message: " + message)
+                    print(f"Received message: {message}")
 
                     if message[0:8] == "/display":
                         animationInstance.queue.append([1, message[9:]])
@@ -802,11 +802,10 @@ class UI:
     @staticmethod
     def setRate(rate):
         try:
-            rate = float(rate[6:])
+            rate = float(rate)
             if 0 < rate < 3:
                 animationInstance.readRate = rate
-                animationInstance.queue.append([1, "You changed the animation hold to " +
-                                                str(animationInstance.readRate)])
+                animationInstance.queue.append([1, f"You changed the animation hold to {str(animationInstance.readRate)}"])
 
             else:
                 animationInstance.queue.append([1, "You can only use a rate value between 0-3"])
@@ -906,7 +905,7 @@ class UI:
             self.chatWindow.show()
 
         except Exception as e:
-            print("Your client crashed unexpectedly due to " + str(e))
+            print(f"Your client crashed unexpectedly due to {str(e)}")
             connectionInstance.leave()
 
     def openSetup(self):
@@ -990,7 +989,7 @@ def keyPressed(event):
                 uiInstance.messageInput.focus()
 
 
-print("Started code at " + str(time()))
+print(f"Started code at {str(time())}")
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
 connectionInstance = Connection("tomm", "lightblue", "10.28.206.165", "52935", "285223667169")
