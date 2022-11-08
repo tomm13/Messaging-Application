@@ -1,5 +1,5 @@
 # 8/11/2022
-# V13 Beta 2
+# V13 
 
 # import logging
 import platform
@@ -556,7 +556,7 @@ class Communication:
                         uiInstance.chatHistory.append(line)
                         uiInstance.linesSent += 1
 
-                    if uiInstance.linesSent >= 13:
+                    if uiInstance.linesSent >= uiInstance.linesLimit:
                         # If the current page has no space left
                         self.createNewPage(message)
 
@@ -841,7 +841,7 @@ class UI:
             self.userList.bg = (255, 255, 255)
             self.userList.text_size = self.fontSize
 
-            self.header = Text(header, text="Your client is loading...", width="fill", height=50)
+            self.header = Text(header, text="Connecting...", width="fill", height=50)
             self.header.text_size = self.fontSize + 14
             self.header.text_color = (255, 255, 255)
             self.header.bg = uiInstance.animationColor
