@@ -1,10 +1,11 @@
-# First draft
+# 8/11/2022
 
-test = "im GAY da Bu DEDE da BU da"
+
+test = "abcdefgABCDEFG 1235649358790213!@(*$£(*&$*(%"
 key = 23
 
 
-def encrypt(message):
+def caesarEncrypt(message):
     newMessage = ""
     for letter in message:
 
@@ -32,7 +33,7 @@ def encrypt(message):
     return newMessage
 
 
-def decrypt(message):
+def caesarDecrypt(message):
     newMessage = ""
     for letter in message:
 
@@ -59,8 +60,9 @@ def decrypt(message):
 
     return newMessage
 
-encryptedMessage = encrypt(test)
+
+encryptedMessage = caesarEncrypt(test)
 print(encryptedMessage)
 
-decryptedMessage = decrypt(encryptedMessage)
+decryptedMessage = caesarDecrypt(encryptedMessage)
 print(decryptedMessage)
