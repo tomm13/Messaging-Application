@@ -1,5 +1,5 @@
-# 3/11/2022
-# V13 Beta 2
+# 8/11/2022
+# V13
 
 import socket
 import time
@@ -347,7 +347,7 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = "10.28.206.165"
+        self.host = "10.28.206.143"
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
         self.spaceRemaining = 50
