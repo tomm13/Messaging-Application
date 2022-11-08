@@ -18,8 +18,7 @@ class Security:
         while True:
             try:
                 connectionInstance.socket.bind((connectionInstance.host, connectionInstance.port))
-                print("[Server] Server Hosted on " + str(connectionInstance.host) + " with Port " +
-                      str(connectionInstance.port))
+                print(f"[Server] Server Hosted on {str(connectionInstance.host)} with port {str(connectionInstance.port)}")
                 break
 
             except ConnectionError:
@@ -118,6 +117,13 @@ class Actions:
         self.userToKick = None
         self.userToKickSocket = None
 
+    def resetVote(self):
+        self.userToKick = None
+        self.userToKickSocket = None
+        self.hasVoted = []
+        self.hasVotedUsers = []
+        self.voteActive = False
+
     def vote(self, message, clientSocket):
         modSocket = clientSocket
         index = connectionInstance.clients.index(modSocket)
@@ -206,13 +212,6 @@ class Actions:
 
                 self.resetVote()
 
-    def resetVote(self):
-        self.userToKick = None
-        self.userToKickSocket = None
-        self.hasVoted = []
-        self.hasVotedUsers = []
-        self.voteActive = False
-
     def mod(self, message, clientSocket):
         modSocket = clientSocket
         index = connectionInstance.clients.index(modSocket)
@@ -262,7 +261,7 @@ class Actions:
 class Send:
     @staticmethod
     def broadcast(message):
-        # Send a public message to every client, not for animating purposes.
+        # Send a public message to every client
         time.sleep(0.1)
         print("[Client] " + message)
 
@@ -272,7 +271,7 @@ class Send:
 
     @staticmethod
     def broadcastDisplay(message):
-        # Send "/display" + a message to every client.
+        # Sends a public animated banner with {message} parameter
         time.sleep(0.1)
         print("[PublicDisplay] " + message)
 
@@ -284,7 +283,7 @@ class Send:
 
     @staticmethod
     def privateBroadcast(message, clientSocket):
-        # Send a private message to 1 specific client, not for animating purposes.
+        # Send a private message to 1 specific client
         time.sleep(0.1)
         print("[Private] " + message)
 
@@ -293,7 +292,7 @@ class Send:
 
     @staticmethod
     def privateBroadcastDisplay(message, clientSocket):
-        # Send "/display" + a message to 1 specific client.
+        # Sends a private animted banner with {message} parameter
         time.sleep(0.1)
         print("[PrivateDisplay] " + message)
 
