@@ -1,4 +1,4 @@
-# 3/11/2022
+# 8/11/2022
 # V13 Beta 2
 
 # import logging
@@ -372,24 +372,10 @@ class Animation:
                         self.switchTheme()
 
                 elif self.queue[0][0] == 3:
-                    if self.queue[0][1] == (240, 230, 140) and not connectionInstance.mod:
-                        self.queue.append([1, "You don't have the power to use this color"])
-
-                    elif self.queue[0][1] == uiInstance.color and self.queue[0][2]:
-                        self.queue.append([1, "You can't change to the same color"])
-
-                    else:
-                        self.fadeColor(self.queue[0][1])
+                    self.fadeColor(self.queue[0][1])
 
                 elif self.queue[0][0] == 4:
-                    if uiInstance.animationColor == (240, 230, 140) and not connectionInstance.mod:
-                        self.queue.append([1, "You don't have the power to use this color"])
-
-                    elif self.queue[0][1] == uiInstance.animationColor and self.queue[0][2]:
-                        self.queue.append([1, "You can't change to the same color"])
-
-                    else:
-                        self.fadeBorder(self.queue[0][1])
+                    self.fadeBorder(self.queue[0][1])
 
                 elif self.queue[0][0] == 5:
                     self.animateStatus()
@@ -596,7 +582,7 @@ class Communication:
 
                     elif message[0:9] == "/savechat":
                         communicationInstance.saveChatHistory(message[10:])
-                
+
                     elif message == "/ldm":
                         uiInstance.setLDM()
 
@@ -626,7 +612,7 @@ class Communication:
 
                     elif message == "/previous":
                         self.previousPage()
-                        
+
                     elif message == "/disconnect":
                         self.disconnectLoop()
 
@@ -668,28 +654,26 @@ class Connection:
             if not self.username == "" and not self.username == "Username" and " " not in self.username and "[" not in \
                     self.username and "]" not in self.username:
                 # Checks: if username is not empty, not Username and does not contain spaces or [ and ]
-                if not self.color.casefold() == "khaki":
-                    try:
-                        uiInstance.color = colorutils.web_to_rgb(connectionInstance.color)
-                        uiInstance.status.value = "Connection Success"
 
-                        self.socket.connect((self.host, self.port))
-                        self.socket.send(self.username.encode())
-                        self.connected = True
+                try:
+                    uiInstance.color = colorutils.web_to_rgb(connectionInstance.color)
+                    uiInstance.status.value = "Connection Success"
 
-                        UI.openChat(uiInstance)
+                    self.socket.connect((self.host, self.port))
+                    self.socket.send(self.username.encode())
+                    self.connected = True
 
-                    except ConnectionRefusedError:
-                        uiInstance.status.value = "Connection Refused"
+                    UI.openChat(uiInstance)
 
-                    except OSError:
-                        connectionInstance.leave()
+                except ConnectionRefusedError:
+                    uiInstance.status.value = "Connection Refused"
 
-                    except BrokenPipeError:
-                        uiInstance.status.value = "Broken Pipe"
+                except OSError:
+                    connectionInstance.leave()
 
-                else:
-                    uiInstance.status.value = "Invalid Color"
+                except BrokenPipeError:
+                    uiInstance.status.value = "Broken Pipe"
+
             else:
                 uiInstance.status.value = "Invalid Username"
 
@@ -774,16 +758,12 @@ class UI:
         try:
             color = colorutils.web_to_rgb(message)
 
-            if color == (240, 230, 140) and not connectionInstance.mod:
-                animationInstance.queue.append([1, "You cannot use this color"])
+            if (uiInstance.darkMode and color == (0, 0, 0)) or (
+                    not uiInstance.darkMode and color == (255, 255, 255)):
+                animationInstance.queue.append([1, "You cannot do this due to contrast"])
 
             else:
-                if (uiInstance.darkMode and color == (0, 0, 0)) or (
-                        not uiInstance.darkMode and color == (255, 255, 255)):
-                    animationInstance.queue.append([1, "You cannot do this due to contrast"])
-
-                else:
-                    animationInstance.queue.append([code, color])
+                animationInstance.queue.append([code, color])
 
         except ValueError:
             animationInstance.queue.append([1, "You cannot use this color as it is undefined"])
@@ -805,7 +785,8 @@ class UI:
             rate = float(rate)
             if 0 < rate < 3:
                 animationInstance.readRate = rate
-                animationInstance.queue.append([1, f"You changed the animation hold to {str(animationInstance.readRate)}"])
+                animationInstance.queue.append(
+                    [1, f"You changed the animation hold to {str(animationInstance.readRate)}"])
 
             else:
                 animationInstance.queue.append([1, "You can only use a rate value between 0-3"])
@@ -992,7 +973,7 @@ def keyPressed(event):
 print(f"Started code at {str(time())}")
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "10.28.206.165", "52935", "285223667169")
+connectionInstance = Connection("tomm", "lightblue", "10.28.206.143", "61172", "502315755221")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
