@@ -1,34 +1,22 @@
-# 8/11/2022
+# 9/11/2022
+# Only accepts integers
 
-
-test = "abcdefgABCDEFG 1235649358790213!@(*$£(*&$*(%"
-key = 23
+test = "012345678"
+key = 0
+characters = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
+              "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
 
 
 def caesarEncrypt(message):
     newMessage = ""
     for letter in message:
 
-        if letter.isalpha():
+        if letter.isnumeric():
+            index = (characters.index(letter) + key) % 36
 
-            if letter.islower():
-                step = 97
-
-            elif letter.isupper():
-                step = 65
-
-            index = ord(letter) + key - step
-
-            while index > 25:
-                index -= 26
-
-            while index < 0:
-                index += 26
-
-            newMessage += chr(index + step)
-
+            newMessage += characters[index]
         else:
-            newMessage += letter
+            raise ValueError(f"Invalid character {letter}")
 
     return newMessage
 
@@ -37,32 +25,19 @@ def caesarDecrypt(message):
     newMessage = ""
     for letter in message:
 
-        if letter.isalpha():
+        if letter.isalnum():
+            index = (characters.index(letter) - key) % 36
 
-            if letter.islower():
-                step = 97
-
-            elif letter.isupper():
-                step = 65
-
-            index = ord(letter) - key - step
-
-            while index > 25:
-                index -= 26
-
-            while index < 0:
-                index += 26
-
-            newMessage += chr(index + step)
+            newMessage += characters[index]
 
         else:
-            newMessage += letter
+            raise ValueError(f"Invalid character {letter}")
 
     return newMessage
 
 
 encryptedMessage = caesarEncrypt(test)
-print(encryptedMessage)
+print(f"encrypted message = {encryptedMessage}")
 
 decryptedMessage = caesarDecrypt(encryptedMessage)
-print(decryptedMessage)
+print(f"message = {decryptedMessage}")
