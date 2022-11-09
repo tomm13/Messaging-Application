@@ -1,5 +1,5 @@
-# 8/11/2022
-# V13 
+# 9/11/2022
+# V13
 
 # import logging
 import platform
@@ -973,7 +973,7 @@ def keyPressed(event):
 print(f"Started code at {str(time())}")
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "10.28.206.143", "61172", "502315755221")
+connectionInstance = Connection("tomm", "lightblue", "172.20.10.2", "55128", "355877891581")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
