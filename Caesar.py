@@ -1,43 +1,68 @@
 # 9/11/2022
-# Only accepts integers
+# Needs to work for most characters in unicode
+# Applied to message
 
-test = "012345678"
-key = 0
-characters = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
-              "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+test = "abcdefgABCDEFG 1235649358790213!@(*$£(*&$*(%"
+key = 23
 
 
 def caesarEncrypt(message):
     newMessage = ""
     for letter in message:
 
-        if letter.isnumeric():
-            index = (characters.index(letter) + key) % 36
+        if letter.isalpha():
 
-            newMessage += characters[index]
+            if letter.islower():
+                step = 97
+
+            elif letter.isupper():
+                step = 65
+
+            index = ord(letter) + key - step
+
+            while index > 25:
+                index -= 26
+
+            while index < 0:
+                index += 26
+
+            newMessage += chr(index + step)
+
         else:
-            raise ValueError(f"Invalid character {letter}")
+            newMessage += letter
 
     return newMessage
-
 
 def caesarDecrypt(message):
     newMessage = ""
     for letter in message:
 
-        if letter.isalnum():
-            index = (characters.index(letter) - key) % 36
+        if letter.isalpha():
 
-            newMessage += characters[index]
+            if letter.islower():
+                step = 97
+
+            elif letter.isupper():
+                step = 65
+
+            index = ord(letter) - key - step
+
+            while index > 25:
+                index -= 26
+
+            while index < 0:
+                index += 26
+
+            newMessage += chr(index + step)
 
         else:
-            raise ValueError(f"Invalid character {letter}")
+            newMessage += letter
 
     return newMessage
 
 
 encryptedMessage = caesarEncrypt(test)
-print(f"encrypted message = {encryptedMessage}")
+print(encryptedMessage)
 
 decryptedMessage = caesarDecrypt(encryptedMessage)
-print(f"message = {decryptedMessage}")
+print(decryptedMessage)
