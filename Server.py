@@ -1,4 +1,4 @@
-# 8/11/2022
+# 9/11/2022
 # V13
 
 import socket
@@ -105,6 +105,7 @@ class Security:
 
 class Actions:
     def __init__(self):
+        self.voteTimeRemaining = 90
         self.modOnline = 0
         self.mods = []
         self.modUsers = []
@@ -118,11 +119,29 @@ class Actions:
         self.userToKickSocket = None
 
     def resetVote(self):
+        self.voteTimeRemaining = 90
         self.userToKick = None
         self.userToKickSocket = None
         self.hasVoted = []
         self.hasVotedUsers = []
         self.voteActive = False
+
+    def voteWaiter(self):
+        # Executed in a thread, waits for a timer to end
+        print("[Server] Started vote-timer thread")
+
+        while self.voteTimeRemaining > 0:
+            self.voteTimeRemaining -= 1
+            time.sleep(1)
+
+        if self.voteFor > self.voteAgainst:
+            sendInstance.broadcastDisplay(f"{self.userToKick} will be kicked")
+            connectionInstance.removeUser(self.userToKick, self.userToKickSocket)
+
+        else:
+            sendInstance.broadcastDisplay(f"{self.userToKick} will not be kicked")
+
+        self.resetVote()
 
     def vote(self, message, clientSocket):
         modSocket = clientSocket
@@ -152,8 +171,10 @@ class Actions:
                                 self.userToKickSocket = clientSocket
                                 self.voteActive = True
 
-                                message = modUsername + " has started a vote to kick " + username
-                                sendInstance.broadcastDisplay(message)
+                                voterThread = Thread(target=self.voteWaiter)
+                                voterThread.start()
+                                
+                                sendInstance.broadcastDisplay(f"{modUsername} has started a vote to kick {username}")
                         else:
                             sendInstance.privateBroadcastDisplay("You cannot complete this action at this time",
                                                                  modSocket)
@@ -204,11 +225,11 @@ class Actions:
                     self.voteAgainst == self.voteTarget:
 
                 if self.voteFor == self.voteTarget:
-                    sendInstance.broadcastDisplay(self.userToKick + " will be kicked")
+                    sendInstance.broadcastDisplay(f"{self.userToKick} will be kicked")
                     connectionInstance.removeUser(self.userToKick, self.userToKickSocket)
 
                 elif self.voteAgainst == self.voteTarget or self.voteFor + self.voteAgainst == self.voteTarget:
-                    sendInstance.broadcastDisplay(self.userToKick + " will not be kicked")
+                    sendInstance.broadcastDisplay(f"{self.userToKick} will not be kicked")
 
                 self.resetVote()
 
@@ -346,7 +367,7 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = "10.28.206.143"
+        self.host = "172.20.10.2"
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
         self.spaceRemaining = 50
