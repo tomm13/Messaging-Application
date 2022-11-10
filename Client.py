@@ -1,4 +1,4 @@
-# 9/11/2022
+# 10/11/2022
 # V13
 
 # import logging
@@ -393,18 +393,38 @@ class Communication:
         self.page = 0
 
     @staticmethod
-    def decrypt(message):
-        message = message.split()
-        decryptedMessage = []
+    def rsaDecrypt(key):
+        newKey = pow(key, connectionInstance.d, connectionInstance.N)
 
+        return newKey
+
+    @staticmethod
+    def caesarDecrypt(message):
+        newMessage = ""
         for letter in message:
-            letter = int(letter, base=10)
-            index = pow(letter, connectionInstance.d, connectionInstance.N)
-            decryptedLetter = chr(index)
-            decryptedMessage.append(decryptedLetter)
 
-        message = str("".join(decryptedMessage))
-        return message
+            if letter.isalpha():
+
+                if letter.islower():
+                    step = 97
+
+                elif letter.isupper():
+                    step = 65
+
+                index = ord(letter) - connectionInstance.cipherKey - step
+
+                while index > 25:
+                    index -= 26
+
+                while index < 0:
+                    index += 26
+
+                newMessage += chr(index + step)
+
+            else:
+                newMessage += letter
+
+        return newMessage
 
     @staticmethod
     def saveChatHistory(location):
@@ -569,7 +589,7 @@ class Communication:
         try:
             print(f"Started update thread at {str(time())}")
             while connectionInstance.connected:
-                message = self.decrypt(connectionInstance.socket.recv(1024).decode())
+                message = self.caesarDecrypt(connectionInstance.socket.recv(1024).decode())
 
                 if message:
                     print(f"Received message: {message}")
@@ -629,12 +649,14 @@ class Communication:
 
 
 class Connection:
-    def __init__(self, username, color, host, port, privateKey):
+    def __init__(self, username, color, host, port, privateKey, encryptedCipherKey):
         self.username = username
         self.color = color
         self.host = host
         self.port = port
         self.privateKey = privateKey
+        self.encryptedCipherKey = encryptedCipherKey
+        self.cipherKey = None
         self.d = None
         self.N = None
         self.socket = socket.socket()
@@ -650,6 +672,7 @@ class Connection:
             self.privateKey = privateKeyInput.value
             self.d = int(str(self.privateKey[0:6]), base=10)
             self.N = int(str(self.privateKey[6:12]), base=10)
+            self.cipherKey = communicationInstance.rsaDecrypt(int(self.encryptedCipherKey, base=10))
 
             if not self.username == "" and not self.username == "Username" and " " not in self.username and "[" not in \
                     self.username and "]" not in self.username:
@@ -973,7 +996,7 @@ def keyPressed(event):
 print(f"Started code at {str(time())}")
 
 # connectionInstance = Connection("Username", "Chat Color", "Host IP", "Port", "Private Key")
-connectionInstance = Connection("tomm", "lightblue", "172.20.10.2", "55128", "355877891581")
+connectionInstance = Connection("tomm", "lightblue", "192.168.1.138", "62891", "392891618983", "201435")
 uiInstance = UI()
 communicationInstance = Communication()
 animationInstance = Animation()
