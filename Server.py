@@ -91,16 +91,14 @@ class Security:
         self.e = e
         self.N = N
 
-    def encrypt(self, message):
-        RSAEncryptedmessage = []
-        for Letter in message:
-            Index = ord(Letter)
-            NewIndex = pow(Index, self.e, self.N)
-            RSAEncryptedmessage.append(str(NewIndex))
-            RSAEncryptedmessage.append(" ")
+    def rsaEncrypt(self, key):
+        newMessage = ""
+        for letter in key:
+            index = ord(letter)
+            newIndex = pow(index, self.e, self.N)
+            newMessage += f"{newIndex} "
 
-        message = str("".join(RSAEncryptedmessage))
-        return message
+        return newMessage
 
 
 class Actions:
@@ -173,7 +171,7 @@ class Actions:
 
                                 voterThread = Thread(target=self.voteWaiter)
                                 voterThread.start()
-                                
+
                                 sendInstance.broadcastDisplay(f"{modUsername} has started a vote to kick {username}")
                         else:
                             sendInstance.privateBroadcastDisplay("You cannot complete this action at this time",
@@ -286,7 +284,7 @@ class Send:
         time.sleep(0.1)
         print("[Client] " + message)
 
-        message = securityInstance.encrypt(message)
+        message = securityInstance.rsaEncrypt(message)
         for client in connectionInstance.clients:
             client.send(message.encode())
 
@@ -297,7 +295,7 @@ class Send:
         print("[PublicDisplay] " + message)
 
         message = "/display " + message
-        message = securityInstance.encrypt(message)
+        message = securityInstance.rsaEncrypt(message)
 
         for client in connectionInstance.clients:
             client.send(message.encode())
@@ -308,7 +306,7 @@ class Send:
         time.sleep(0.1)
         print("[Private] " + message)
 
-        message = securityInstance.encrypt(message)
+        message = securityInstance.rsaEncrypt(message)
         clientSocket.send(message.encode())
 
     @staticmethod
@@ -318,7 +316,7 @@ class Send:
         print("[PrivateDisplay] " + message)
 
         message = "/display " + message
-        message = securityInstance.encrypt(message)
+        message = securityInstance.rsaEncrypt(message)
         clientSocket.send(message.encode())
 
     @staticmethod
@@ -367,7 +365,7 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = "172.20.10.2"
+        self.host = "192.168.1.138"
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
         self.spaceRemaining = 50
