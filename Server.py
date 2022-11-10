@@ -12,8 +12,8 @@ class Security:
         self.d = None
         self.e = None
         self.N = None
-        self.encryptedKey = None
         self.cipherKey = None
+        self.encryptedCipherKey = None
 
     @staticmethod
     def generatePort():
@@ -60,17 +60,17 @@ class Security:
             PhiNFactors = []
             NFactors = []
             eFactors = []
-            for Factor in range(1, e + 1):
-                if e % Factor == 0:
-                    eFactors.append(Factor)
+            for factor in range(1, e + 1):
+                if e % factor == 0:
+                    eFactors.append(factor)
 
-            for Factor in range(1, N + 1):
-                if N % Factor == 0:
-                    NFactors.append(Factor)
+            for factor in range(1, N + 1):
+                if N % factor == 0:
+                    NFactors.append(factor)
 
-            for Factor in range(1, PhiN + 1):
-                if PhiN % Factor == 0:
-                    PhiNFactors.append(Factor)
+            for factor in range(1, PhiN + 1):
+                if PhiN % factor == 0:
+                    PhiNFactors.append(factor)
 
             if 1 in eFactors and 1 in PhiNFactors and 1 in NFactors:
                 PhiNFactors.remove(1)
@@ -78,7 +78,6 @@ class Security:
                 eFactors.remove(1)
 
             if len(eFactors) == 1 and eFactors[0] not in PhiNFactors and eFactors[0] not in NFactors:
-                # print("[Server] Public Key =", (e, N))
                 break
 
         for k in range(1, 2 * Maximum):
@@ -87,20 +86,26 @@ class Security:
                     d = (k * PhiN + 1) // e
                     break
 
-        self.d = d
         self.e = e
+        self.d = d
         self.N = N
 
         self.cipherKey = random.randint(1, 26)
-        self.encryptedKey = self.rsaEncrypt(self.cipherKey)
+        self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey)
 
+        print(f"[Server] Public RSA Key = {e}{N}")
         print(f"[Server] Private RSA Key = {d}{N}")
-        print(f"[Server] RSA encrypted cipher key = {self.encryptedKey}")
+        print(f"[Server] RSA encrypted cipher key = {self.encryptedCipherKey}")
 
     def rsaEncrypt(self, key):
-        rsaKey = pow(key, self.e, self.N)
+        newKey = pow(key, self.e, self.N)
 
-        return rsaKey
+        return newKey
+
+    def rsaDecrypt(self, key):
+        newKey = pow(key, self.d, self.N)
+
+        return newKey
 
     def caesarEncrypt(self, message):
         newMessage = ""
@@ -115,6 +120,33 @@ class Security:
                     step = 65
 
                 index = ord(letter) + self.cipherKey - step
+
+                while index > 25:
+                    index -= 26
+
+                while index < 0:
+                    index += 26
+
+                newMessage += chr(index + step)
+
+            else:
+                newMessage += letter
+
+        return newMessage
+
+    def caesarDecrypt(self, message):
+        newMessage = ""
+        for letter in message:
+
+            if letter.isalpha():
+
+                if letter.islower():
+                    step = 97
+
+                elif letter.isupper():
+                    step = 65
+
+                index = ord(letter) - self.cipherKey - step
 
                 while index > 25:
                     index -= 26
@@ -394,7 +426,7 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = "192.168.1.138"
+        self.host = "10.28.206.151"
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
         self.spaceRemaining = 50
@@ -451,7 +483,7 @@ class Connection:
         warnUser = False
         while True:
             try:
-                message = clientSocket.recv(1024).decode()
+                message = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode())
                 unifiedmessage = username + ": " + message
 
                 if message:
