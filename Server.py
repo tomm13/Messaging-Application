@@ -1,6 +1,7 @@
 # 10/11/2022
 # V13
 
+import math
 import socket
 import time
 import random
@@ -20,70 +21,58 @@ class Security:
         while True:
             try:
                 connectionInstance.socket.bind((connectionInstance.host, connectionInstance.port))
-                print(f"[Server] Server Hosted on {str(connectionInstance.host)} with port {str(connectionInstance.port)}")
                 break
 
             except ConnectionError:
                 connectionInstance.port = random.randint(49125, 65536)
 
     def generateKey(self):
+        # These variables, albeit terribly named, are for references during modular exponentiation
+        e = 0
+        d = 0
         N = 0
+        P = 0
+        Q = 0
+
+        lower = 100
+        upper = 9999
+
+        primes = []
+        coprimes = []
+
+        print("[Server] Initialising generation of primes...")
+
+        for prime in range(lower, upper):
+            isPrime = True
+            for factor in range(2, int(math.sqrt(prime) + 1)):
+                if prime % factor == 0:
+                    isPrime = False
+            if isPrime:
+                primes.append(prime)
+
         while not len(str(N)) == 6:
-            Minimum = 650
-            Maximum = 1000
-            Primes = []
-            PrimeCandidates = []
-            for Number in range(Minimum, Maximum):
-                IsPrime = True
-                for Factor in range(2, Number):
-                    if Number % Factor == 0:
-                        IsPrime = False
-                if IsPrime:
-                    Primes.append(Number)
+            # Generate 2 primes P and Q where the product N is 6 digits
+            P = primes[random.randint(0, len(primes))]
+            Q = primes[random.randint(0, len(primes))]
 
-            for Prime in range(2):
-                Max = len(Primes) - 1
-                RandomNum = random.randint(0, Max)
-                PrimeCandidates.append(Primes[RandomNum])
-                Primes.pop(RandomNum)
-
-            P = PrimeCandidates[0]
-            Q = PrimeCandidates[1]
+            # N is the 7-12th digits of either the public or private key
             N = P * Q
-            PhiN = (P - 1) * (Q - 1)
+            phiN = (P - 1) * (Q - 1)
 
-        eList = []
-        for eCandidate in range(2, PhiN):
-            eList.append(eCandidate)
+        print(f"[Server] Completed generation of primes")
 
-        for e in eList:
-            PhiNFactors = []
-            NFactors = []
-            eFactors = []
-            for factor in range(1, e + 1):
-                if e % factor == 0:
-                    eFactors.append(factor)
+        # Generate e such that e < phiN, 6 digits long, as well as coprime with phiN
+        for coprime in range(100000, phiN):
+            if math.gcd(coprime, phiN) == 1:
+                coprimes.append(coprime)
 
-            for factor in range(1, N + 1):
-                if N % factor == 0:
-                    NFactors.append(factor)
+        e = coprimes[random.randint(0, len(coprimes))]
 
-            for factor in range(1, PhiN + 1):
-                if PhiN % factor == 0:
-                    PhiNFactors.append(factor)
-
-            if 1 in eFactors and 1 in PhiNFactors and 1 in NFactors:
-                PhiNFactors.remove(1)
-                NFactors.remove(1)
-                eFactors.remove(1)
-
-            if len(eFactors) == 1 and eFactors[0] not in PhiNFactors and eFactors[0] not in NFactors:
-                break
-
-        for k in range(1, 2 * Maximum):
-            if (k * PhiN + 1) % e == 0:
-                if not (k * PhiN + 1) // e == e and len(str((k * PhiN + 1) // e)) == 6:
-                    d = (k * PhiN + 1) // e
+        for k in range(1, upper ** 2):
+            # Generate d such that d = e^-1 mod phiN and is 6 digits long
+            if (k * phiN + 1) % e == 0:
+                if not (k * phiN + 1) // e == e and len(str((k * phiN + 1) // e)) == 6:
+                    d = (k * phiN + 1) // e
                     break
 
         self.e = e
@@ -93,8 +82,9 @@ class Security:
         self.cipherKey = random.randint(1, 26)
         self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey)
 
-        print(f"[Server] Public RSA Key = {e}{N}")
-        print(f"[Server] Private RSA Key = {d}{N}")
+        print(f"[Server] Server hosted on {str(connectionInstance.host)} with port {str(connectionInstance.port)}")
+        print(f"[Server] Public RSA key = {e}{N}")
+        print(f"[Server] Private RSA key = {d}{N}")
         print(f"[Server] RSA encrypted cipher key = {self.encryptedCipherKey}")
 
     def rsaEncrypt(self, key):
@@ -426,7 +416,7 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = "10.28.206.151"
+        self.host = "192.168.1.138"
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
         self.spaceRemaining = 50
