@@ -1,7 +1,6 @@
 # 10/11/2022
-# V13
+# V13.2.1
 
-# import logging
 import platform
 import socket
 import colorutils
@@ -674,6 +673,7 @@ class Communication:
 
 class Connection:
     def __init__(self):
+        # Inputs
         self.username = None
         self.color = None
         self.host = None
@@ -681,6 +681,8 @@ class Connection:
         self.privateKey = None
         self.publicKey = None
         self.cipherKey = None
+
+        # Attributes
         self.encryptedCipherKey = None
         self.e = None
         self.d = None
@@ -689,6 +691,15 @@ class Connection:
         self.connected = False
         self.mod = False
         self.inputRequest = 0
+
+        # Input booleans
+        self.hasUsername = False
+        self.hasColor = False
+        self.hasHost = False
+        self.hasPort = False
+        self.hasPublicKey = False
+        self.hasPrivateKey = False
+        self.hasCipherKey = False
 
     def connect(self):
         self.e = int(str(self.publicKey[0:6]), base=10)
@@ -828,152 +839,215 @@ class UI:
             uiInstance.LDM = True
             animationInstance.queue.append([1, "You turned LDM on"])
 
+    def getUsername(self, key):
+        if not self.hasAnimated or not key:
+            animationInstance.queue.append([1, "Choose a username"])
+
+            self.hasAnimated = True
+
+        else:
+            if "Username" == uiInstance.inputTextBox.value or " " in uiInstance.inputTextBox.value or \
+                    "[" in uiInstance.inputTextBox.value or "]" in uiInstance.inputTextBox.value or \
+                    not uiInstance.inputTextBox.value:
+                # Checks: if username is not empty, not Username and does not contain spaces or [ and ]
+                animationInstance.queue.append([1, "Try a different username"])
+
+            else:
+                connectionInstance.username = uiInstance.inputTextBox.value
+                connectionInstance.inputRequest += 1
+
+                connectionInstance.hasUsername = True
+                self.hasAnimated = False
+
+        uiInstance.inputTextBox.clear()
+
+    def getColor(self, key):
+        if not self.hasAnimated or not key:
+            animationInstance.queue.append([1, f"{connectionInstance.username}, choose a color"])
+
+            self.hasAnimated = True
+
+        else:
+            if not uiInstance.inputTextBox.value:
+                animationInstance.queue.append([1, "Try a different color"])
+
+            else:
+                try:
+                    connectionInstance.color = colorutils.web_to_rgb(uiInstance.inputTextBox.value)
+                    connectionInstance.inputRequest += 1
+
+                    connectionInstance.hasColor = True
+                    self.hasAnimated = False
+
+                except ValueError:
+                    animationInstance.queue.append([1, "Try a different color"])
+
+        uiInstance.inputTextBox.clear()
+
+    def getHost(self, key):
+        if not self.hasAnimated or not key:
+            animationInstance.queue.append([1, f"{connectionInstance.username}, enter your IP"])
+
+            self.hasAnimated = True
+
+        else:
+            if not uiInstance.inputTextBox.value or "." not in uiInstance.inputTextBox.value:
+                animationInstance.queue.append([1, "Try a different IP"])
+
+            else:
+                connectionInstance.host = uiInstance.inputTextBox.value
+                connectionInstance.inputRequest += 1
+
+                connectionInstance.hasHost = True
+                self.hasAnimated = False
+
+        uiInstance.inputTextBox.clear()
+
+    def getPort(self, key):
+        if not self.hasAnimated or not key:
+            animationInstance.queue.append([1, f"{connectionInstance.username}, enter your port"])
+
+            self.hasAnimated = True
+
+        else:
+            if not len(str(uiInstance.inputTextBox.value)) == 5:
+                animationInstance.queue.append([1, "Try a different port"])
+
+            else:
+                connectionInstance.port = uiInstance.inputTextBox.value
+                connectionInstance.inputRequest += 1
+
+                connectionInstance.hasPort = True
+                self.hasAnimated = False
+
+        uiInstance.inputTextBox.clear()
+
+    def getPublicKey(self, key):
+        if not self.hasAnimated or not key:
+            animationInstance.queue.append([
+                1, f"{connectionInstance.username}, enter the public RSA key"])
+
+            self.hasAnimated = True
+
+        else:
+            if not len(uiInstance.inputTextBox.value) == 12:
+                animationInstance.queue.append([1, "Try reentering the public RSA key"])
+
+            else:
+                connectionInstance.publicKey = uiInstance.inputTextBox.value
+                connectionInstance.inputRequest += 1
+
+                connectionInstance.hasPublicKey = True
+                self.hasAnimated = False
+
+        uiInstance.inputTextBox.clear()
+
+    def getPrivateKey(self, key):
+        if not self.hasAnimated or not key:
+            animationInstance.queue.append([
+                1, f"{connectionInstance.username}, enter your private RSA key"])
+
+            self.hasAnimated = True
+
+        else:
+            if not len(uiInstance.inputTextBox.value) == 12:
+                animationInstance.queue.append([1, "Try reentering the private RSA key"])
+
+            else:
+                connectionInstance.privateKey = uiInstance.inputTextBox.value
+                connectionInstance.inputRequest += 1
+
+                connectionInstance.hasPrivateKey = True
+                self.hasAnimated = False
+
+        uiInstance.inputTextBox.clear()
+
+    def getCipherKey(self, key):
+        if not self.hasAnimated or not key:
+            animationInstance.queue.append(
+                [1, f"{connectionInstance.username}, enter the public Cipher key"])
+
+            self.hasAnimated = True
+
+        else:
+            if not uiInstance.inputTextBox.value:
+                animationInstance.queue.append([1, "Try a different public Cipher key"])
+
+            else:
+                connectionInstance.encryptedCipherKey = uiInstance.inputTextBox.value
+                connectionInstance.inputRequest += 1
+
+                connectionInstance.hasCipherKey = True
+                self.hasAnimated = False
+
+        uiInstance.inputTextBox.clear()
+
+    def requestInput(self, key):
+        if not connectionInstance.connected:
+            # Creates a series of input requests
+            if connectionInstance.inputRequest == 0:
+                self.getUsername(key)
+
+            if connectionInstance.inputRequest == 1:
+                self.getColor(key)
+
+            if connectionInstance.inputRequest == 2:
+                self.getHost(key)
+
+            if connectionInstance.inputRequest == 3:
+                self.getPort(key)
+
+            if connectionInstance.inputRequest == 4:
+                self.getPublicKey(key)
+
+            if connectionInstance.inputRequest == 5:
+                self.getPrivateKey(key)
+
+            if connectionInstance.inputRequest == 6:
+                self.getCipherKey(key)
+
+            if connectionInstance.inputRequest < 0:
+                connectionInstance.inputRequest = 6
+                if not connectionInstance.hasUsername or not connectionInstance.hasColor or not \
+                        connectionInstance.hasHost or not connectionInstance.hasPort or not \
+                        connectionInstance.hasPublicKey or not connectionInstance.hasPrivateKey or not \
+                        connectionInstance.hasCipherKey:
+                    self.requestInput(key)
+
+            if connectionInstance.inputRequest > 6:
+                connectionInstance.inputRequest = 0
+                if not connectionInstance.hasUsername or not connectionInstance.hasColor or not \
+                        connectionInstance.hasHost or not connectionInstance.hasPort or not \
+                        connectionInstance.hasPublicKey or not connectionInstance.hasPrivateKey or not \
+                        connectionInstance.hasCipherKey:
+                    self.requestInput(key)
+
+            if connectionInstance.hasUsername and connectionInstance.hasColor and connectionInstance.hasHost \
+                    and connectionInstance.hasPort and connectionInstance.hasPublicKey and \
+                    connectionInstance.hasPrivateKey and connectionInstance.hasCipherKey and \
+                    not connectionInstance.connected:
+                connectionInstance.connect()
+
     def keyPressed(self, event):
         if event:
+            if event.tk_event.keysym == "Left":
+                if 7 > connectionInstance.inputRequest > -1:
+                    connectionInstance.inputRequest -= 1
+
+                    self.requestInput(False)
+
+            if event.tk_event.keysym == "Right":
+                if 7 > connectionInstance.inputRequest > -1:
+                    connectionInstance.inputRequest += 1
+
+                    self.requestInput(False)
+
             if event.tk_event.keysym == "Return":
                 if connectionInstance.connected:
                     communicationInstance.sendToServer()
 
                 else:
-                    # Creates a series of input requests
-                    if connectionInstance.inputRequest == 0:
-                        if not self.hasAnimated:
-                            animationInstance.queue.append([1, "Choose a username"])
-
-                            self.hasAnimated = True
-
-                        else:
-                            if "Username" == uiInstance.inputTextBox.value or " " in uiInstance.inputTextBox.value or \
-                                    "[" in uiInstance.inputTextBox.value or "]" in uiInstance.inputTextBox.value or \
-                                    not uiInstance.inputTextBox.value:
-                                # Checks: if username is not empty, not Username and does not contain spaces or [ and ]
-                                animationInstance.queue.append([1, "Try a different username"])
-
-                            else:
-                                connectionInstance.username = uiInstance.inputTextBox.value
-                                connectionInstance.inputRequest += 1
-
-                                self.hasAnimated = False
-
-                        uiInstance.inputTextBox.clear()
-
-                    if connectionInstance.inputRequest == 1:
-                        if not self.hasAnimated:
-                            animationInstance.queue.append([1, f"{connectionInstance.username}, choose a color"])
-
-                            self.hasAnimated = True
-
-                        else:
-                            if not uiInstance.inputTextBox.value:
-                                animationInstance.queue.append([1, "Try a different color"])
-
-                            else:
-                                try:
-                                    connectionInstance.color = colorutils.web_to_rgb(uiInstance.inputTextBox.value)
-                                    connectionInstance.inputRequest += 1
-
-                                    self.hasAnimated = False
-
-                                except ValueError:
-                                    animationInstance.queue.append([1, "Try a different color"])
-
-                        uiInstance.inputTextBox.clear()
-
-                    if connectionInstance.inputRequest == 2:
-                        if not self.hasAnimated:
-                            animationInstance.queue.append([1, f"{connectionInstance.username}, enter your IP"])
-
-                            self.hasAnimated = True
-
-                        else:
-                            if not uiInstance.inputTextBox.value or "." not in uiInstance.inputTextBox.value:
-                                animationInstance.queue.append([1, "Try a different IP"])
-
-                            else:
-                                connectionInstance.host = uiInstance.inputTextBox.value
-                                connectionInstance.inputRequest += 1
-
-                                self.hasAnimated = False
-
-                        uiInstance.inputTextBox.clear()
-
-                    if connectionInstance.inputRequest == 3:
-                        if not self.hasAnimated:
-                            animationInstance.queue.append([1, f"{connectionInstance.username}, enter your port"])
-
-                            self.hasAnimated = True
-
-                        else:
-                            if not len(str(uiInstance.inputTextBox.value)) == 5:
-                                animationInstance.queue.append([1, "Try a different port"])
-
-                            else:
-                                connectionInstance.port = uiInstance.inputTextBox.value
-                                connectionInstance.inputRequest += 1
-
-                                self.hasAnimated = False
-
-                        uiInstance.inputTextBox.clear()
-
-                    if connectionInstance.inputRequest == 4:
-                        if not self.hasAnimated:
-                            animationInstance.queue.append([
-                                1, f"{connectionInstance.username}, enter the public RSA key"])
-
-                            self.hasAnimated = True
-
-                        else:
-                            if not len(uiInstance.inputTextBox.value) == 12:
-                                animationInstance.queue.append([1, "Try reentering the public RSA key"])
-
-                            else:
-                                connectionInstance.publicKey = uiInstance.inputTextBox.value
-                                connectionInstance.inputRequest += 1
-
-                                self.hasAnimated = False
-
-                        uiInstance.inputTextBox.clear()
-
-                    if connectionInstance.inputRequest == 5:
-                        if not self.hasAnimated:
-                            animationInstance.queue.append([
-                                1, f"{connectionInstance.username}, enter your private RSA key"])
-
-                            self.hasAnimated = True
-
-                        else:
-                            if not len(uiInstance.inputTextBox.value) == 12:
-                                animationInstance.queue.append([1, "Try reentering the private RSA key"])
-
-                            else:
-                                connectionInstance.privateKey = uiInstance.inputTextBox.value
-                                connectionInstance.inputRequest += 1
-
-                                self.hasAnimated = False
-
-                        uiInstance.inputTextBox.clear()
-
-                    if connectionInstance.inputRequest == 6:
-                        if not self.hasAnimated:
-                            animationInstance.queue.append(
-                                [1, f"{connectionInstance.username}, enter the public cipher key"])
-
-                            self.hasAnimated = True
-
-                        else:
-                            if not uiInstance.inputTextBox.value:
-                                animationInstance.queue.append([1, "Try a different public cipher key"])
-
-                            else:
-                                connectionInstance.encryptedCipherKey = uiInstance.inputTextBox.value
-                                connectionInstance.inputRequest += 1
-
-                                self.hasAnimated = False
-
-                        uiInstance.inputTextBox.clear()
-
-                    if connectionInstance.inputRequest == 7:
-                        connectionInstance.connect()
+                    self.requestInput(True)
 
             else:
                 if connectionInstance.connected and event.tk_event.keysym:
@@ -985,88 +1059,83 @@ class UI:
     # Methods below create the UI
 
     def openChat(self):
-        try:
-            self.chatWindow = Window(self.setupWindow, width=1280, height=720, title="Chatroom", bg=self.bg)
-            self.chatWindow.when_closed = connectionInstance.leave
-            self.chatWindow.when_key_pressed = self.keyPressed
+        self.chatWindow = Window(self.setupWindow, width=1280, height=720, title="Chatroom", bg=self.bg)
+        self.chatWindow.when_closed = connectionInstance.leave
+        self.chatWindow.when_key_pressed = self.keyPressed
 
-            topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
-            leftPadding = Box(self.chatWindow, width=50, height="fill", align="left")
-            rightPadding = Box(self.chatWindow, width=50, height="fill", align="right")
-            bottomPadding = Box(self.chatWindow, width="fill", height=50, align="bottom")
+        topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
+        leftPadding = Box(self.chatWindow, width=50, height="fill", align="left")
+        rightPadding = Box(self.chatWindow, width=50, height="fill", align="right")
+        bottomPadding = Box(self.chatWindow, width="fill", height=50, align="bottom")
 
-            self.border = Box(self.chatWindow, width="fill", height="fill")
+        self.border = Box(self.chatWindow, width="fill", height="fill")
 
-            header = Box(self.border, width="fill", height=50, align="top")
-            headerBlocker = Box(self.border, width="fill", height=50, align="top")
+        header = Box(self.border, width="fill", height=50, align="top")
+        headerBlocker = Box(self.border, width="fill", height=50, align="top")
 
-            userListBox = Box(self.border, width=220, height="fill", align="right")
-            userBox = Box(self.border, width="fill", height="fill", align="left")
-            inputBox = Box(userBox, width="fill", height=120, align="bottom")
-            inputBlocker = Box(inputBox, width=50, height="fill", align="right")
+        userListBox = Box(self.border, width=220, height="fill", align="right")
+        userBox = Box(self.border, width="fill", height="fill", align="left")
+        inputBox = Box(userBox, width="fill", height=120, align="bottom")
+        inputBlocker = Box(inputBox, width=50, height="fill", align="right")
 
-            userListBorder = Box(userListBox, width=50, height="fill", align="left")
-            self.userListTopBorder = Box(userListBox, width="fill", height=10, align="top")
-            self.userListTopBorder.bg = uiInstance.animationColor
-            self.userListRightBorder = Box(userListBox, width=10, height="fill", align="right")
-            self.userListRightBorder.bg = uiInstance.animationColor
-            self.userListBottomBorder = Box(userListBox, width="fill", height=10, align="bottom")
-            self.userListBottomBorder.bg = uiInstance.animationColor
-            self.userListLeftBorder = Box(userListBox, width=10, height="fill", align="left")
-            self.userListLeftBorder.bg = uiInstance.animationColor
+        userListBorder = Box(userListBox, width=50, height="fill", align="left")
+        self.userListTopBorder = Box(userListBox, width="fill", height=10, align="top")
+        self.userListTopBorder.bg = uiInstance.animationColor
+        self.userListRightBorder = Box(userListBox, width=10, height="fill", align="right")
+        self.userListRightBorder.bg = uiInstance.animationColor
+        self.userListBottomBorder = Box(userListBox, width="fill", height=10, align="bottom")
+        self.userListBottomBorder.bg = uiInstance.animationColor
+        self.userListLeftBorder = Box(userListBox, width=10, height="fill", align="left")
+        self.userListLeftBorder.bg = uiInstance.animationColor
 
-            self.userList = ListBox(userListBox, items=["Users online:"], width=150, height="fill", align="right")
-            self.userList.text_color = connectionInstance.color
-            self.userList.text_size = self.fontSize
-            self.userList.bg = (255, 255, 255)
+        self.userList = ListBox(userListBox, items=["Users online:"], width=150, height="fill", align="right")
+        self.userList.text_color = connectionInstance.color
+        self.userList.text_size = self.fontSize
+        self.userList.bg = (255, 255, 255)
 
-            self.header = Text(header, text="Initialising threads...", width="fill", height=50)
-            self.header.text_color = (255, 255, 255)
-            self.header.text_size = self.fontSize + 14
-            self.header.bg = uiInstance.animationColor
+        self.header = Text(header, text="Initialising threads...", width="fill", height=50)
+        self.header.text_color = (255, 255, 255)
+        self.header.text_size = self.fontSize + 14
+        self.header.bg = uiInstance.animationColor
 
-            self.chatHistoryTopBorder = Box(userBox, width="fill", height=10, align="top")
-            self.chatHistoryTopBorder.bg = uiInstance.animationColor
-            self.chatHistoryRightBorder = Box(userBox, width=10, height="fill", align="right")
-            self.chatHistoryRightBorder.bg = uiInstance.animationColor
-            self.chatHistoryBottomBorder = Box(userBox, width="fill", height=10, align="bottom")
-            self.chatHistoryBottomBorder.bg = uiInstance.animationColor
-            self.chatHistoryLeftBorder = Box(userBox, width=10, height="fill", align="left")
-            self.chatHistoryLeftBorder.bg = uiInstance.animationColor
+        self.chatHistoryTopBorder = Box(userBox, width="fill", height=10, align="top")
+        self.chatHistoryTopBorder.bg = uiInstance.animationColor
+        self.chatHistoryRightBorder = Box(userBox, width=10, height="fill", align="right")
+        self.chatHistoryRightBorder.bg = uiInstance.animationColor
+        self.chatHistoryBottomBorder = Box(userBox, width="fill", height=10, align="bottom")
+        self.chatHistoryBottomBorder.bg = uiInstance.animationColor
+        self.chatHistoryLeftBorder = Box(userBox, width=10, height="fill", align="left")
+        self.chatHistoryLeftBorder.bg = uiInstance.animationColor
 
-            self.chatHistory = TextBox(userBox, width="fill", height="fill", align="top", multiline=True)
-            self.chatHistory.text_color = connectionInstance.color
-            self.chatHistory.text_size = self.fontSize + 2
-            self.chatHistory.bg = (255, 255, 255)
-            self.chatHistory.disable()
+        self.chatHistory = TextBox(userBox, width="fill", height="fill", align="top", multiline=True)
+        self.chatHistory.text_color = connectionInstance.color
+        self.chatHistory.text_size = self.fontSize + 2
+        self.chatHistory.bg = (255, 255, 255)
+        self.chatHistory.disable()
 
-            messageInputBorder = Box(inputBox, width="fill", height=50, align="top")
-            self.messageInputTopBorder = Box(inputBox, width="fill", height=10, align="top")
-            self.messageInputTopBorder.bg = uiInstance.animationColor
-            self.messageInputRightBorder = Box(inputBox, width=10, height="fill", align="right")
-            self.messageInputRightBorder.bg = uiInstance.animationColor
-            self.messageInputBottomBorder = Box(inputBox, width="fill", height=10, align="bottom")
-            self.messageInputBottomBorder.bg = uiInstance.animationColor
-            self.messageInputLeftBorder = Box(inputBox, width=10, height="fill", align="left")
-            self.messageInputLeftBorder.bg = uiInstance.animationColor
+        messageInputBorder = Box(inputBox, width="fill", height=50, align="top")
+        self.messageInputTopBorder = Box(inputBox, width="fill", height=10, align="top")
+        self.messageInputTopBorder.bg = uiInstance.animationColor
+        self.messageInputRightBorder = Box(inputBox, width=10, height="fill", align="right")
+        self.messageInputRightBorder.bg = uiInstance.animationColor
+        self.messageInputBottomBorder = Box(inputBox, width="fill", height=10, align="bottom")
+        self.messageInputBottomBorder.bg = uiInstance.animationColor
+        self.messageInputLeftBorder = Box(inputBox, width=10, height="fill", align="left")
+        self.messageInputLeftBorder.bg = uiInstance.animationColor
 
-            self.messageInput = TextBox(inputBox, width="fill", align="bottom")
-            self.messageInput.text_color = connectionInstance.color
-            self.messageInput.text_size = self.fontSize + 10
-            self.messageInput.bg = (255, 255, 255)
-            self.messageInput.when_key_pressed = self.keyPressed
+        self.messageInput = TextBox(inputBox, width="fill", align="bottom")
+        self.messageInput.text_color = connectionInstance.color
+        self.messageInput.text_size = self.fontSize + 10
+        self.messageInput.bg = (255, 255, 255)
+        self.messageInput.when_key_pressed = self.keyPressed
 
-            # Threads start here
+        # Threads start here
 
-            startUpdateThread = Thread(target=communicationInstance.updateThread)
-            startUpdateThread.start()
+        startUpdateThread = Thread(target=communicationInstance.updateThread)
+        startUpdateThread.start()
 
-            self.setupWindow.hide()
-            self.chatWindow.show()
-
-        except Exception as e:
-            print(f"Your client crashed unexpectedly due to {str(e)}")
-            connectionInstance.leave()
+        self.setupWindow.hide()
+        self.chatWindow.show()
 
     def openSetup(self):
         self.setupWindow = App(title="Connect", width=800, height=275)
