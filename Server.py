@@ -95,7 +95,6 @@ class Security:
         self.encryptedKey = self.rsaEncrypt(self.cipherKey)
 
         print(f"[Server] Private RSA Key = {d}{N}")
-        print(f"[Server] Non encrypted cipher key = {self.cipherKey}")
         print(f"[Server] RSA encrypted cipher key = {self.encryptedKey}")
 
     def rsaEncrypt(self, key):
