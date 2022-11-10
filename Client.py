@@ -807,14 +807,22 @@ class UI:
             if event.tk_event.keysym == "Return":
                 if connectionInstance.connected:
                     communicationInstance.sendToServer()
+
                 else:
                     # Creates a series of input requests
                     if connectionInstance.inputRequest == 0:
+                        if not self.hasAnimated:
+                            animationInstance.queue.append([1, "Choose a username"])
+
+                            self.hasAnimated = True
+
                         if uiInstance.inputTextBox.value:
                             # Add selection
                             connectionInstance.username = uiInstance.inputTextBox.value
                             connectionInstance.inputRequest += 1
                             uiInstance.inputTextBox.clear()
+
+                            self.hasAnimated = False
 
                     if connectionInstance.inputRequest == 1:
                         if not self.hasAnimated:
@@ -887,7 +895,7 @@ class UI:
                         connectionInstance.connect()
 
             else:
-                if connectionInstance.connected and event.tk_event.keysym.isalnum():
+                if connectionInstance.connected and event.tk_event.keysym:
                     uiInstance.messageInput.focus()
 
     def openChat(self):
@@ -990,7 +998,7 @@ class UI:
         rightPadding = Box(contents, width=20, height="fill", align="right")
         leftPadding = Box(contents, width=10, height="fill", align="left")
 
-        self.status = Text(header, text="Choose a username")
+        self.status = Text(header, text="Welcome")
         self.status.text_color = (255, 255, 255)
         self.status.text_size = self.fontSize + 10
 
