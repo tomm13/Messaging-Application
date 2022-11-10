@@ -1,4 +1,4 @@
-# 9/11/2022
+# 10/11/2022
 # V13
 
 import socket
@@ -12,6 +12,8 @@ class Security:
         self.d = None
         self.e = None
         self.N = None
+        self.encryptedKey = None
+        self.cipherKey = None
 
     @staticmethod
     def generatePort():
@@ -85,18 +87,46 @@ class Security:
                     d = (k * PhiN + 1) // e
                     break
 
-        print("[Server] Private Key = " + str(d) + str(N))
-
         self.d = d
         self.e = e
         self.N = N
 
+        self.cipherKey = random.randint(1, 26)
+        self.encryptedKey = self.rsaEncrypt(self.cipherKey)
+
+        print(f"[Server] Private RSA Key = {d}{N}")
+        print(f"[Server] Non encrypted cipher key = {self.cipherKey}")
+        print(f"[Server] RSA encrypted cipher key = {self.encryptedKey}")
+
     def rsaEncrypt(self, key):
+        rsaKey = pow(key, self.e, self.N)
+
+        return rsaKey
+
+    def caesarEncrypt(self, message):
         newMessage = ""
-        for letter in key:
-            index = ord(letter)
-            newIndex = pow(index, self.e, self.N)
-            newMessage += f"{newIndex} "
+        for letter in message:
+
+            if letter.isalpha():
+
+                if letter.islower():
+                    step = 97
+
+                elif letter.isupper():
+                    step = 65
+
+                index = ord(letter) + self.cipherKey - step
+
+                while index > 25:
+                    index -= 26
+
+                while index < 0:
+                    index += 26
+
+                newMessage += chr(index + step)
+
+            else:
+                newMessage += letter
 
         return newMessage
 
@@ -284,7 +314,7 @@ class Send:
         time.sleep(0.1)
         print("[Client] " + message)
 
-        message = securityInstance.rsaEncrypt(message)
+        message = securityInstance.caesarEncrypt(message)
         for client in connectionInstance.clients:
             client.send(message.encode())
 
@@ -295,7 +325,7 @@ class Send:
         print("[PublicDisplay] " + message)
 
         message = "/display " + message
-        message = securityInstance.rsaEncrypt(message)
+        message = securityInstance.caesarEncrypt(message)
 
         for client in connectionInstance.clients:
             client.send(message.encode())
@@ -306,7 +336,7 @@ class Send:
         time.sleep(0.1)
         print("[Private] " + message)
 
-        message = securityInstance.rsaEncrypt(message)
+        message = securityInstance.caesarEncrypt(message)
         clientSocket.send(message.encode())
 
     @staticmethod
@@ -316,7 +346,7 @@ class Send:
         print("[PrivateDisplay] " + message)
 
         message = "/display " + message
-        message = securityInstance.rsaEncrypt(message)
+        message = securityInstance.caesarEncrypt(message)
         clientSocket.send(message.encode())
 
     @staticmethod
