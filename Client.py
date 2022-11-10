@@ -384,10 +384,44 @@ class Communication:
         self.page = 0
 
     @staticmethod
+    def rsaEncrypt(key):
+        rsaKey = pow(key, connectionInstance.e, connectionInstance.N)
+
+        return rsaKey
+
+    @staticmethod
     def rsaDecrypt(key):
         newKey = pow(key, connectionInstance.d, connectionInstance.N)
 
         return newKey
+
+    @staticmethod
+    def caesarEncrypt(message):
+        newMessage = ""
+        for letter in message:
+
+            if letter.isalpha():
+
+                if letter.islower():
+                    step = 97
+
+                elif letter.isupper():
+                    step = 65
+
+                index = ord(letter) + connectionInstance.cipherKey - step
+
+                while index > 25:
+                    index -= 26
+
+                while index < 0:
+                    index += 26
+
+                newMessage += chr(index + step)
+
+            else:
+                newMessage += letter
+
+        return newMessage
 
     @staticmethod
     def caesarDecrypt(message):
@@ -457,7 +491,7 @@ class Communication:
                                 self.messageTooLongWarning = False
 
                     else:
-                        connectionInstance.socket.send(message.encode())
+                        connectionInstance.socket.send(self.caesarEncrypt(message).encode())
                         uiInstance.messageInput.clear()
 
         except BrokenPipeError:
@@ -646,8 +680,10 @@ class Connection:
         self.host = None
         self.port = None
         self.privateKey = None
-        self.encryptedCipherKey = None
+        self.publicKey = None
         self.cipherKey = None
+        self.encryptedCipherKey = None
+        self.e = None
         self.d = None
         self.N = None
         self.socket = socket.socket()
@@ -657,7 +693,8 @@ class Connection:
 
     def connect(self):
         self.d = int(str(self.privateKey[0:6]), base=10)
-        self.N = int(str(self.privateKey[6:12]), base=10)
+        self.e = int(str(self.publicKey[0:6]), base=10)
+        self.N = int(str(self.publicKey[6:12]), base=10)
         self.cipherKey = communicationInstance.rsaDecrypt(int(self.encryptedCipherKey, base=10))
 
         if not self.username == "" and not self.username == "Username" and " " not in self.username and "[" not in \
@@ -800,8 +837,6 @@ class UI:
             uiInstance.LDM = True
             animationInstance.queue.append([1, "You turned LDM on"])
 
-    # Methods below create the UI
-
     def keyPressed(self, event):
         if event:
             if event.tk_event.keysym == "Return":
@@ -866,6 +901,20 @@ class UI:
                     if connectionInstance.inputRequest == 4:
                         if not self.hasAnimated:
                             animationInstance.queue.append([
+                                1, f"{connectionInstance.username}, enter the public RSA key"])
+
+                            self.hasAnimated = True
+
+                        if uiInstance.inputTextBox.value:
+                            connectionInstance.publicKey = uiInstance.inputTextBox.value
+                            connectionInstance.inputRequest += 1
+                            uiInstance.inputTextBox.clear()
+
+                            self.hasAnimated = False
+
+                    if connectionInstance.inputRequest == 5:
+                        if not self.hasAnimated:
+                            animationInstance.queue.append([
                                 1, f"{connectionInstance.username}, enter your private RSA key"])
 
                             self.hasAnimated = True
@@ -877,7 +926,7 @@ class UI:
 
                             self.hasAnimated = False
 
-                    if connectionInstance.inputRequest == 5:
+                    if connectionInstance.inputRequest == 6:
                         if not self.hasAnimated:
                             animationInstance.queue.append(
                                 [1, f"{connectionInstance.username}, enter the public cipher key"])
@@ -891,12 +940,14 @@ class UI:
 
                             self.hasAnimated = False
 
-                    if connectionInstance.inputRequest == 6:
+                    if connectionInstance.inputRequest == 7:
                         connectionInstance.connect()
 
             else:
                 if connectionInstance.connected and event.tk_event.keysym:
                     uiInstance.messageInput.focus()
+
+    # Methods below create the UI
 
     def openChat(self):
         try:
