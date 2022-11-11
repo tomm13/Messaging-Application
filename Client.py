@@ -1,5 +1,5 @@
-# 10/11/2022
-# V13.2.1
+# 11/11/2022
+# V13.2.2
 
 import platform
 import socket
@@ -647,9 +647,6 @@ class Communication:
                     elif message[0:7] == "/remove":
                         self.removeUsers(message[8:])
 
-                    elif message[0:14] == "/recentmessage":
-                        self.addMessage(message[15:])
-
                     elif message == "/next":
                         self.nextPage()
 
@@ -1008,24 +1005,20 @@ class UI:
 
             if connectionInstance.inputRequest < 0:
                 connectionInstance.inputRequest = 6
-                if not connectionInstance.hasUsername or not connectionInstance.hasColor or not \
-                        connectionInstance.hasHost or not connectionInstance.hasPort or not \
-                        connectionInstance.hasPublicKey or not connectionInstance.hasPrivateKey or not \
-                        connectionInstance.hasCipherKey:
-                    self.requestInput(key)
+                self.requestInput(key)
 
             if connectionInstance.inputRequest > 6:
                 connectionInstance.inputRequest = 0
-                if not connectionInstance.hasUsername or not connectionInstance.hasColor or not \
-                        connectionInstance.hasHost or not connectionInstance.hasPort or not \
-                        connectionInstance.hasPublicKey or not connectionInstance.hasPrivateKey or not \
-                        connectionInstance.hasCipherKey:
-                    self.requestInput(key)
+                self.requestInput(key)
 
             if connectionInstance.hasUsername and connectionInstance.hasColor and connectionInstance.hasHost \
                     and connectionInstance.hasPort and connectionInstance.hasPublicKey and \
                     connectionInstance.hasPrivateKey and connectionInstance.hasCipherKey and \
                     not connectionInstance.connected:
+
+                while animationInstance.queue:
+                    animationInstance.queue = []
+
                 connectionInstance.connect()
 
     def keyPressed(self, event):
@@ -1166,7 +1159,7 @@ class UI:
         self.connectText.text_color = self.animationColor
         self.connectText.text_size = self.fontSize + 2
 
-        build = Text(bottomPadding, text="Rework setup UI", align="bottom")
+        build = Text(bottomPadding, text="Stable", align="bottom")
 
         startAnimationThread = Thread(target=animationInstance.animationThread)
         startAnimationThread.start()
