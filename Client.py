@@ -323,9 +323,74 @@ class Animation:
             uiInstance.messageInputRightBorder.bg = (R, G, B)
             uiInstance.messageInputBottomBorder.bg = (R, G, B)
             uiInstance.messageInputLeftBorder.bg = (R, G, B)
+
             sleep(uiInstance.rate)
 
         uiInstance.animationColor = newColor
+
+        return
+
+    @staticmethod
+    def fadeIndicator(key, newColor):
+        # Code 5
+
+        if key == 0:
+            (R, G, B) = colorutils.web_to_rgb(uiInstance.usernameIndicator.bg)
+
+        elif key == 1:
+            (R, G, B) = colorutils.web_to_rgb(uiInstance.colorIndicator.bg)
+
+        elif key == 2:
+            (R, G, B) = colorutils.web_to_rgb(uiInstance.hostIndicator.bg)
+
+        elif key == 3:
+            (R, G, B) = colorutils.web_to_rgb(uiInstance.portIndicator.bg)
+
+        elif key == 4:
+            (R, G, B) = colorutils.web_to_rgb(uiInstance.publicKeyIndicator.bg)
+
+        elif key == 5:
+            (R, G, B) = colorutils.web_to_rgb(uiInstance.privateKeyIndicator.bg)
+
+        elif key == 6:
+            (R, G, B) = colorutils.web_to_rgb(uiInstance.cipherKeyIndicator.bg)
+
+        while not (R, G, B) == newColor:
+            if R < newColor[0]:
+                R += 1
+            if G < newColor[1]:
+                G += 1
+            if B < newColor[2]:
+                B += 1
+            if R > newColor[0]:
+                R -= 1
+            if G > newColor[1]:
+                G -= 1
+            if B > newColor[2]:
+                B -= 1
+
+            if key == 0:
+                uiInstance.usernameIndicator.bg = (R, G, B)
+
+            elif key == 1:
+                uiInstance.colorIndicator.bg = (R, G, B)
+
+            elif key == 2:
+                uiInstance.hostIndicator.bg = (R, G, B)
+
+            elif key == 3:
+                uiInstance.portIndicator.bg = (R, G, B)
+
+            elif key == 4:
+                uiInstance.publicKeyIndicator.bg = (R, G, B)
+
+            elif key == 5:
+                uiInstance.privateKeyIndicator.bg = (R, G, B)
+
+            elif key == 6:
+                uiInstance.cipherKeyIndicator.bg = (R, G, B)
+
+            sleep(uiInstance.rate)
 
         return
 
@@ -369,6 +434,10 @@ class Animation:
 
                 elif self.queue[0][0] == 4:
                     self.fadeBorder(self.queue[0][1])
+
+                elif self.queue[0][0] == 5:
+                    if not connectionInstance.connected:
+                        self.fadeIndicator(self.queue[0][1], self.queue[0][2])
 
                 self.queue.pop(0)
 
@@ -738,6 +807,13 @@ class UI:
         self.inputTextBox = None
         self.status = None
         self.connectText = None
+        self.usernameIndicator = None
+        self.colorIndicator = None
+        self.hostIndicator = None
+        self.portIndicator = None
+        self.publicKeyIndicator = None
+        self.privateKeyIndicator = None
+        self.cipherKeyIndicator = None
 
         # UI elements (chatWindow)
         self.chatWindow = None
@@ -856,6 +932,8 @@ class UI:
                 connectionInstance.hasUsername = True
                 self.hasAnimated = False
 
+                animationInstance.queue.append([5, 0, uiInstance.animationColor])
+
         uiInstance.inputTextBox.clear()
 
     def getColor(self, key):
@@ -875,6 +953,8 @@ class UI:
 
                     connectionInstance.hasColor = True
                     self.hasAnimated = False
+
+                    animationInstance.queue.append([5, 1, uiInstance.animationColor])
 
                 except ValueError:
                     animationInstance.queue.append([1, "Try a different color"])
@@ -898,6 +978,8 @@ class UI:
                 connectionInstance.hasHost = True
                 self.hasAnimated = False
 
+                animationInstance.queue.append([5, 2, uiInstance.animationColor])
+
         uiInstance.inputTextBox.clear()
 
     def getPort(self, key):
@@ -916,6 +998,8 @@ class UI:
 
                 connectionInstance.hasPort = True
                 self.hasAnimated = False
+
+                animationInstance.queue.append([5, 3, uiInstance.animationColor])
 
         uiInstance.inputTextBox.clear()
 
@@ -937,6 +1021,8 @@ class UI:
                 connectionInstance.hasPublicKey = True
                 self.hasAnimated = False
 
+                animationInstance.queue.append([5, 4, uiInstance.animationColor])
+
         uiInstance.inputTextBox.clear()
 
     def getPrivateKey(self, key):
@@ -956,6 +1042,8 @@ class UI:
 
                 connectionInstance.hasPrivateKey = True
                 self.hasAnimated = False
+
+                animationInstance.queue.append([5, 5, uiInstance.animationColor])
 
         uiInstance.inputTextBox.clear()
 
@@ -977,30 +1065,39 @@ class UI:
                 connectionInstance.hasCipherKey = True
                 self.hasAnimated = False
 
+                animationInstance.queue.append([5, 6, uiInstance.animationColor])
+
         uiInstance.inputTextBox.clear()
 
     def requestInput(self, key):
         if not connectionInstance.connected:
             # Creates a series of input requests
             if connectionInstance.inputRequest == 0:
+                animationInstance.queue.append([5, 0, (255, 255, 255)])
                 self.getUsername(key)
 
             if connectionInstance.inputRequest == 1:
+                animationInstance.queue.append([5, 1, (255, 255, 255)])
                 self.getColor(key)
 
             if connectionInstance.inputRequest == 2:
+                animationInstance.queue.append([5, 2, (255, 255, 255)])
                 self.getHost(key)
 
             if connectionInstance.inputRequest == 3:
+                animationInstance.queue.append([5, 3, (255, 255, 255)])
                 self.getPort(key)
 
             if connectionInstance.inputRequest == 4:
+                animationInstance.queue.append([5, 4, (255, 255, 255)])
                 self.getPublicKey(key)
 
             if connectionInstance.inputRequest == 5:
+                animationInstance.queue.append([5, 5, (255, 255, 255)])
                 self.getPrivateKey(key)
 
             if connectionInstance.inputRequest == 6:
+                animationInstance.queue.append([5, 6, (255, 255, 255)])
                 self.getCipherKey(key)
 
             if connectionInstance.inputRequest < 0:
@@ -1010,6 +1107,27 @@ class UI:
             if connectionInstance.inputRequest > 6:
                 connectionInstance.inputRequest = 0
                 self.requestInput(key)
+
+            if connectionInstance.hasUsername and not connectionInstance.inputRequest == 0:
+                animationInstance.queue.append([5, 0, uiInstance.animationColor])
+
+            if connectionInstance.hasColor and not connectionInstance.inputRequest == 1:
+                animationInstance.queue.append([5, 1, uiInstance.animationColor])
+
+            if connectionInstance.hasHost and not connectionInstance.inputRequest == 2:
+                animationInstance.queue.append([5, 2, uiInstance.animationColor])
+
+            if connectionInstance.hasPort and not connectionInstance.inputRequest == 3:
+                animationInstance.queue.append([5, 3, uiInstance.animationColor])
+
+            if connectionInstance.hasPublicKey and not connectionInstance.inputRequest == 4:
+                animationInstance.queue.append([5, 4, uiInstance.animationColor])
+
+            if connectionInstance.hasPrivateKey and not connectionInstance.inputRequest == 5:
+                animationInstance.queue.append([5, 5, uiInstance.animationColor])
+
+            if connectionInstance.hasCipherKey and not connectionInstance.inputRequest == 6:
+                animationInstance.queue.append([5, 6, uiInstance.animationColor])
 
             if connectionInstance.hasUsername and connectionInstance.hasColor and connectionInstance.hasHost \
                     and connectionInstance.hasPort and connectionInstance.hasPublicKey and \
@@ -1025,12 +1143,16 @@ class UI:
         if event:
             if event.tk_event.keysym == "Left":
                 if 7 > connectionInstance.inputRequest > -1:
+                    animationInstance.queue.append([5, connectionInstance.inputRequest, uiInstance.bg])
+
                     connectionInstance.inputRequest -= 1
 
                     self.requestInput(False)
 
             if event.tk_event.keysym == "Right":
                 if 7 > connectionInstance.inputRequest > -1:
+                    animationInstance.queue.append([5, connectionInstance.inputRequest, uiInstance.bg])
+
                     connectionInstance.inputRequest += 1
 
                     self.requestInput(False)
@@ -1086,7 +1208,7 @@ class UI:
         self.userList.text_size = self.fontSize
         self.userList.bg = (255, 255, 255)
 
-        self.header = Text(header, text="Initialising threads...", width="fill", height=50)
+        self.header = Text(header, text=f"Welcome {connectionInstance.username}", width="fill", height=50)
         self.header.text_color = (255, 255, 255)
         self.header.text_size = self.fontSize + 14
         self.header.bg = uiInstance.animationColor
@@ -1143,6 +1265,8 @@ class UI:
         header = Box(contents, width="fill", height=40, align="top")
         header.bg = uiInstance.animationColor
 
+        indicator = Box(contents, width="fill", height=40, align="bottom")
+
         rightPadding = Box(contents, width=20, height="fill", align="right")
         leftPadding = Box(contents, width=10, height="fill", align="left")
 
@@ -1158,6 +1282,14 @@ class UI:
         self.connectText = Text(contents, text="Press Enter to continue", align="right")
         self.connectText.text_color = self.animationColor
         self.connectText.text_size = self.fontSize + 2
+
+        self.usernameIndicator = Box(indicator, width=114, height="fill", align="left")
+        self.colorIndicator = Box(indicator, width=114, height="fill", align="left")
+        self.hostIndicator = Box(indicator, width=114, height="fill", align="left")
+        self.portIndicator = Box(indicator, width=114, height="fill", align="left")
+        self.publicKeyIndicator = Box(indicator, width=114, height="fill", align="left")
+        self.privateKeyIndicator = Box(indicator, width=114, height="fill", align="left")
+        self.cipherKeyIndicator = Box(indicator, width=114, height="fill", align="left")
 
         build = Text(bottomPadding, text="Stable", align="bottom")
 
