@@ -1100,14 +1100,6 @@ class UI:
                 animationInstance.queue.append([5, 6, (255, 255, 255)])
                 self.getCipherKey(key)
 
-            if connectionInstance.inputRequest < 0:
-                connectionInstance.inputRequest = 6
-                self.requestInput(key)
-
-            if connectionInstance.inputRequest > 6:
-                connectionInstance.inputRequest = 0
-                self.requestInput(key)
-
             if connectionInstance.hasUsername and not connectionInstance.inputRequest == 0:
                 animationInstance.queue.append([5, 0, uiInstance.animationColor])
 
@@ -1128,6 +1120,14 @@ class UI:
 
             if connectionInstance.hasCipherKey and not connectionInstance.inputRequest == 6:
                 animationInstance.queue.append([5, 6, uiInstance.animationColor])
+                
+            if connectionInstance.inputRequest < 0:
+                connectionInstance.inputRequest = 6
+                self.requestInput(key)
+
+            if connectionInstance.inputRequest > 6:
+                connectionInstance.inputRequest = 0
+                self.requestInput(key)
 
             if connectionInstance.hasUsername and connectionInstance.hasColor and connectionInstance.hasHost \
                     and connectionInstance.hasPort and connectionInstance.hasPublicKey and \
