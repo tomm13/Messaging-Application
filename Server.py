@@ -1,5 +1,5 @@
-# 10/11/2022
-# V13
+# 11/11/2022
+# V13.2.2
 
 import math
 import socket
@@ -422,7 +422,6 @@ class Connection:
         self.spaceRemaining = 50
         self.users = []
         self.clients = []
-        self.recentMessages = []
 
     def connect(self):
         securityInstance.generatePort()
@@ -448,19 +447,12 @@ class Connection:
                 message = "/add "
 
                 for user in self.users:
-                    if user in actionsInstance.modUsers:
-                        message += user + "-[mod] "
-                    else:
-                        message += user + " "
+                    message += user + " "
 
                 sendInstance.broadcast(message)
 
                 self.userOnline += 1
                 self.spaceRemaining -= 1
-
-                if len(self.recentMessages) > 0:
-                    for message in self.recentMessages:
-                        sendInstance.privateBroadcast(message, clientSocket)
 
                 listeningThread = Thread(target=self.listen, args=[clientSocket])
                 listeningThread.start()
@@ -471,6 +463,7 @@ class Connection:
         messagesSentRecently = 0
         lastMessageSentTime = time.time()
         warnUser = False
+
         while True:
             try:
                 message = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode())
@@ -497,16 +490,12 @@ class Connection:
 
                         else:
                             sendInstance.broadcast(unifiedmessage)
-                            self.recentMessages.append(unifiedmessage)
 
                             if lastMessageSentTime + 1 > time.time():
                                 messagesSentRecently += 1
 
                             elif messagesSentRecently > 0:
                                 messagesSentRecently -= 1
-
-                            if len(self.recentMessages) > 15:
-                                self.recentMessages = self.recentMessages[1:]
 
                             lastMessageSentTime = time.time()
 
