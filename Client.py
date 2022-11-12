@@ -1,4 +1,4 @@
-# 11/11/2022
+# 12/11/2022
 # V13.2.2
 
 import platform
@@ -550,7 +550,7 @@ class Communication:
                 else:
                     if len(message) + len(connectionInstance.username) + 2 >= 45:
                         if not self.messageTooLongWarning:
-                            animationInstance.queue.append([1, "Your message is too long."])
+                            animationInstance.queue.append([1, "Your message is too long"])
                             self.messageTooLongWarning = True
                             self.warningTimer = time()
 
@@ -1120,7 +1120,7 @@ class UI:
 
             if connectionInstance.hasCipherKey and not connectionInstance.inputRequest == 6:
                 animationInstance.queue.append([5, 6, uiInstance.animationColor])
-                
+
             if connectionInstance.inputRequest < 0:
                 connectionInstance.inputRequest = 6
                 self.requestInput(key)
@@ -1290,8 +1290,6 @@ class UI:
         self.publicKeyIndicator = Box(indicator, width=114, height="fill", align="left")
         self.privateKeyIndicator = Box(indicator, width=114, height="fill", align="left")
         self.cipherKeyIndicator = Box(indicator, width=114, height="fill", align="left")
-
-        build = Text(bottomPadding, text="Stable", align="bottom")
 
         startAnimationThread = Thread(target=animationInstance.animationThread)
         startAnimationThread.start()
