@@ -11,6 +11,7 @@ from guizero import *
 
 
 class Animation:
+    # Creates a class with animation methods and a thread method
     def __init__(self):
         self.queue = []
         self.readRate = 1
@@ -521,6 +522,7 @@ class Communication:
 
     @staticmethod
     def saveChatHistory(location):
+        # Called by /savechat [Location]
         if location and " " not in location:
             with open(location, "w") as file:
                 for chatLine in communicationInstance.chatHistory:
@@ -534,6 +536,7 @@ class Communication:
 
     @staticmethod
     def disconnectLoop():
+        # Called by using an existing username when connecting
         uiInstance.animationColor = (255, 0, 0)
 
         while True:
@@ -542,6 +545,7 @@ class Communication:
             sleep(1)
 
     def sendToServer(self):
+        # Gets the value of the input, encrypts, then broadcasts
         try:
             message = uiInstance.messageInput.value
             if message:
@@ -567,6 +571,7 @@ class Communication:
             connectionInstance.leave()
 
     def setUsers(self, message):
+        # Called by /add [Users spilt by space]
         message = message.split()
         message.sort()
 
@@ -586,6 +591,7 @@ class Communication:
                 uiInstance.userList.append(user)
 
     def removeUsers(self, message):
+        # Called by /remove [Users split by space]
         if message == connectionInstance.username:
             while True:
                 uiInstance.animationColor = (255, 0, 0)
@@ -597,6 +603,7 @@ class Communication:
         animationInstance.queue.append([1, f"{message[8:]} has disconnected"])
 
     def previousPage(self):
+        # Called by /previous
         if self.page > 0:
             self.page -= 1
 
@@ -613,6 +620,7 @@ class Communication:
             animationInstance.queue.append([1, "You cannot go below this page"])
 
     def nextPage(self):
+        # Called by /next
         if self.page < uiInstance.page:
             self.page += 1
 
@@ -638,6 +646,7 @@ class Communication:
         uiInstance.linesSent = 1
 
     def addMessage(self, message):
+        # Called when the message is not a command
         if uiInstance.linesSent >= uiInstance.linesLimit:
             self.createNewPage(message)
 
@@ -678,6 +687,8 @@ class Communication:
                         uiInstance.linesSent += 1
 
     def updateThread(self):
+        # Starts when the user is connected
+        # Looks out for server broadcasts
         try:
             print(f"Started update thread at {str(time())}")
             while connectionInstance.connected:
@@ -768,6 +779,9 @@ class Connection:
         self.hasCipherKey = False
 
     def connect(self):
+        # Called when the user has filled out all 7 inputs
+        # Connects to the socket, calculates the RSA encryption key, decryption key, and 
+        # The cipher key.
         self.e = int(str(self.publicKey[0:6]), base=10)
         self.d = int(str(self.privateKey[0:6]), base=10)
         self.N = int(str(self.privateKey[6:12]), base=10)
@@ -863,6 +877,7 @@ class UI:
 
     @staticmethod
     def chooseColor(code, message):
+        # Called by /color [Color]
         try:
             color = colorutils.web_to_rgb(message)
 
@@ -878,6 +893,7 @@ class UI:
 
     @staticmethod
     def setMod(message):
+        # Called by /mod [User]
         if message == connectionInstance.username and not connectionInstance.mod:
             if not uiInstance.darkMode:
                 animationInstance.queue.append([2, False])
@@ -889,6 +905,7 @@ class UI:
 
     @staticmethod
     def setRate(rate):
+        # Called by /rate [Rate]
         try:
             rate = float(rate)
             if 0 < rate < 3:
@@ -904,6 +921,7 @@ class UI:
 
     @staticmethod
     def setLDM():
+        # Called by /ldm
         if uiInstance.LDM:
             uiInstance.LDM = False
             animationInstance.queue.append([1, "You turned LDM off"])
@@ -911,6 +929,8 @@ class UI:
         else:
             uiInstance.LDM = True
             animationInstance.queue.append([1, "You turned LDM on"])
+            
+    # The next 7 methods request for user inputs prior to connecting
 
     def getUsername(self, key):
         if not self.hasAnimated or not key:
@@ -1139,6 +1159,7 @@ class UI:
                 connectionInstance.connect()
 
     def keyPressed(self, event):
+        # Detects key presses, more specifically, enter, left and right
         if event:
             if event.tk_event.keysym == "Left":
                 if 7 > connectionInstance.inputRequest > -1:
@@ -1173,6 +1194,7 @@ class UI:
     # Methods below create the UI
 
     def openChat(self):
+        # Creates chat window
         self.chatWindow = Window(self.setupWindow, width=1280, height=720, title="Chatroom", bg=self.bg)
         self.chatWindow.when_closed = connectionInstance.leave
         self.chatWindow.when_key_pressed = self.keyPressed
@@ -1252,6 +1274,7 @@ class UI:
         self.chatWindow.show()
 
     def openSetup(self):
+        # Creates setup window
         self.setupWindow = App(title="Connect", width=800, height=275)
         self.setupWindow.bg = self.bg
         self.setupWindow.font = self.font
