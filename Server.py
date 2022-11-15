@@ -1,4 +1,4 @@
-# 11/11/2022
+# 15/11/2022
 # V13.2.2
 
 import math
@@ -397,8 +397,6 @@ class Send:
             actionsInstance.mod(message, clientSocket)
         elif message[0:5] == "/kick" or message[0:5] == "/vote":
             actionsInstance.vote(message, clientSocket)
-        elif message == "/filler":
-            sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:5] == "/rate":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:7] == "/border":
@@ -529,8 +527,9 @@ class Connection:
         sendInstance.broadcast(message)
 
 
-sendInstance = Send()
-securityInstance = Security()
 actionsInstance = Actions()
 connectionInstance = Connection()
-Connection.connect(connectionInstance)
+securityInstance = Security()
+sendInstance = Send()
+
+connectionInstance.connect()
