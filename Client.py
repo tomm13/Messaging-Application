@@ -1134,8 +1134,7 @@ class UI:
                     connectionInstance.hasPrivateKey and connectionInstance.hasCipherKey and \
                     not connectionInstance.connected:
 
-                while animationInstance.queue:
-                    animationInstance.queue = []
+                animationInstance.queue = []
 
                 connectionInstance.connect()
 
