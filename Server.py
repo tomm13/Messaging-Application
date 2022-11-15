@@ -18,6 +18,7 @@ class Security:
 
     @staticmethod
     def generatePort():
+        # Binds to an open port within the range 49125-65536
         while True:
             try:
                 connectionInstance.socket.bind((connectionInstance.host, connectionInstance.port))
@@ -27,7 +28,8 @@ class Security:
                 connectionInstance.port = random.randint(49125, 65536)
 
     def generateKey(self):
-        # These variables, albeit terribly named, are for references during modular exponentiation
+        # Uses algorithms in modular exponentiation to generate the RSA private, public
+        # And cipher key
         e = 0
         d = 0
         N = 0
@@ -193,6 +195,8 @@ class Actions:
         self.resetVote()
 
     def vote(self, message, clientSocket):
+        # Called when a moderator is trying to kick a user, and depending on the number
+        # of moderators online, the user is either kicked or a vote starts. Use /kick
         modSocket = clientSocket
         index = connectionInstance.clients.index(modSocket)
         modUsername = connectionInstance.users[index]
@@ -283,6 +287,8 @@ class Actions:
                 self.resetVote()
 
     def mod(self, message, clientSocket):
+        # Called when a moderator converts other users into another moderator
+        # Use /mod
         modSocket = clientSocket
         index = connectionInstance.clients.index(modSocket)
         modUsername = connectionInstance.users[index]
@@ -429,6 +435,7 @@ class Connection:
 
         for i in range(self.spaceRemaining):
             # The main thread listens for incoming connections and accepts it
+            # This also broadcasts to other online users that a new user has connected.
 
             clientSocket, Address = self.socket.accept()
             self.clients.append(clientSocket)
@@ -456,6 +463,7 @@ class Connection:
                 listeningThread.start()
 
     def listen(self, clientSocket):
+        # A listening thread linked to every unique client, and detects input from them
         index = self.clients.index(clientSocket)
         username = self.users[index]
         messagesSentRecently = 0
@@ -506,6 +514,7 @@ class Connection:
                 break
 
     def removeUser(self, username, clientSocket):
+        # Called when a user has a duplicate username or more commonly, leaves
         connectionInstance.clients.remove(clientSocket)
         connectionInstance.users.remove(username)
 
