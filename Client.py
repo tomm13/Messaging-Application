@@ -1,4 +1,4 @@
-# 12/11/2022
+# 15/11/2022
 # V13.2.2
 
 import platform
@@ -1299,9 +1299,9 @@ class UI:
 
 print(f"Started code at {str(time())}")
 
+animationInstance = Animation()
+communicationInstance = Communication()
 connectionInstance = Connection()
 uiInstance = UI()
-communicationInstance = Communication()
-animationInstance = Animation()
 
-UI.openSetup(uiInstance)
+uiInstance.openSetup()
