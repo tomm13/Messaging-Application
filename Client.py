@@ -1,5 +1,5 @@
-# 15/11/2022
-# V13.2.2
+# 23/11/2022
+# V13.2.3
 
 import platform
 import socket
@@ -477,13 +477,7 @@ class Communication:
                 elif letter.isupper():
                     step = 65
 
-                index = ord(letter) + connectionInstance.cipherKey - step
-
-                while index > 25:
-                    index -= 26
-
-                while index < 0:
-                    index += 26
+                index = (ord(letter) + connectionInstance.cipherKey - step) % 26
 
                 newMessage += chr(index + step)
 
@@ -505,13 +499,7 @@ class Communication:
                 elif letter.isupper():
                     step = 65
 
-                index = ord(letter) - connectionInstance.cipherKey - step
-
-                while index > 25:
-                    index -= 26
-
-                while index < 0:
-                    index += 26
+                index = (ord(letter) - connectionInstance.cipherKey - step) % 26
 
                 newMessage += chr(index + step)
 
@@ -780,7 +768,7 @@ class Connection:
 
     def connect(self):
         # Called when the user has filled out all 7 inputs
-        # Connects to the socket, calculates the RSA encryption key, decryption key, and 
+        # Connects to the socket, calculates the RSA encryption key, decryption key, and
         # The cipher key.
         self.e = int(str(self.publicKey[0:6]), base=10)
         self.d = int(str(self.privateKey[0:6]), base=10)
@@ -929,7 +917,7 @@ class UI:
         else:
             uiInstance.LDM = True
             animationInstance.queue.append([1, "You turned LDM on"])
-            
+
     # The next 7 methods request for user inputs prior to connecting
 
     def getUsername(self, key):
@@ -1153,7 +1141,6 @@ class UI:
                     and connectionInstance.hasPort and connectionInstance.hasPublicKey and \
                     connectionInstance.hasPrivateKey and connectionInstance.hasCipherKey and \
                     not connectionInstance.connected:
-
                 animationInstance.queue = []
 
                 connectionInstance.connect()
