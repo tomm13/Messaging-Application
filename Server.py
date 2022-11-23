@@ -1,5 +1,5 @@
-# 15/11/2022
-# V13.2.2
+# 23/11/2022
+# V13.2.3
 
 import math
 import socket
@@ -111,13 +111,7 @@ class Security:
                 elif letter.isupper():
                     step = 65
 
-                index = ord(letter) + self.cipherKey - step
-
-                while index > 25:
-                    index -= 26
-
-                while index < 0:
-                    index += 26
+                index = (ord(letter) + self.cipherKey - step) % 26
 
                 newMessage += chr(index + step)
 
@@ -138,13 +132,7 @@ class Security:
                 elif letter.isupper():
                     step = 65
 
-                index = ord(letter) - self.cipherKey - step
-
-                while index > 25:
-                    index -= 26
-
-                while index < 0:
-                    index += 26
+                index = (ord(letter) - self.cipherKey - step) % 26
 
                 newMessage += chr(index + step)
 
@@ -420,7 +408,7 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = "192.168.1.138"
+        self.host = "192.168.1.140"
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
         self.spaceRemaining = 50
