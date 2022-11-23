@@ -1,6 +1,5 @@
-# 9/11/2022
-# Needs to work for most characters in unicode
-# Applied to message
+# 23/11/2022
+# Rework handling of index > 26 or < 0
 
 test = "abcdefgABCDEFG 1235649358790213!@(*$£(*&$*(%"
 key = 23
@@ -18,13 +17,7 @@ def caesarEncrypt(message):
             elif letter.isupper():
                 step = 65
 
-            index = ord(letter) + key - step
-
-            while index > 25:
-                index -= 26
-
-            while index < 0:
-                index += 26
+            index = (ord(letter) + key - step) % 26
 
             newMessage += chr(index + step)
 
@@ -32,6 +25,7 @@ def caesarEncrypt(message):
             newMessage += letter
 
     return newMessage
+
 
 def caesarDecrypt(message):
     newMessage = ""
@@ -45,13 +39,7 @@ def caesarDecrypt(message):
             elif letter.isupper():
                 step = 65
 
-            index = ord(letter) - key - step
-
-            while index > 25:
-                index -= 26
-
-            while index < 0:
-                index += 26
+            index = (ord(letter) - key - step) % 26
 
             newMessage += chr(index + step)
 
