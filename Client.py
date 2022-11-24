@@ -1,5 +1,5 @@
-# 23/11/2022
-# V13.2.3
+# 24/11/2022
+# V13.2.4
 
 import platform
 import socket
@@ -956,13 +956,19 @@ class UI:
 
             else:
                 try:
-                    connectionInstance.color = colorutils.web_to_rgb(uiInstance.inputTextBox.value)
-                    connectionInstance.inputRequest += 1
+                    color = colorutils.web_to_rgb(uiInstance.inputTextBox.value)
 
-                    connectionInstance.hasColor = True
-                    self.hasAnimated = False
+                    if color == (255, 255, 255):
+                        animationInstance.queue.append([1, "Try a different color"])
 
-                    animationInstance.queue.append([5, 1, uiInstance.animationColor])
+                    else:
+                        connectionInstance.color = color
+                        connectionInstance.inputRequest += 1
+
+                        connectionInstance.hasColor = True
+                        self.hasAnimated = False
+
+                        animationInstance.queue.append([5, 1, uiInstance.animationColor])
 
                 except ValueError:
                     animationInstance.queue.append([1, "Try a different color"])
