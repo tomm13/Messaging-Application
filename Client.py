@@ -281,13 +281,9 @@ class Animation:
             if B < newColor[2]:
                 B += 1
 
-            if connectionInstance.connected:
-              uiInstance.userList.text_color = (R, G, B)
-              uiInstance.chatHistory.text_color = (R, G, B)
-              uiInstance.messageInput.text_color = (R, G, B)  
-              
-            else:
-              uiInstance.connectText.text_color = (R, G, B)
+            uiInstance.userList.text_color = (R, G, B)
+            uiInstance.chatHistory.text_color = (R, G, B)
+            uiInstance.messageInput.text_color = (R, G, B)
 
             sleep(uiInstance.rate)
 
@@ -315,23 +311,19 @@ class Animation:
             if B > newColor[2]:
                 B -= 1
 
-            if connectionInstance.connected:
-              uiInstance.header.bg = (R, G, B)  
-              uiInstance.chatHistoryTopBorder.bg = (R, G, B)
-              uiInstance.chatHistoryRightBorder.bg = (R, G, B)
-              uiInstance.chatHistoryBottomBorder.bg = (R, G, B)
-              uiInstance.chatHistoryLeftBorder.bg = (R, G, B)
-              uiInstance.userListTopBorder.bg = (R, G, B)
-              uiInstance.userListRightBorder.bg = (R, G, B)
-              uiInstance.userListBottomBorder.bg = (R, G, B)
-              uiInstance.userListLeftBorder.bg = (R, G, B)
-              uiInstance.messageInputTopBorder.bg = (R, G, B)
-              uiInstance.messageInputRightBorder.bg = (R, G, B)
-              uiInstance.messageInputBottomBorder.bg = (R, G, B)
-              uiInstance.messageInputLeftBorder.bg = (R, G, B)
-
-            else:
-              uiInstance.status.bg = (R, G, B)
+            uiInstance.header.bg = (R, G, B)
+            uiInstance.chatHistoryTopBorder.bg = (R, G, B)
+            uiInstance.chatHistoryRightBorder.bg = (R, G, B)
+            uiInstance.chatHistoryBottomBorder.bg = (R, G, B)
+            uiInstance.chatHistoryLeftBorder.bg = (R, G, B)
+            uiInstance.userListTopBorder.bg = (R, G, B)
+            uiInstance.userListRightBorder.bg = (R, G, B)
+            uiInstance.userListBottomBorder.bg = (R, G, B)
+            uiInstance.userListLeftBorder.bg = (R, G, B)
+            uiInstance.messageInputTopBorder.bg = (R, G, B)
+            uiInstance.messageInputRightBorder.bg = (R, G, B)
+            uiInstance.messageInputBottomBorder.bg = (R, G, B)
+            uiInstance.messageInputLeftBorder.bg = (R, G, B)
 
             sleep(uiInstance.rate)
 
@@ -868,11 +860,6 @@ class UI:
             self.fontSize = 18
             self.rate = 0.00000
             self.linesLimit = 9
-        else:
-            self.fontSize = 12
-            self.rate = 0.00000
-            self.linesLimit = 13
-          
 
     # Methods below alter UI attributes
 
@@ -981,10 +968,8 @@ class UI:
                         connectionInstance.hasColor = True
                         self.hasAnimated = False
 
-                        animationInstance.queue.append([3, color])
-                        animationInstance.queue.append([4, color])
                         animationInstance.queue.append([5, 1, uiInstance.animationColor])
-                        
+
                 except ValueError:
                     animationInstance.queue.append([1, "Try a different color"])
 
@@ -1293,15 +1278,16 @@ class UI:
         contents = Box(self.setupWindow, width="fill", height="fill", align="top")
 
         header = Box(contents, width="fill", height=40, align="top")
+        header.bg = uiInstance.animationColor
+
         indicator = Box(contents, width="fill", height=40, align="bottom")
 
         rightPadding = Box(contents, width=20, height="fill", align="right")
         leftPadding = Box(contents, width=10, height="fill", align="left")
 
-        self.status = Text(header, text="Welcome", width="fill", height=40)
+        self.status = Text(header, text="Welcome")
         self.status.text_color = (255, 255, 255)
         self.status.text_size = self.fontSize + 10
-        self.status.bg = uiInstance.animationColor
 
         self.inputTextBox = TextBox(contents, width=30, align="left")
         self.inputTextBox.text_color = (255, 255, 255)
