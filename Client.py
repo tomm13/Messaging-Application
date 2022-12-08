@@ -1,5 +1,5 @@
-# 8/12/2022
-# V13.2.4
+# 24/11/2022
+# V13.2.3
 
 import platform
 import socket
@@ -334,7 +334,7 @@ class Animation:
               uiInstance.portIndicator.bg = (R, G, B)
               uiInstance.publicKeyIndicator.bg = (R, G, B)
               uiInstance.privateKeyIndicator.bg = (R, G, B)
-              uiInstance.cipherKeyIndicator.bg = (R, G, B)
+              uiInstance.cipherKeyIndicator = (R, G, B)
 
             sleep(uiInstance.rate)
 
@@ -1302,7 +1302,7 @@ class UI:
         rightPadding = Box(contents, width=20, height="fill", align="right")
         leftPadding = Box(contents, width=10, height="fill", align="left")
 
-        self.status = Text(header, text="Welcome")
+        self.status = Text(header, text="Welcome", width="fill", height=40)
         self.status.text_color = (255, 255, 255)
         self.status.text_size = self.fontSize + 10
 
