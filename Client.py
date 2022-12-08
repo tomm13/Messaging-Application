@@ -281,9 +281,13 @@ class Animation:
             if B < newColor[2]:
                 B += 1
 
-            uiInstance.userList.text_color = (R, G, B)
-            uiInstance.chatHistory.text_color = (R, G, B)
-            uiInstance.messageInput.text_color = (R, G, B)
+            if connectionInstance.connected:
+              uiInstance.userList.text_color = (R, G, B)
+              uiInstance.chatHistory.text_color = (R, G, B)
+              uiInstance.messageInput.text_color = (R, G, B)  
+              
+            else:
+              uiInstance.connectText.text_color = (R, G, B)
 
             sleep(uiInstance.rate)
 
@@ -977,6 +981,7 @@ class UI:
                         connectionInstance.hasColor = True
                         self.hasAnimated = False
 
+                        animationInstance.queue.append([3, color])
                         animationInstance.queue.append([4, color])
                         animationInstance.queue.append([5, 1, uiInstance.animationColor])
                         
