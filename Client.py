@@ -1,5 +1,5 @@
-# 24/11/2022
-# V13.2.3
+# 8/12/2022
+# V13.2.4
 
 import platform
 import socket
@@ -311,19 +311,30 @@ class Animation:
             if B > newColor[2]:
                 B -= 1
 
-            uiInstance.header.bg = (R, G, B)
-            uiInstance.chatHistoryTopBorder.bg = (R, G, B)
-            uiInstance.chatHistoryRightBorder.bg = (R, G, B)
-            uiInstance.chatHistoryBottomBorder.bg = (R, G, B)
-            uiInstance.chatHistoryLeftBorder.bg = (R, G, B)
-            uiInstance.userListTopBorder.bg = (R, G, B)
-            uiInstance.userListRightBorder.bg = (R, G, B)
-            uiInstance.userListBottomBorder.bg = (R, G, B)
-            uiInstance.userListLeftBorder.bg = (R, G, B)
-            uiInstance.messageInputTopBorder.bg = (R, G, B)
-            uiInstance.messageInputRightBorder.bg = (R, G, B)
-            uiInstance.messageInputBottomBorder.bg = (R, G, B)
-            uiInstance.messageInputLeftBorder.bg = (R, G, B)
+            if connectionInstance.connected:
+              uiInstance.header.bg = (R, G, B)  
+              uiInstance.chatHistoryTopBorder.bg = (R, G, B)
+              uiInstance.chatHistoryRightBorder.bg = (R, G, B)
+              uiInstance.chatHistoryBottomBorder.bg = (R, G, B)
+              uiInstance.chatHistoryLeftBorder.bg = (R, G, B)
+              uiInstance.userListTopBorder.bg = (R, G, B)
+              uiInstance.userListRightBorder.bg = (R, G, B)
+              uiInstance.userListBottomBorder.bg = (R, G, B)
+              uiInstance.userListLeftBorder.bg = (R, G, B)
+              uiInstance.messageInputTopBorder.bg = (R, G, B)
+              uiInstance.messageInputRightBorder.bg = (R, G, B)
+              uiInstance.messageInputBottomBorder.bg = (R, G, B)
+              uiInstance.messageInputLeftBorder.bg = (R, G, B)
+
+            else:
+              uiInstance.status.bg = (R, G, B)
+              uiInstance.usernameIndicator.bg = (R, G, B)
+              uiInstance.colorIndicator.bg = (R, G, B)
+              uiInstance.hostIndicator.bg = (R, G, B)
+              uiInstance.portIndicator.bg = (R, G, B)
+              uiInstance.publicKeyIndicator.bg = (R, G, B)
+              uiInstance.privateKeyIndicator.bg = (R, G, B)
+              uiInstance.cipherKeyIndicator.bg = (R, G, B)
 
             sleep(uiInstance.rate)
 
@@ -860,6 +871,11 @@ class UI:
             self.fontSize = 18
             self.rate = 0.00000
             self.linesLimit = 9
+        else:
+            self.fontSize = 12
+            self.rate = 0.00000
+            self.linesLimit = 13
+          
 
     # Methods below alter UI attributes
 
@@ -968,8 +984,9 @@ class UI:
                         connectionInstance.hasColor = True
                         self.hasAnimated = False
 
+                        animationInstance.queue.append([4, color])
                         animationInstance.queue.append([5, 1, uiInstance.animationColor])
-
+                        
                 except ValueError:
                     animationInstance.queue.append([1, "Try a different color"])
 
