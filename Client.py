@@ -281,9 +281,13 @@ class Animation:
             if B < newColor[2]:
                 B += 1
 
-            uiInstance.userList.text_color = (R, G, B)
-            uiInstance.chatHistory.text_color = (R, G, B)
-            uiInstance.messageInput.text_color = (R, G, B)
+            if connectionInstance.connected:
+              uiInstance.userList.text_color = (R, G, B)
+              uiInstance.chatHistory.text_color = (R, G, B)
+              uiInstance.messageInput.text_color = (R, G, B)  
+              
+            else:
+              uiInstance.connectText.text_color = (R, G, B)
 
             sleep(uiInstance.rate)
 
@@ -328,13 +332,6 @@ class Animation:
 
             else:
               uiInstance.status.bg = (R, G, B)
-              uiInstance.usernameIndicator.bg = (R, G, B)
-              uiInstance.colorIndicator.bg = (R, G, B)
-              uiInstance.hostIndicator.bg = (R, G, B)
-              uiInstance.portIndicator.bg = (R, G, B)
-              uiInstance.publicKeyIndicator.bg = (R, G, B)
-              uiInstance.privateKeyIndicator.bg = (R, G, B)
-              uiInstance.cipherKeyIndicator = (R, G, B)
 
             sleep(uiInstance.rate)
 
@@ -984,6 +981,7 @@ class UI:
                         connectionInstance.hasColor = True
                         self.hasAnimated = False
 
+                        animationInstance.queue.append([3, color])
                         animationInstance.queue.append([4, color])
                         animationInstance.queue.append([5, 1, uiInstance.animationColor])
                         
@@ -1295,8 +1293,6 @@ class UI:
         contents = Box(self.setupWindow, width="fill", height="fill", align="top")
 
         header = Box(contents, width="fill", height=40, align="top")
-        header.bg = uiInstance.animationColor
-
         indicator = Box(contents, width="fill", height=40, align="bottom")
 
         rightPadding = Box(contents, width=20, height="fill", align="right")
@@ -1305,6 +1301,7 @@ class UI:
         self.status = Text(header, text="Welcome", width="fill", height=40)
         self.status.text_color = (255, 255, 255)
         self.status.text_size = self.fontSize + 10
+        self.status.bg = uiInstance.animationColor
 
         self.inputTextBox = TextBox(contents, width=30, align="left")
         self.inputTextBox.text_color = (255, 255, 255)
