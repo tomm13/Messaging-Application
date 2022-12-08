@@ -282,12 +282,12 @@ class Animation:
                 B += 1
 
             if connectionInstance.connected:
-              uiInstance.userList.text_color = (R, G, B)
-              uiInstance.chatHistory.text_color = (R, G, B)
-              uiInstance.messageInput.text_color = (R, G, B)  
-              
+                uiInstance.userList.text_color = (R, G, B)
+                uiInstance.chatHistory.text_color = (R, G, B)
+                uiInstance.messageInput.text_color = (R, G, B)
+
             else:
-              uiInstance.connectText.text_color = (R, G, B)
+                uiInstance.connectText.text_color = (R, G, B)
 
             sleep(uiInstance.rate)
 
@@ -316,22 +316,22 @@ class Animation:
                 B -= 1
 
             if connectionInstance.connected:
-              uiInstance.header.bg = (R, G, B)  
-              uiInstance.chatHistoryTopBorder.bg = (R, G, B)
-              uiInstance.chatHistoryRightBorder.bg = (R, G, B)
-              uiInstance.chatHistoryBottomBorder.bg = (R, G, B)
-              uiInstance.chatHistoryLeftBorder.bg = (R, G, B)
-              uiInstance.userListTopBorder.bg = (R, G, B)
-              uiInstance.userListRightBorder.bg = (R, G, B)
-              uiInstance.userListBottomBorder.bg = (R, G, B)
-              uiInstance.userListLeftBorder.bg = (R, G, B)
-              uiInstance.messageInputTopBorder.bg = (R, G, B)
-              uiInstance.messageInputRightBorder.bg = (R, G, B)
-              uiInstance.messageInputBottomBorder.bg = (R, G, B)
-              uiInstance.messageInputLeftBorder.bg = (R, G, B)
+                uiInstance.header.bg = (R, G, B)
+                uiInstance.chatHistoryTopBorder.bg = (R, G, B)
+                uiInstance.chatHistoryRightBorder.bg = (R, G, B)
+                uiInstance.chatHistoryBottomBorder.bg = (R, G, B)
+                uiInstance.chatHistoryLeftBorder.bg = (R, G, B)
+                uiInstance.userListTopBorder.bg = (R, G, B)
+                uiInstance.userListRightBorder.bg = (R, G, B)
+                uiInstance.userListBottomBorder.bg = (R, G, B)
+                uiInstance.userListLeftBorder.bg = (R, G, B)
+                uiInstance.messageInputTopBorder.bg = (R, G, B)
+                uiInstance.messageInputRightBorder.bg = (R, G, B)
+                uiInstance.messageInputBottomBorder.bg = (R, G, B)
+                uiInstance.messageInputLeftBorder.bg = (R, G, B)
 
             else:
-              uiInstance.status.bg = (R, G, B)
+                uiInstance.status.bg = (R, G, B)
 
             sleep(uiInstance.rate)
 
@@ -409,6 +409,7 @@ class Animation:
         print(f"Started animation thread at {str(time())}")
         while True:
             if self.queue:
+                print(self.queue)
                 # Check if queue has duplicate items
                 while len(self.queue) > 1 and self.queue[0] == self.queue[1]:
                     self.queue.pop(0)
@@ -872,7 +873,6 @@ class UI:
             self.fontSize = 12
             self.rate = 0.00000
             self.linesLimit = 13
-          
 
     # Methods below alter UI attributes
 
@@ -983,12 +983,18 @@ class UI:
 
                         animationInstance.queue.append([3, color])
                         animationInstance.queue.append([4, color])
-                        animationInstance.queue.append([5, 1, uiInstance.animationColor])
-                        
+                        animationInstance.queue.append([5, 1, color])
+
+                        uiInstance.inputTextBox.clear()
+
+                        return color
+
                 except ValueError:
                     animationInstance.queue.append([1, "Try a different color"])
 
         uiInstance.inputTextBox.clear()
+
+        return uiInstance.animationColor
 
     def getHost(self, key):
         if not self.hasAnimated or not key:
@@ -1011,6 +1017,8 @@ class UI:
 
         uiInstance.inputTextBox.clear()
 
+        return
+
     def getPort(self, key):
         if not self.hasAnimated or not key:
             animationInstance.queue.append([1, f"{connectionInstance.username}, enter your port"])
@@ -1031,6 +1039,8 @@ class UI:
                 animationInstance.queue.append([5, 3, uiInstance.animationColor])
 
         uiInstance.inputTextBox.clear()
+
+        return
 
     def getPublicKey(self, key):
         if not self.hasAnimated or not key:
@@ -1054,6 +1064,8 @@ class UI:
 
         uiInstance.inputTextBox.clear()
 
+        return
+
     def getPrivateKey(self, key):
         if not self.hasAnimated or not key:
             animationInstance.queue.append([
@@ -1075,6 +1087,8 @@ class UI:
                 animationInstance.queue.append([5, 5, uiInstance.animationColor])
 
         uiInstance.inputTextBox.clear()
+
+        return
 
     def getCipherKey(self, key):
         if not self.hasAnimated or not key:
@@ -1098,16 +1112,20 @@ class UI:
 
         uiInstance.inputTextBox.clear()
 
+        return
+
     def requestInput(self, key):
         if not connectionInstance.connected:
             # Creates a series of input requests
+            color = uiInstance.animationColor
+
             if connectionInstance.inputRequest == 0:
                 animationInstance.queue.append([5, 0, (255, 255, 255)])
                 self.getUsername(key)
 
             if connectionInstance.inputRequest == 1:
                 animationInstance.queue.append([5, 1, (255, 255, 255)])
-                self.getColor(key)
+                color = self.getColor(key)
 
             if connectionInstance.inputRequest == 2:
                 animationInstance.queue.append([5, 2, (255, 255, 255)])
@@ -1130,25 +1148,25 @@ class UI:
                 self.getCipherKey(key)
 
             if connectionInstance.hasUsername and not connectionInstance.inputRequest == 0:
-                animationInstance.queue.append([5, 0, uiInstance.animationColor])
+                animationInstance.queue.append([5, 0, color])
 
             if connectionInstance.hasColor and not connectionInstance.inputRequest == 1:
-                animationInstance.queue.append([5, 1, uiInstance.animationColor])
+                animationInstance.queue.append([5, 1, color])
 
             if connectionInstance.hasHost and not connectionInstance.inputRequest == 2:
-                animationInstance.queue.append([5, 2, uiInstance.animationColor])
+                animationInstance.queue.append([5, 2, color])
 
             if connectionInstance.hasPort and not connectionInstance.inputRequest == 3:
-                animationInstance.queue.append([5, 3, uiInstance.animationColor])
+                animationInstance.queue.append([5, 3, color])
 
             if connectionInstance.hasPublicKey and not connectionInstance.inputRequest == 4:
-                animationInstance.queue.append([5, 4, uiInstance.animationColor])
+                animationInstance.queue.append([5, 4, color])
 
             if connectionInstance.hasPrivateKey and not connectionInstance.inputRequest == 5:
-                animationInstance.queue.append([5, 5, uiInstance.animationColor])
+                animationInstance.queue.append([5, 5, color])
 
             if connectionInstance.hasCipherKey and not connectionInstance.inputRequest == 6:
-                animationInstance.queue.append([5, 6, uiInstance.animationColor])
+                animationInstance.queue.append([5, 6, color])
 
             if connectionInstance.inputRequest < 0:
                 connectionInstance.inputRequest = 6
