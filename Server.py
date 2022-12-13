@@ -367,9 +367,7 @@ class Send:
     @staticmethod
     def command(message, clientSocket):
         # Use list to prevent doubled code
-        if message == "/space":
-            sendInstance.privateBroadcastDisplay(str(connectionInstance.spaceRemaining), clientSocket)
-        elif message == "/online":
+        if message == "/online":
             sendInstance.privateBroadcastDisplay(str(connectionInstance.userOnline), clientSocket)
         elif message == "/users":
             for user in connectionInstance.users:
@@ -411,7 +409,6 @@ class Connection:
         self.host = "192.168.1.140"
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
-        self.spaceRemaining = 50
         self.users = []
         self.clients = []
 
@@ -421,7 +418,7 @@ class Connection:
 
         self.socket.listen()
 
-        for i in range(self.spaceRemaining):
+        while True:
             # The main thread listens for incoming connections and accepts it
             # This also broadcasts to other online users that a new user has connected.
 
@@ -445,7 +442,6 @@ class Connection:
                 sendInstance.broadcast(message)
 
                 self.userOnline += 1
-                self.spaceRemaining -= 1
 
                 listeningThread = Thread(target=self.listen, args=[clientSocket])
                 listeningThread.start()
