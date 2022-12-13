@@ -406,7 +406,7 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = "192.168.1.140"
+        self.host = socket.gethostbyname(socket.gethostname())
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
         self.users = []
