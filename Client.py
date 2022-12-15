@@ -1,4 +1,4 @@
-# 24/11/2022
+# 25/13/2022
 # V13.2.3
 
 import platform
@@ -775,6 +775,10 @@ class Connection:
         self.hasPrivateKey = False
         self.hasCipherKey = False
 
+        # Input booleans in list
+        self.hasInputs = [self.hasUsername, self.hasColor, self.hasHost, self.hasPort, self.hasPublicKey,
+                          self.hasPrivateKey, self.hasCipherKey]
+
     def connect(self):
         # Called when the user has filled out all 7 inputs
         # Connects to the socket, calculates the RSA encryption key, decryption key, and
@@ -951,6 +955,7 @@ class UI:
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasUsername = True
+                connectionInstance.hasInputs[0] = True
                 self.hasAnimated = False
 
                 animationInstance.queue.append([5, 0, uiInstance.animationColor])
@@ -979,6 +984,7 @@ class UI:
                         connectionInstance.inputRequest += 1
 
                         connectionInstance.hasColor = True
+                        connectionInstance.hasInputs[1] = True
                         self.hasAnimated = False
 
                         animationInstance.queue.append([3, color])
@@ -1011,6 +1017,7 @@ class UI:
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasHost = True
+                connectionInstance.hasInputs[2] = True
                 self.hasAnimated = False
 
                 animationInstance.queue.append([5, 2, uiInstance.animationColor])
@@ -1034,6 +1041,7 @@ class UI:
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasPort = True
+                connectionInstance.hasInputs[3] = True
                 self.hasAnimated = False
 
                 animationInstance.queue.append([5, 3, uiInstance.animationColor])
@@ -1058,6 +1066,7 @@ class UI:
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasPublicKey = True
+                connectionInstance.hasInputs[4] = True
                 self.hasAnimated = False
 
                 animationInstance.queue.append([5, 4, uiInstance.animationColor])
@@ -1082,6 +1091,7 @@ class UI:
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasPrivateKey = True
+                connectionInstance.hasInputs[5] = True
                 self.hasAnimated = False
 
                 animationInstance.queue.append([5, 5, uiInstance.animationColor])
@@ -1106,6 +1116,7 @@ class UI:
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasCipherKey = True
+                connectionInstance.hasInputs[6] = True
                 self.hasAnimated = False
 
                 animationInstance.queue.append([5, 6, uiInstance.animationColor])
@@ -1147,26 +1158,9 @@ class UI:
                 animationInstance.queue.append([5, 6, (255, 255, 255)])
                 self.getCipherKey(key)
 
-            if connectionInstance.hasUsername and not connectionInstance.inputRequest == 0:
-                animationInstance.queue.append([5, 0, color])
-
-            if connectionInstance.hasColor and not connectionInstance.inputRequest == 1:
-                animationInstance.queue.append([5, 1, color])
-
-            if connectionInstance.hasHost and not connectionInstance.inputRequest == 2:
-                animationInstance.queue.append([5, 2, color])
-
-            if connectionInstance.hasPort and not connectionInstance.inputRequest == 3:
-                animationInstance.queue.append([5, 3, color])
-
-            if connectionInstance.hasPublicKey and not connectionInstance.inputRequest == 4:
-                animationInstance.queue.append([5, 4, color])
-
-            if connectionInstance.hasPrivateKey and not connectionInstance.inputRequest == 5:
-                animationInstance.queue.append([5, 5, color])
-
-            if connectionInstance.hasCipherKey and not connectionInstance.inputRequest == 6:
-                animationInstance.queue.append([5, 6, color])
+            for check in range(7):
+                if connectionInstance.hasInputs[check] and not connectionInstance.inputRequest == check:
+                    animationInstance.queue.append([5, check, color])
 
             if connectionInstance.inputRequest < 0:
                 connectionInstance.inputRequest = 6
