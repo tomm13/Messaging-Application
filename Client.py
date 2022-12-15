@@ -958,8 +958,6 @@ class UI:
                 connectionInstance.hasInputs[0] = True
                 self.hasAnimated = False
 
-                animationInstance.queue.append([5, 0, uiInstance.animationColor])
-
         uiInstance.inputTextBox.clear()
 
     def getColor(self, key):
@@ -989,7 +987,6 @@ class UI:
 
                         animationInstance.queue.append([3, color])
                         animationInstance.queue.append([4, color])
-                        animationInstance.queue.append([5, 1, color])
 
                         uiInstance.inputTextBox.clear()
 
@@ -1020,8 +1017,6 @@ class UI:
                 connectionInstance.hasInputs[2] = True
                 self.hasAnimated = False
 
-                animationInstance.queue.append([5, 2, uiInstance.animationColor])
-
         uiInstance.inputTextBox.clear()
 
         return
@@ -1043,8 +1038,6 @@ class UI:
                 connectionInstance.hasPort = True
                 connectionInstance.hasInputs[3] = True
                 self.hasAnimated = False
-
-                animationInstance.queue.append([5, 3, uiInstance.animationColor])
 
         uiInstance.inputTextBox.clear()
 
@@ -1069,8 +1062,6 @@ class UI:
                 connectionInstance.hasInputs[4] = True
                 self.hasAnimated = False
 
-                animationInstance.queue.append([5, 4, uiInstance.animationColor])
-
         uiInstance.inputTextBox.clear()
 
         return
@@ -1094,8 +1085,6 @@ class UI:
                 connectionInstance.hasInputs[5] = True
                 self.hasAnimated = False
 
-                animationInstance.queue.append([5, 5, uiInstance.animationColor])
-
         uiInstance.inputTextBox.clear()
 
         return
@@ -1118,8 +1107,6 @@ class UI:
                 connectionInstance.hasCipherKey = True
                 connectionInstance.hasInputs[6] = True
                 self.hasAnimated = False
-
-                animationInstance.queue.append([5, 6, uiInstance.animationColor])
 
         uiInstance.inputTextBox.clear()
 
