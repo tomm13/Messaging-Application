@@ -865,6 +865,10 @@ class UI:
         self.hasAnimated = False
         self.page = 0
 
+        # Method list
+        self.getInputs = [self.getUsername, self.getColor, self.getHost, self.getPort, self.getPublicKey,
+                          self.getPrivateKey, self.getCipherKey]
+
         if platform.system() == "Darwin":
             self.fontSize = 22
             self.rate = 0.00035
@@ -1117,33 +1121,15 @@ class UI:
             # Creates a series of input requests
             color = uiInstance.animationColor
 
-            if connectionInstance.inputRequest == 0:
-                animationInstance.queue.append([5, 0, (255, 255, 255)])
-                self.getUsername(key)
+            for check in range(7):
+                if connectionInstance.inputRequest == check:
+                    if connectionInstance.inputRequest == 1:
+                        color = self.getInputs[1](key)
 
-            if connectionInstance.inputRequest == 1:
-                animationInstance.queue.append([5, 1, (255, 255, 255)])
-                color = self.getColor(key)
+                    else:
+                        self.getInputs[check](key)
 
-            if connectionInstance.inputRequest == 2:
-                animationInstance.queue.append([5, 2, (255, 255, 255)])
-                self.getHost(key)
-
-            if connectionInstance.inputRequest == 3:
-                animationInstance.queue.append([5, 3, (255, 255, 255)])
-                self.getPort(key)
-
-            if connectionInstance.inputRequest == 4:
-                animationInstance.queue.append([5, 4, (255, 255, 255)])
-                self.getPublicKey(key)
-
-            if connectionInstance.inputRequest == 5:
-                animationInstance.queue.append([5, 5, (255, 255, 255)])
-                self.getPrivateKey(key)
-
-            if connectionInstance.inputRequest == 6:
-                animationInstance.queue.append([5, 6, (255, 255, 255)])
-                self.getCipherKey(key)
+                    animationInstance.queue.append([5, check, (255, 255, 255)])
 
             for check in range(7):
                 if connectionInstance.hasInputs[check] and not connectionInstance.inputRequest == check:
