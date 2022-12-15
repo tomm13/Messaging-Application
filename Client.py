@@ -1,4 +1,4 @@
-# 24/11/2022
+# 25/13/2022
 # V13.2.3
 
 import platform
@@ -281,9 +281,13 @@ class Animation:
             if B < newColor[2]:
                 B += 1
 
-            uiInstance.userList.text_color = (R, G, B)
-            uiInstance.chatHistory.text_color = (R, G, B)
-            uiInstance.messageInput.text_color = (R, G, B)
+            if connectionInstance.connected:
+                uiInstance.userList.text_color = (R, G, B)
+                uiInstance.chatHistory.text_color = (R, G, B)
+                uiInstance.messageInput.text_color = (R, G, B)
+
+            else:
+                uiInstance.connectText.text_color = (R, G, B)
 
             sleep(uiInstance.rate)
 
@@ -311,19 +315,23 @@ class Animation:
             if B > newColor[2]:
                 B -= 1
 
-            uiInstance.header.bg = (R, G, B)
-            uiInstance.chatHistoryTopBorder.bg = (R, G, B)
-            uiInstance.chatHistoryRightBorder.bg = (R, G, B)
-            uiInstance.chatHistoryBottomBorder.bg = (R, G, B)
-            uiInstance.chatHistoryLeftBorder.bg = (R, G, B)
-            uiInstance.userListTopBorder.bg = (R, G, B)
-            uiInstance.userListRightBorder.bg = (R, G, B)
-            uiInstance.userListBottomBorder.bg = (R, G, B)
-            uiInstance.userListLeftBorder.bg = (R, G, B)
-            uiInstance.messageInputTopBorder.bg = (R, G, B)
-            uiInstance.messageInputRightBorder.bg = (R, G, B)
-            uiInstance.messageInputBottomBorder.bg = (R, G, B)
-            uiInstance.messageInputLeftBorder.bg = (R, G, B)
+            if connectionInstance.connected:
+                uiInstance.header.bg = (R, G, B)
+                uiInstance.chatHistoryTopBorder.bg = (R, G, B)
+                uiInstance.chatHistoryRightBorder.bg = (R, G, B)
+                uiInstance.chatHistoryBottomBorder.bg = (R, G, B)
+                uiInstance.chatHistoryLeftBorder.bg = (R, G, B)
+                uiInstance.userListTopBorder.bg = (R, G, B)
+                uiInstance.userListRightBorder.bg = (R, G, B)
+                uiInstance.userListBottomBorder.bg = (R, G, B)
+                uiInstance.userListLeftBorder.bg = (R, G, B)
+                uiInstance.messageInputTopBorder.bg = (R, G, B)
+                uiInstance.messageInputRightBorder.bg = (R, G, B)
+                uiInstance.messageInputBottomBorder.bg = (R, G, B)
+                uiInstance.messageInputLeftBorder.bg = (R, G, B)
+
+            else:
+                uiInstance.status.bg = (R, G, B)
 
             sleep(uiInstance.rate)
 
@@ -401,6 +409,7 @@ class Animation:
         print(f"Started animation thread at {str(time())}")
         while True:
             if self.queue:
+                print(self.queue)
                 # Check if queue has duplicate items
                 while len(self.queue) > 1 and self.queue[0] == self.queue[1]:
                     self.queue.pop(0)
@@ -766,6 +775,10 @@ class Connection:
         self.hasPrivateKey = False
         self.hasCipherKey = False
 
+        # Input booleans in list
+        self.hasInputs = [self.hasUsername, self.hasColor, self.hasHost, self.hasPort, self.hasPublicKey,
+                          self.hasPrivateKey, self.hasCipherKey]
+
     def connect(self):
         # Called when the user has filled out all 7 inputs
         # Connects to the socket, calculates the RSA encryption key, decryption key, and
@@ -860,6 +873,10 @@ class UI:
             self.fontSize = 18
             self.rate = 0.00000
             self.linesLimit = 9
+        else:
+            self.fontSize = 12
+            self.rate = 0.00000
+            self.linesLimit = 13
 
     # Methods below alter UI attributes
 
@@ -938,9 +955,8 @@ class UI:
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasUsername = True
+                connectionInstance.hasInputs[0] = True
                 self.hasAnimated = False
-
-                animationInstance.queue.append([5, 0, uiInstance.animationColor])
 
         uiInstance.inputTextBox.clear()
 
@@ -966,14 +982,22 @@ class UI:
                         connectionInstance.inputRequest += 1
 
                         connectionInstance.hasColor = True
+                        connectionInstance.hasInputs[1] = True
                         self.hasAnimated = False
 
-                        animationInstance.queue.append([5, 1, uiInstance.animationColor])
+                        animationInstance.queue.append([3, color])
+                        animationInstance.queue.append([4, color])
+
+                        uiInstance.inputTextBox.clear()
+
+                        return color
 
                 except ValueError:
                     animationInstance.queue.append([1, "Try a different color"])
 
         uiInstance.inputTextBox.clear()
+
+        return uiInstance.animationColor
 
     def getHost(self, key):
         if not self.hasAnimated or not key:
@@ -990,11 +1014,12 @@ class UI:
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasHost = True
+                connectionInstance.hasInputs[2] = True
                 self.hasAnimated = False
 
-                animationInstance.queue.append([5, 2, uiInstance.animationColor])
-
         uiInstance.inputTextBox.clear()
+
+        return
 
     def getPort(self, key):
         if not self.hasAnimated or not key:
@@ -1011,11 +1036,12 @@ class UI:
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasPort = True
+                connectionInstance.hasInputs[3] = True
                 self.hasAnimated = False
 
-                animationInstance.queue.append([5, 3, uiInstance.animationColor])
-
         uiInstance.inputTextBox.clear()
+
+        return
 
     def getPublicKey(self, key):
         if not self.hasAnimated or not key:
@@ -1033,11 +1059,12 @@ class UI:
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasPublicKey = True
+                connectionInstance.hasInputs[4] = True
                 self.hasAnimated = False
 
-                animationInstance.queue.append([5, 4, uiInstance.animationColor])
-
         uiInstance.inputTextBox.clear()
+
+        return
 
     def getPrivateKey(self, key):
         if not self.hasAnimated or not key:
@@ -1055,11 +1082,12 @@ class UI:
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasPrivateKey = True
+                connectionInstance.hasInputs[5] = True
                 self.hasAnimated = False
 
-                animationInstance.queue.append([5, 5, uiInstance.animationColor])
-
         uiInstance.inputTextBox.clear()
+
+        return
 
     def getCipherKey(self, key):
         if not self.hasAnimated or not key:
@@ -1077,22 +1105,25 @@ class UI:
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasCipherKey = True
+                connectionInstance.hasInputs[6] = True
                 self.hasAnimated = False
 
-                animationInstance.queue.append([5, 6, uiInstance.animationColor])
-
         uiInstance.inputTextBox.clear()
+
+        return
 
     def requestInput(self, key):
         if not connectionInstance.connected:
             # Creates a series of input requests
+            color = uiInstance.animationColor
+
             if connectionInstance.inputRequest == 0:
                 animationInstance.queue.append([5, 0, (255, 255, 255)])
                 self.getUsername(key)
 
             if connectionInstance.inputRequest == 1:
                 animationInstance.queue.append([5, 1, (255, 255, 255)])
-                self.getColor(key)
+                color = self.getColor(key)
 
             if connectionInstance.inputRequest == 2:
                 animationInstance.queue.append([5, 2, (255, 255, 255)])
@@ -1114,26 +1145,9 @@ class UI:
                 animationInstance.queue.append([5, 6, (255, 255, 255)])
                 self.getCipherKey(key)
 
-            if connectionInstance.hasUsername and not connectionInstance.inputRequest == 0:
-                animationInstance.queue.append([5, 0, uiInstance.animationColor])
-
-            if connectionInstance.hasColor and not connectionInstance.inputRequest == 1:
-                animationInstance.queue.append([5, 1, uiInstance.animationColor])
-
-            if connectionInstance.hasHost and not connectionInstance.inputRequest == 2:
-                animationInstance.queue.append([5, 2, uiInstance.animationColor])
-
-            if connectionInstance.hasPort and not connectionInstance.inputRequest == 3:
-                animationInstance.queue.append([5, 3, uiInstance.animationColor])
-
-            if connectionInstance.hasPublicKey and not connectionInstance.inputRequest == 4:
-                animationInstance.queue.append([5, 4, uiInstance.animationColor])
-
-            if connectionInstance.hasPrivateKey and not connectionInstance.inputRequest == 5:
-                animationInstance.queue.append([5, 5, uiInstance.animationColor])
-
-            if connectionInstance.hasCipherKey and not connectionInstance.inputRequest == 6:
-                animationInstance.queue.append([5, 6, uiInstance.animationColor])
+            for check in range(7):
+                if connectionInstance.hasInputs[check] and not connectionInstance.inputRequest == check:
+                    animationInstance.queue.append([5, check, color])
 
             if connectionInstance.inputRequest < 0:
                 connectionInstance.inputRequest = 6
@@ -1278,16 +1292,15 @@ class UI:
         contents = Box(self.setupWindow, width="fill", height="fill", align="top")
 
         header = Box(contents, width="fill", height=40, align="top")
-        header.bg = uiInstance.animationColor
-
         indicator = Box(contents, width="fill", height=40, align="bottom")
 
         rightPadding = Box(contents, width=20, height="fill", align="right")
         leftPadding = Box(contents, width=10, height="fill", align="left")
 
-        self.status = Text(header, text="Welcome")
+        self.status = Text(header, text="Welcome", width="fill", height=40)
         self.status.text_color = (255, 255, 255)
         self.status.text_size = self.fontSize + 10
+        self.status.bg = uiInstance.animationColor
 
         self.inputTextBox = TextBox(contents, width=30, align="left")
         self.inputTextBox.text_color = (255, 255, 255)
