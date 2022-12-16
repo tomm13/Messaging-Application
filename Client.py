@@ -1,4 +1,4 @@
-# 25/13/2022
+# 16/12/2022
 # V13.2.3
 
 import platform
@@ -412,7 +412,7 @@ class Animation:
                 print(self.queue)
                 # Check if queue has duplicate items
                 while len(self.queue) > 1 and self.queue[0] == self.queue[1]:
-                    self.queue.pop(0)
+                    self.queue.pop(1)
 
                 if self.queue[0][0] == 1:
                     if not uiInstance.LDM:
