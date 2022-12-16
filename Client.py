@@ -1,5 +1,5 @@
 # 16/12/2022
-# V13.2.3
+# V13.2.5
 
 import platform
 import socket
@@ -1271,10 +1271,8 @@ class UI:
         self.messageInput.bg = (255, 255, 255)
         self.messageInput.when_key_pressed = self.keyPressed
 
-        # Threads start here
-
-        startUpdateThread = Thread(target=communicationInstance.updateThread)
-        startUpdateThread.start()
+        # Threads here will start when the chat is open
+        Thread(target=communicationInstance.updateThread).start()
 
         self.setupWindow.hide()
         self.chatWindow.show()
@@ -1318,8 +1316,8 @@ class UI:
         self.privateKeyIndicator = Box(indicator, width=114, height="fill", align="left")
         self.cipherKeyIndicator = Box(indicator, width=114, height="fill", align="left")
 
-        startAnimationThread = Thread(target=animationInstance.animationThread)
-        startAnimationThread.start()
+        # Threads here will start when the code starts
+        Thread(target=animationInstance.animationThread).start()
 
         self.setupWindow.display()
 
