@@ -862,7 +862,7 @@ class UI:
         self.linesSent = 0
         self.darkMode = False
         self.LDM = False
-        self.hasAnimated = False
+        self.hasRequestedInput = False
         self.page = 0
 
         # Method list
@@ -942,10 +942,10 @@ class UI:
     # The next 7 methods request for user inputs prior to connecting
 
     def getUsername(self, key):
-        if not self.hasAnimated or not key:
+        if not self.hasRequestedInput or not key:
             animationInstance.queue.append([1, "Choose a username"])
 
-            self.hasAnimated = True
+            self.hasRequestedInput = True
 
         else:
             if "Username" == uiInstance.inputTextBox.value or " " in uiInstance.inputTextBox.value or \
@@ -960,15 +960,15 @@ class UI:
 
                 connectionInstance.hasUsername = True
                 connectionInstance.hasInputs[0] = True
-                self.hasAnimated = False
+                self.hasRequestedInput = False
 
         uiInstance.inputTextBox.clear()
 
     def getColor(self, key):
-        if not self.hasAnimated or not key:
+        if not self.hasRequestedInput or not key:
             animationInstance.queue.append([1, f"{connectionInstance.username}, choose a color"])
 
-            self.hasAnimated = True
+            self.hasRequestedInput = True
 
         else:
             if not uiInstance.inputTextBox.value:
@@ -987,7 +987,7 @@ class UI:
 
                         connectionInstance.hasColor = True
                         connectionInstance.hasInputs[1] = True
-                        self.hasAnimated = False
+                        self.hasRequestedInput = False
 
                         animationInstance.queue.append([3, color])
                         animationInstance.queue.append([4, color])
@@ -1004,10 +1004,10 @@ class UI:
         return uiInstance.animationColor
 
     def getHost(self, key):
-        if not self.hasAnimated or not key:
+        if not self.hasRequestedInput or not key:
             animationInstance.queue.append([1, f"{connectionInstance.username}, enter your IP"])
 
-            self.hasAnimated = True
+            self.hasRequestedInput = True
 
         else:
             if not uiInstance.inputTextBox.value or "." not in uiInstance.inputTextBox.value:
@@ -1019,17 +1019,17 @@ class UI:
 
                 connectionInstance.hasHost = True
                 connectionInstance.hasInputs[2] = True
-                self.hasAnimated = False
+                self.hasRequestedInput = False
 
         uiInstance.inputTextBox.clear()
 
         return
 
     def getPort(self, key):
-        if not self.hasAnimated or not key:
+        if not self.hasRequestedInput or not key:
             animationInstance.queue.append([1, f"{connectionInstance.username}, enter your port"])
 
-            self.hasAnimated = True
+            self.hasRequestedInput = True
 
         else:
             if not len(str(uiInstance.inputTextBox.value)) == 5:
@@ -1041,18 +1041,18 @@ class UI:
 
                 connectionInstance.hasPort = True
                 connectionInstance.hasInputs[3] = True
-                self.hasAnimated = False
+                self.hasRequestedInput = False
 
         uiInstance.inputTextBox.clear()
 
         return
 
     def getPublicKey(self, key):
-        if not self.hasAnimated or not key:
+        if not self.hasRequestedInput or not key:
             animationInstance.queue.append([
                 1, f"{connectionInstance.username}, enter the public RSA key"])
 
-            self.hasAnimated = True
+            self.hasRequestedInput = True
 
         else:
             if not len(uiInstance.inputTextBox.value) == 12:
@@ -1064,18 +1064,18 @@ class UI:
 
                 connectionInstance.hasPublicKey = True
                 connectionInstance.hasInputs[4] = True
-                self.hasAnimated = False
+                self.hasRequestedInput = False
 
         uiInstance.inputTextBox.clear()
 
         return
 
     def getPrivateKey(self, key):
-        if not self.hasAnimated or not key:
+        if not self.hasRequestedInput or not key:
             animationInstance.queue.append([
                 1, f"{connectionInstance.username}, enter your private RSA key"])
 
-            self.hasAnimated = True
+            self.hasRequestedInput = True
 
         else:
             if not len(uiInstance.inputTextBox.value) == 12:
@@ -1087,18 +1087,18 @@ class UI:
 
                 connectionInstance.hasPrivateKey = True
                 connectionInstance.hasInputs[5] = True
-                self.hasAnimated = False
+                self.hasRequestedInput = False
 
         uiInstance.inputTextBox.clear()
 
         return
 
     def getCipherKey(self, key):
-        if not self.hasAnimated or not key:
+        if not self.hasRequestedInput or not key:
             animationInstance.queue.append(
                 [1, f"{connectionInstance.username}, enter the public Cipher key"])
 
-            self.hasAnimated = True
+            self.hasRequestedInput = True
 
         else:
             if not uiInstance.inputTextBox.value:
@@ -1110,7 +1110,7 @@ class UI:
 
                 connectionInstance.hasCipherKey = True
                 connectionInstance.hasInputs[6] = True
-                self.hasAnimated = False
+                self.hasRequestedInput = False
 
         uiInstance.inputTextBox.clear()
 
@@ -1121,6 +1121,7 @@ class UI:
             # Creates a series of input requests
             color = uiInstance.animationColor
 
+            # Creates white block cursor
             for check in range(7):
                 if connectionInstance.inputRequest == check:
                     if connectionInstance.inputRequest == 1:
@@ -1131,6 +1132,7 @@ class UI:
 
                     animationInstance.queue.append([5, check, (255, 255, 255)])
 
+            # Marks every completed input with color
             for check in range(7):
                 if connectionInstance.hasInputs[check] and not connectionInstance.inputRequest == check:
                     animationInstance.queue.append([5, check, color])
@@ -1147,13 +1149,13 @@ class UI:
                     and connectionInstance.hasPort and connectionInstance.hasPublicKey and \
                     connectionInstance.hasPrivateKey and connectionInstance.hasCipherKey and \
                     not connectionInstance.connected:
-                animationInstance.queue = []
-
                 connectionInstance.connect()
 
     def keyPressed(self, event):
-        # Detects key presses, more specifically, enter, left and right
+        # Detects key presses with emphasis on enter, left and right
         if event:
+            # Left and right keys bypass all if statements in getInputs, therefore will request for inputs every time
+            # Whereas enter key does not bypass (as it is True), so it may request with the "try again" message
             if event.tk_event.keysym == "Left":
                 if 7 > connectionInstance.inputRequest > -1:
                     animationInstance.queue.append([5, connectionInstance.inputRequest, uiInstance.bg])
