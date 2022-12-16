@@ -1,5 +1,5 @@
 # 16/12/2022
-# V13.2.4
+# V13.2.5
 
 import math
 import socket
@@ -212,8 +212,7 @@ class Actions:
                                 self.userToKickSocket = clientSocket
                                 self.voteActive = True
 
-                                voterThread = Thread(target=self.voteWaiter)
-                                voterThread.start()
+                                Thread(target=self.voteWaiter).start()
 
                                 sendInstance.broadcastDisplay(f"{modUsername} has started a vote to kick {username}")
                         else:
@@ -443,8 +442,7 @@ class Connection:
 
                 self.userOnline += 1
 
-                listeningThread = Thread(target=self.listen, args=[clientSocket])
-                listeningThread.start()
+                Thread(target=self.listen, args=[clientSocket]).start()
 
     def listen(self, clientSocket):
         # A listening thread linked to every unique client, and detects input from them
