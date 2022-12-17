@@ -421,19 +421,19 @@ class Connection:
             # The main thread listens for incoming connections and accepts it
             # This also broadcasts to other online users that a new user has connected.
 
-            clientSocket, Address = self.socket.accept()
+            clientSocket, address = self.socket.accept()
             self.clients.append(clientSocket)
 
             username = clientSocket.recv(1024).decode()
             if username in self.users or username == "" or username == "Username" or " " in username or "[" in username\
-                    or "]" in username or len(username) > 10:
-                sendInstance.privateBroadcast("/disconnect", clientSocket)
+                    or "]" in username or len(username) > 10 or username in self.users:
+                sendInstance.privateBroadcast("/reject", clientSocket)
                 self.clients.remove(clientSocket)
 
             else:
                 self.users.append(username)
 
-                message = "/add "
+                message = "/accept "
 
                 for user in self.users:
                     message += user + " "
