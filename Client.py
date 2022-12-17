@@ -1,4 +1,4 @@
-# 16/12/2022
+# 17/12/2022
 # V13.2.5
 
 import platform
@@ -808,9 +808,10 @@ class Connection:
 
             if not self.threadInitialised:
                 Thread(target=communicationInstance.updateThread).start()
+                self.threadInitialised = True
 
         if not self.pendingApproval:
-            self.socket.send(self.username.encode())
+            self.socket.send(communicationInstance.caesarEncrypt(self.username).encode())
             self.pendingApproval = True
 
     def leave(self):
@@ -833,10 +834,8 @@ class Connection:
         uiInstance.openChat()
 
     def connectionRejected(self):
-        self.socket.close()
         self.connected = False
         self.pendingApproval = False
-        self.linked = False
 
         animationInstance.queue.append([5, "Request denied. Please try again later"])
 
@@ -992,9 +991,8 @@ class UI:
 
         else:
             if "Username" == uiInstance.inputTextBox.value or " " in uiInstance.inputTextBox.value or \
-                    "[" in uiInstance.inputTextBox.value or "]" in uiInstance.inputTextBox.value or \
-                    not uiInstance.inputTextBox.value:
-                # Checks: if username is not empty, not Username and does not contain spaces or [ and ]
+                   len(uiInstance.inputTextBox.value) > 10 or not uiInstance.inputTextBox.value:
+                # Checks: if username is not empty, not Username and does not contain spaces or longer than 10 chars
                 animationInstance.queue.append([5, "Try a different username"])
 
             else:
