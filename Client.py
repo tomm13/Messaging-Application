@@ -545,16 +545,6 @@ class Communication:
         else:
             animationInstance.queue.append([1, "You can't save to this location"])
 
-    @staticmethod
-    def disconnectLoop():
-        # Called by using an existing username when connecting
-        uiInstance.animationColor = (255, 0, 0)
-
-        while True:
-            animationInstance.queue.append([1, "You cannot use this username, "
-                                               "please rejoin under a different username"])
-            sleep(1)
-
     def sendToServer(self):
         # Gets the value of the input, encrypts, then broadcasts
         try:
@@ -702,13 +692,20 @@ class Communication:
         # Looks out for server broadcasts
         try:
             print(f"Started update thread at {str(time())}")
-            while connectionInstance.connected:
+            while True:
                 message = self.caesarDecrypt(connectionInstance.socket.recv(1024).decode())
 
                 if message:
                     print(f"Received message: {message}")
 
-                    if message[0:8] == "/display":
+                    if message[0:7] == "/accept":
+                        connectionInstance.connectionApproved()
+                        self.setUsers(message[8:])
+
+                    elif message == "/reject":
+                        connectionInstance.connectionRejected()
+
+                    elif message[0:8] == "/display":
                         animationInstance.queue.append([1, message[9:]])
 
                     elif message == "/theme":
@@ -744,9 +741,6 @@ class Communication:
                     elif message == "/previous":
                         self.previousPage()
 
-                    elif message == "/disconnect":
-                        self.disconnectLoop()
-
                     else:
                         self.addMessage(message)
 
@@ -777,6 +771,9 @@ class Connection:
         self.N = None
         self.socket = socket.socket()
         self.connected = False
+        self.linked = False
+        self.pendingApproval = False
+        self.threadInitialised = False
         self.mod = False
         self.inputRequest = 0
 
@@ -802,19 +799,19 @@ class Connection:
         self.N = int(str(self.privateKey[6:12]), base=10)
         self.cipherKey = communicationInstance.rsaDecrypt(int(self.encryptedCipherKey, base=10))
 
-        try:
+        if not self.linked:
+            # Prevents recursive calls returning OSError
+            # The linked attribute implies that the socket is connected, whereas connected implies
+            # that the user can send messages to the server
             self.socket.connect((self.host, int(self.port, base=10)))
+            self.linked = True
+
+            if not self.threadInitialised:
+                Thread(target=communicationInstance.updateThread).start()
+
+        if not self.pendingApproval:
             self.socket.send(self.username.encode())
-            self.connected = True
-
-            uiInstance.color = connectionInstance.color
-            uiInstance.openChat()
-
-        except ConnectionRefusedError:
-            animationInstance.queue.append([1, "Connection refused"])
-
-        except OSError:
-            connectionInstance.leave()
+            self.pendingApproval = True
 
     def leave(self):
         if connectionInstance.connected:
@@ -827,6 +824,38 @@ class Connection:
 
         self.socket.close()
         sys.exit("You have disconnected")
+
+    def connectionApproved(self):
+        self.connected = True
+        self.pendingApproval = False
+
+        uiInstance.color = connectionInstance.color
+        uiInstance.openChat()
+
+    def connectionRejected(self):
+        self.socket.close()
+        self.connected = False
+        self.pendingApproval = False
+        self.linked = False
+
+        animationInstance.queue.append([5, "Request denied. Please try again later"])
+
+        # Resets username and booleans
+        connectionInstance.username = None
+        connectionInstance.hasUsername = False
+        connectionInstance.hasColor = False
+        connectionInstance.hasHost = False
+        connectionInstance.hasPort = False
+        connectionInstance.hasPublicKey = False
+        connectionInstance.hasPrivateKey = False
+        connectionInstance.hasCipherKey = False
+        connectionInstance.hasInputs = [connectionInstance.hasUsername, connectionInstance.hasColor,
+                                        connectionInstance.hasHost, connectionInstance.hasPort,
+                                        connectionInstance.hasPublicKey, connectionInstance.hasPrivateKey,
+                                        connectionInstance.hasCipherKey]
+
+        for index in range(0, 7):
+            animationInstance.queue.append([6, index, uiInstance.bg])
 
 
 class UI:
@@ -1270,9 +1299,6 @@ class UI:
         self.messageInput.text_size = self.fontSize + 10
         self.messageInput.bg = (255, 255, 255)
         self.messageInput.when_key_pressed = self.keyPressed
-
-        # Threads here will start when the chat is open
-        Thread(target=communicationInstance.updateThread).start()
 
         self.setupWindow.hide()
         self.chatWindow.show()
