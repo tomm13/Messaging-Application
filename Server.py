@@ -1,4 +1,4 @@
-# 16/12/2022
+# 17/12/2022
 # V13.2.5
 
 import math
@@ -405,7 +405,8 @@ class Send:
 class Connection:
     def __init__(self):
         self.socket = socket.socket()
-        self.host = socket.gethostbyname(socket.gethostname())
+        self.host = '192.168.1.150'
+        #self.host = socket.gethostbyname(socket.gethostname())
         self.port = random.randint(49125, 65535)
         self.userOnline = 0
         self.users = []
@@ -423,29 +424,29 @@ class Connection:
 
             clientSocket, address = self.socket.accept()
             self.clients.append(clientSocket)
+            Thread(target=self.listen, args=[clientSocket]).start()
 
-            username = clientSocket.recv(1024).decode()
-            if username in self.users or username == "" or username == "Username" or " " in username or "[" in username\
-                    or "]" in username or len(username) > 10 or username in self.users:
+    def listen(self, clientSocket):
+        # A listening thread linked to every unique client, and detects input from them
+        while True:
+            username = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode())
+
+            if username in self.users or username == "Username" or " " in username or len(username) > 10 or not username:
                 sendInstance.privateBroadcast("/reject", clientSocket)
-                self.clients.remove(clientSocket)
 
             else:
                 self.users.append(username)
+                self.userOnline += 1
 
                 message = "/accept "
 
                 for user in self.users:
-                    message += user + " "
+                    message += f"{user} "
 
                 sendInstance.broadcast(message)
 
-                self.userOnline += 1
+                break
 
-                Thread(target=self.listen, args=[clientSocket]).start()
-
-    def listen(self, clientSocket):
-        # A listening thread linked to every unique client, and detects input from them
         index = self.clients.index(clientSocket)
         username = self.users[index]
         messagesSentRecently = 0
@@ -480,19 +481,23 @@ class Connection:
                             sendInstance.broadcast(unifiedmessage)
 
                             if lastMessageSentTime + 1 > time.time():
+                                # If messages were sent in a dense manner (more than 1/s)
                                 messagesSentRecently += 1
 
                             elif messagesSentRecently > 0:
+                                #
                                 messagesSentRecently -= 1
 
                             lastMessageSentTime = time.time()
 
             except ConnectionResetError:
                 self.removeUser(username, clientSocket)
+                print(f"[Server] Closed {username}'s listening thread due to ConnectionResetError")
                 break
 
             except OSError:
-                print("[Server] Closed a client thread")
+                self.removeUser(username, clientSocket)
+                print(f"[Server] Closed {username}'s listening thread due to OSError")
                 break
 
     def removeUser(self, username, clientSocket):
