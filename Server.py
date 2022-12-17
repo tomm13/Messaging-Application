@@ -485,7 +485,7 @@ class Connection:
                                 messagesSentRecently += 1
 
                             elif messagesSentRecently > 0:
-                                #
+                                # If messages are sent sparsely
                                 messagesSentRecently -= 1
 
                             lastMessageSentTime = time.time()
