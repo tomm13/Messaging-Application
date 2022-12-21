@@ -17,15 +17,24 @@ class Security:
         self.encryptedCipherKey = None
 
     @staticmethod
-    def generatePort():
+    def getPort():
+        return input("[Server] Failed to bind - Enter an IP to host "
+                                                    "the server on\n")
+
+    def generatePort(self):
         # Binds to an open port within the range 49125-65536
         while True:
             try:
+                while connectionInstance.host == '127.0.0.1':
+                    connectionInstance.host = self.getPort()
                 connectionInstance.socket.bind((connectionInstance.host, connectionInstance.port))
                 break
 
             except ConnectionError:
                 connectionInstance.port = random.randint(49125, 65536)
+                
+            except OSError:
+                connectionInstance.host = self.getPort()
 
     def generateKey(self):
         # Uses algorithms in modular exponentiation to generate the RSA private, public
