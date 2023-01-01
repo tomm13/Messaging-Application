@@ -837,8 +837,6 @@ class Connection:
         self.connected = False
         self.pendingApproval = False
 
-        animationInstance.queue.append([5, "Request denied. Please try again later"])
-
         # Resets username and booleans
         connectionInstance.username = None
         connectionInstance.hasUsername = False
@@ -853,7 +851,7 @@ class Connection:
                                         connectionInstance.hasPublicKey, connectionInstance.hasPrivateKey,
                                         connectionInstance.hasCipherKey]
 
-        for index in range(0, 7):
+        for index in range(1, 7):
             animationInstance.queue.append([6, index, uiInstance.bg])
 
 
