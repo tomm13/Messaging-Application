@@ -1,4 +1,4 @@
-# 16/12/2022
+# 1/1/2023
 # V13.2.5
 
 import math
@@ -19,7 +19,7 @@ class Security:
     @staticmethod
     def getPort():
         return input("[Server] Failed to bind - Enter an IP to host "
-                                                    "the server on\n")
+                     "the server on\n")
 
     def generatePort(self):
         # Binds to an open port within the range 49125-65536
@@ -32,7 +32,7 @@ class Security:
 
             except ConnectionError:
                 connectionInstance.port = random.randint(49125, 65536)
-                
+
             except OSError:
                 connectionInstance.host = self.getPort()
 
@@ -434,7 +434,7 @@ class Connection:
             self.clients.append(clientSocket)
 
             username = clientSocket.recv(1024).decode()
-            if username in self.users or username == "" or username == "Username" or " " in username or "[" in username\
+            if username in self.users or username == "" or username == "Username" or " " in username or "[" in username \
                     or "]" in username or len(username) > 10:
                 sendInstance.privateBroadcast("/disconnect", clientSocket)
                 self.clients.remove(clientSocket)
@@ -496,12 +496,9 @@ class Connection:
 
                             lastMessageSentTime = time.time()
 
-            except ConnectionResetError:
+            except (ConnectionResetError, OSError) as e:
+                print(f"Closed {username}'s update thread. {e}")
                 self.removeUser(username, clientSocket)
-                break
-
-            except OSError:
-                print("[Server] Closed a client thread")
                 break
 
     def removeUser(self, username, clientSocket):
