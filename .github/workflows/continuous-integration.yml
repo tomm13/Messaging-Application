@@ -27,7 +27,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest colorutils
+        pip install pytest colorutils guizero
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Test Server
       run: |
