@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build:
-    name: Continuous Integration
+    name: Functionality Checks
 
     runs-on: ubuntu-latest
 
