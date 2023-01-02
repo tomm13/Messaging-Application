@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build:
-    name: Server Test
+    name: Continuous Integration
 
     runs-on: ubuntu-latest
 
