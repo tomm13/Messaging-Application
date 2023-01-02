@@ -28,6 +28,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest colorutils guizero
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Execute pytest
         pytest test_server.py
   job2:
     name: Clientside Testing
@@ -44,4 +45,5 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest colorutils guizero
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Execute pytest
         pytest test_client.py
