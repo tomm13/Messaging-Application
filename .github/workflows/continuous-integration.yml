@@ -27,8 +27,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest
+        pip install pytest, colorutils
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Test with pytest
+    - name: Test Server
       run: |
         pytest test_server.py
+    - name: Test Client
+      run: |
+        pytest test_client.py
