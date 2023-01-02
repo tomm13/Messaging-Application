@@ -90,7 +90,7 @@ class Security:
         self.d = d
         self.N = N
 
-        self.cipherKey = random.randint(1, 26)
+        self.cipherKey = random.randint(0, -1)
         self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey)
 
         print(f"[Server] Server hosted on {str(connectionInstance.host)} with port {str(connectionInstance.port)}")
