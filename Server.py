@@ -1,5 +1,5 @@
-# 1/1/2023
-# V13.2.5
+# 2/1/2023
+# V13.3
 
 import math
 import socket
@@ -452,6 +452,7 @@ class Connection:
                 self.userOnline += 1
 
                 Thread(target=self.listen, args=[clientSocket]).start()
+                print(f"[Thread] Started {username}'s update thread")
 
     def listen(self, clientSocket):
         # A listening thread linked to every unique client, and detects input from them
@@ -497,7 +498,7 @@ class Connection:
                             lastMessageSentTime = time.time()
 
             except (ConnectionResetError, OSError) as e:
-                print(f"Closed {username}'s update thread. {e}")
+                print(f"[Thread] Closed {username}'s update thread {e}")
                 self.removeUser(username, clientSocket)
                 break
 
@@ -529,4 +530,5 @@ connectionInstance = Connection()
 securityInstance = Security()
 sendInstance = Send()
 
-connectionInstance.connect()
+if __name__ == '__main__':
+    connectionInstance.connect()
