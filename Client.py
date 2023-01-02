@@ -1,5 +1,5 @@
-# 16/12/2022
-# V13.2.5
+# 2/1/2023
+# V13.3
 
 import platform
 import socket
@@ -1329,4 +1329,5 @@ communicationInstance = Communication()
 connectionInstance = Connection()
 uiInstance = UI()
 
-uiInstance.openSetup()
+if __name__ == '__main__':
+    uiInstance.openSetup()
