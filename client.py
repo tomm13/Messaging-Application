@@ -227,8 +227,6 @@ class Animation:
 
                 uiInstance.darkMode = True
 
-        return
-
     @staticmethod
     def fadeColorsInChat(newColor):
         # Code 3
