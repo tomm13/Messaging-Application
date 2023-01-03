@@ -779,6 +779,7 @@ class Connection:
         self.connected = False
         self.mod = False
         self.inputRequest = 0
+        self.timeoutduration = 5
 
         # Input booleans
         self.hasUsername = False
@@ -803,6 +804,7 @@ class Connection:
         self.cipherKey = communicationInstance.rsaDecrypt(int(self.encryptedCipherKey, base=10))
 
         try:
+            self.socket.settimeout(self.timeoutduration)
             self.socket.connect((self.host, int(self.port, base=10)))
             self.socket.send(self.username.encode())
             self.connected = True
@@ -810,11 +812,8 @@ class Connection:
             uiInstance.color = connectionInstance.color
             uiInstance.openChat()
 
-        except ConnectionRefusedError:
-            animationInstance.queue.append([1, "Connection refused"])
-
-        except OSError:
-            connectionInstance.leave()
+        except (ConnectionRefusedError, OSError, TimeoutError):
+            animationInstance.queue.append([5, "Connection refused, try checking the host IP and port"])
 
     def leave(self):
         if connectionInstance.connected:
@@ -1154,7 +1153,7 @@ class UI:
             if connectionInstance.hasUsername and connectionInstance.hasColor and connectionInstance.hasHost \
                     and connectionInstance.hasPort and connectionInstance.hasPublicKey and \
                     connectionInstance.hasPrivateKey and connectionInstance.hasCipherKey and \
-                    not connectionInstance.connected:
+                    key and not connectionInstance.connected:
                 connectionInstance.connect()
 
     def keyPressed(self, event):
