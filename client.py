@@ -1087,13 +1087,13 @@ class UI:
     def requestInput(self, key, value):
         if not connectionInstance.connected:
             # Creates a series of input requests
-            color = uiInstance.animationColor
+            connectionInstance.color = uiInstance.animationColor
 
             # Creates white block cursor
             for check in range(7):
                 if connectionInstance.inputRequest == check:
                     if connectionInstance.inputRequest == 1:
-                        color = self.getInputs[1](key, value)
+                        connectionInstance.color = self.getInputs[1](key, value)
 
                     else:
                         self.getInputs[check](key, value)
@@ -1106,7 +1106,7 @@ class UI:
             # Marks every completed input with color
             for check in range(7):
                 if connectionInstance.hasInputs[check] and not connectionInstance.inputRequest == check:
-                    animationInstance.queue.append([6, check, color])
+                    animationInstance.queue.append([6, check, connectionInstance.color])
 
             if connectionInstance.inputRequest < 0:
                 connectionInstance.inputRequest = 6
