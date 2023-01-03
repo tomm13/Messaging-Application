@@ -781,18 +781,8 @@ class Connection:
         self.inputRequest = 0
         self.timeoutduration = 5
 
-        # Input booleans
-        self.hasUsername = False
-        self.hasColor = False
-        self.hasHost = False
-        self.hasPort = False
-        self.hasPublicKey = False
-        self.hasPrivateKey = False
-        self.hasCipherKey = False
-
         # Input booleans in list
-        self.hasInputs = [self.hasUsername, self.hasColor, self.hasHost, self.hasPort, self.hasPublicKey,
-                          self.hasPrivateKey, self.hasCipherKey]
+        self.hasInputs = [False for i in range(7)]
 
     def connect(self):
         # Called when the user has filled out all 7 inputs
@@ -968,7 +958,6 @@ class UI:
             else:
                 connectionInstance.username = value
                 connectionInstance.inputRequest += 1
-                connectionInstance.hasUsername = True
                 connectionInstance.hasInputs[0] = True
                 self.hasRequestedInput = False
 
@@ -992,7 +981,6 @@ class UI:
                     else:
                         connectionInstance.color = color
                         connectionInstance.inputRequest += 1
-                        connectionInstance.hasColor = True
                         connectionInstance.hasInputs[1] = True
                         self.hasRequestedInput = False
 
@@ -1019,7 +1007,6 @@ class UI:
             else:
                 connectionInstance.host = value
                 connectionInstance.inputRequest += 1
-                connectionInstance.hasHost = True
                 connectionInstance.hasInputs[2] = True
                 self.hasRequestedInput = False
 
@@ -1038,8 +1025,6 @@ class UI:
             else:
                 connectionInstance.port = value
                 connectionInstance.inputRequest += 1
-
-                connectionInstance.hasPort = True
                 connectionInstance.hasInputs[3] = True
                 self.hasRequestedInput = False
 
@@ -1058,8 +1043,6 @@ class UI:
             else:
                 connectionInstance.publicKey = value
                 connectionInstance.inputRequest += 1
-
-                connectionInstance.hasPublicKey = True
                 connectionInstance.hasInputs[4] = True
                 self.hasRequestedInput = False
 
@@ -1078,8 +1061,6 @@ class UI:
             else:
                 connectionInstance.privateKey = value
                 connectionInstance.inputRequest += 1
-
-                connectionInstance.hasPrivateKey = True
                 connectionInstance.hasInputs[5] = True
                 self.hasRequestedInput = False
 
@@ -1098,8 +1079,6 @@ class UI:
             else:
                 connectionInstance.encryptedCipherKey = value
                 connectionInstance.inputRequest += 1
-
-                connectionInstance.hasCipherKey = True
                 connectionInstance.hasInputs[6] = True
                 self.hasRequestedInput = False
 
@@ -1137,10 +1116,7 @@ class UI:
                 connectionInstance.inputRequest = 0
                 self.requestInput(key, value)
 
-            if connectionInstance.hasUsername and connectionInstance.hasColor and connectionInstance.hasHost \
-                    and connectionInstance.hasPort and connectionInstance.hasPublicKey and \
-                    connectionInstance.hasPrivateKey and connectionInstance.hasCipherKey and \
-                    key and not connectionInstance.connected:
+            if all(connectionInstance.hasInputs) and key and not connectionInstance.connected:
                 connectionInstance.connect()
 
     def keyPressed(self, event):
