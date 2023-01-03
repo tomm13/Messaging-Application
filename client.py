@@ -1179,51 +1179,51 @@ class UI:
 
         userListBorder = Box(userListBox, width=50, height="fill", align="left")
         self.userListTopBorder = Box(userListBox, width="fill", height=10, align="top")
-        self.userListTopBorder.bg = uiInstance.animationColor
+        self.userListTopBorder.bg = self.color
         self.userListRightBorder = Box(userListBox, width=10, height="fill", align="right")
-        self.userListRightBorder.bg = uiInstance.animationColor
+        self.userListRightBorder.bg = self.color
         self.userListBottomBorder = Box(userListBox, width="fill", height=10, align="bottom")
-        self.userListBottomBorder.bg = uiInstance.animationColor
+        self.userListBottomBorder.bg = self.color
         self.userListLeftBorder = Box(userListBox, width=10, height="fill", align="left")
-        self.userListLeftBorder.bg = uiInstance.animationColor
+        self.userListLeftBorder.bg = self.color
 
         self.userList = ListBox(userListBox, items=["Users online:"], width=150, height="fill", align="right")
-        self.userList.text_color = connectionInstance.color
+        self.userList.text_color = self.color
         self.userList.text_size = self.fontSize
         self.userList.bg = (255, 255, 255)
 
         self.header = Text(header, text=f"Welcome {connectionInstance.username}", width="fill", height=50)
         self.header.text_color = (255, 255, 255)
         self.header.text_size = self.fontSize + 14
-        self.header.bg = uiInstance.animationColor
+        self.header.bg = self.color
 
         self.chatHistoryTopBorder = Box(userBox, width="fill", height=10, align="top")
-        self.chatHistoryTopBorder.bg = uiInstance.animationColor
+        self.chatHistoryTopBorder.bg = self.color
         self.chatHistoryRightBorder = Box(userBox, width=10, height="fill", align="right")
-        self.chatHistoryRightBorder.bg = uiInstance.animationColor
+        self.chatHistoryRightBorder.bg = self.color
         self.chatHistoryBottomBorder = Box(userBox, width="fill", height=10, align="bottom")
-        self.chatHistoryBottomBorder.bg = uiInstance.animationColor
+        self.chatHistoryBottomBorder.bg = self.color
         self.chatHistoryLeftBorder = Box(userBox, width=10, height="fill", align="left")
-        self.chatHistoryLeftBorder.bg = uiInstance.animationColor
+        self.chatHistoryLeftBorder.bg = self.color
 
         self.chatHistory = TextBox(userBox, width="fill", height="fill", align="top", multiline=True)
-        self.chatHistory.text_color = connectionInstance.color
+        self.chatHistory.text_color = self.color
         self.chatHistory.text_size = self.fontSize + 2
         self.chatHistory.bg = (255, 255, 255)
         self.chatHistory.disable()
 
         messageInputBorder = Box(inputBox, width="fill", height=50, align="top")
         self.messageInputTopBorder = Box(inputBox, width="fill", height=10, align="top")
-        self.messageInputTopBorder.bg = uiInstance.animationColor
+        self.messageInputTopBorder.bg = self.color
         self.messageInputRightBorder = Box(inputBox, width=10, height="fill", align="right")
-        self.messageInputRightBorder.bg = uiInstance.animationColor
+        self.messageInputRightBorder.bg = self.color
         self.messageInputBottomBorder = Box(inputBox, width="fill", height=10, align="bottom")
-        self.messageInputBottomBorder.bg = uiInstance.animationColor
+        self.messageInputBottomBorder.bg = self.color
         self.messageInputLeftBorder = Box(inputBox, width=10, height="fill", align="left")
-        self.messageInputLeftBorder.bg = uiInstance.animationColor
+        self.messageInputLeftBorder.bg = self.color
 
         self.messageInput = TextBox(inputBox, width="fill", align="bottom")
-        self.messageInput.text_color = connectionInstance.color
+        self.messageInput.text_color = self.color
         self.messageInput.text_size = self.fontSize + 10
         self.messageInput.bg = (255, 255, 255)
         self.messageInput.when_key_pressed = self.keyPressed
