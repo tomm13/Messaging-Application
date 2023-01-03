@@ -1,4 +1,4 @@
-# 2/1/2023
+# 3/1/2023
 # V13.3
 
 import platform
@@ -955,42 +955,39 @@ class UI:
 
     # The next 7 methods request for user inputs prior to connecting
 
-    def getUsername(self, key):
+    def getUsername(self, key, value):
         if not self.hasRequestedInput or not key:
             animationInstance.queue.append([5, "Choose a username"])
 
             self.hasRequestedInput = True
 
         else:
-            if "Username" == uiInstance.inputTextBox.value or " " in uiInstance.inputTextBox.value or \
-                    "[" in uiInstance.inputTextBox.value or "]" in uiInstance.inputTextBox.value or \
-                    not uiInstance.inputTextBox.value:
+            if not value or value in [" ", "[", "]", "Username", "username"]:
                 # Checks: if username is not empty, not Username and does not contain spaces or [ and ]
                 animationInstance.queue.append([5, "Try a different username"])
 
             else:
-                connectionInstance.username = uiInstance.inputTextBox.value
+                connectionInstance.username = value
                 connectionInstance.inputRequest += 1
-
                 connectionInstance.hasUsername = True
                 connectionInstance.hasInputs[0] = True
                 self.hasRequestedInput = False
 
         uiInstance.inputTextBox.clear()
 
-    def getColor(self, key):
+    def getColor(self, key, value):
         if not self.hasRequestedInput or not key:
             animationInstance.queue.append([5, f"{connectionInstance.username}, choose a color"])
 
             self.hasRequestedInput = True
 
         else:
-            if not uiInstance.inputTextBox.value:
+            if not value:
                 animationInstance.queue.append([5, "Try a different color"])
 
             else:
                 try:
-                    color = colorutils.web_to_rgb(uiInstance.inputTextBox.value)
+                    color = colorutils.web_to_rgb(value)
 
                     if color == (255, 255, 255):
                         animationInstance.queue.append([5, "Try a different color"])
@@ -998,7 +995,6 @@ class UI:
                     else:
                         connectionInstance.color = color
                         connectionInstance.inputRequest += 1
-
                         connectionInstance.hasColor = True
                         connectionInstance.hasInputs[1] = True
                         self.hasRequestedInput = False
@@ -1017,20 +1013,19 @@ class UI:
 
         return uiInstance.animationColor
 
-    def getHost(self, key):
+    def getHost(self, key, value):
         if not self.hasRequestedInput or not key:
             animationInstance.queue.append([5, f"{connectionInstance.username}, enter your IP"])
 
             self.hasRequestedInput = True
 
         else:
-            if not uiInstance.inputTextBox.value or "." not in uiInstance.inputTextBox.value:
+            if not value or "." not in value:
                 animationInstance.queue.append([5, "Try a different IP"])
 
             else:
-                connectionInstance.host = uiInstance.inputTextBox.value
+                connectionInstance.host = value
                 connectionInstance.inputRequest += 1
-
                 connectionInstance.hasHost = True
                 connectionInstance.hasInputs[2] = True
                 self.hasRequestedInput = False
@@ -1039,18 +1034,18 @@ class UI:
 
         return
 
-    def getPort(self, key):
+    def getPort(self, key, value):
         if not self.hasRequestedInput or not key:
             animationInstance.queue.append([5, f"{connectionInstance.username}, enter your port"])
 
             self.hasRequestedInput = True
 
         else:
-            if not len(str(uiInstance.inputTextBox.value)) == 5:
+            if not len(str(value)) == 5:
                 animationInstance.queue.append([5, "Try a different port"])
 
             else:
-                connectionInstance.port = uiInstance.inputTextBox.value
+                connectionInstance.port = value
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasPort = True
@@ -1061,18 +1056,18 @@ class UI:
 
         return
 
-    def getPublicKey(self, key):
+    def getPublicKey(self, key, value):
         if not self.hasRequestedInput or not key:
             animationInstance.queue.append([5, f"{connectionInstance.username}, enter the public RSA key"])
 
             self.hasRequestedInput = True
 
         else:
-            if not len(uiInstance.inputTextBox.value) == 12:
+            if not len(value) == 12:
                 animationInstance.queue.append([5, "Try reentering the public RSA key"])
 
             else:
-                connectionInstance.publicKey = uiInstance.inputTextBox.value
+                connectionInstance.publicKey = value
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasPublicKey = True
@@ -1083,18 +1078,18 @@ class UI:
 
         return
 
-    def getPrivateKey(self, key):
+    def getPrivateKey(self, key, value):
         if not self.hasRequestedInput or not key:
             animationInstance.queue.append([5, f"{connectionInstance.username}, enter your private RSA key"])
 
             self.hasRequestedInput = True
 
         else:
-            if not len(uiInstance.inputTextBox.value) == 12:
+            if not len(value) == 12:
                 animationInstance.queue.append([5, "Try reentering the private RSA key"])
 
             else:
-                connectionInstance.privateKey = uiInstance.inputTextBox.value
+                connectionInstance.privateKey = value
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasPrivateKey = True
@@ -1105,18 +1100,18 @@ class UI:
 
         return
 
-    def getCipherKey(self, key):
+    def getCipherKey(self, key, value):
         if not self.hasRequestedInput or not key:
             animationInstance.queue.append([5, f"{connectionInstance.username}, enter the public Cipher key"])
 
             self.hasRequestedInput = True
 
         else:
-            if not uiInstance.inputTextBox.value:
+            if not value:
                 animationInstance.queue.append([5, "Try a different public Cipher key"])
 
             else:
-                connectionInstance.encryptedCipherKey = uiInstance.inputTextBox.value
+                connectionInstance.encryptedCipherKey = value
                 connectionInstance.inputRequest += 1
 
                 connectionInstance.hasCipherKey = True
@@ -1127,7 +1122,7 @@ class UI:
 
         return
 
-    def requestInput(self, key):
+    def requestInput(self, key, value):
         if not connectionInstance.connected:
             # Creates a series of input requests
             color = uiInstance.animationColor
@@ -1136,10 +1131,10 @@ class UI:
             for check in range(7):
                 if connectionInstance.inputRequest == check:
                     if connectionInstance.inputRequest == 1:
-                        color = self.getInputs[1](key)
+                        color = self.getInputs[1](key, value)
 
                     else:
-                        self.getInputs[check](key)
+                        self.getInputs[check](key, value)
 
                     animationInstance.queue.append([6, check, (255, 255, 255)])
 
@@ -1150,11 +1145,11 @@ class UI:
 
             if connectionInstance.inputRequest < 0:
                 connectionInstance.inputRequest = 6
-                self.requestInput(key)
+                self.requestInput(key, value)
 
             if connectionInstance.inputRequest > 6:
                 connectionInstance.inputRequest = 0
-                self.requestInput(key)
+                self.requestInput(key, value)
 
             if connectionInstance.hasUsername and connectionInstance.hasColor and connectionInstance.hasHost \
                     and connectionInstance.hasPort and connectionInstance.hasPublicKey and \
@@ -1173,7 +1168,7 @@ class UI:
 
                     connectionInstance.inputRequest -= 1
 
-                    self.requestInput(False)
+                    self.requestInput(False, uiInstance.inputTextBox.value)
 
             if event.tk_event.keysym == "Right":
                 if 7 > connectionInstance.inputRequest > -1:
@@ -1181,14 +1176,14 @@ class UI:
 
                     connectionInstance.inputRequest += 1
 
-                    self.requestInput(False)
+                    self.requestInput(False, uiInstance.inputTextBox.value)
 
             if event.tk_event.keysym == "Return":
                 if connectionInstance.connected:
                     communicationInstance.sendToServer()
 
                 else:
-                    self.requestInput(True)
+                    self.requestInput(True, uiInstance.inputTextBox.value)
 
             else:
                 if connectionInstance.connected and event.tk_event.keysym:
