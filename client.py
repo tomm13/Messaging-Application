@@ -17,6 +17,8 @@ class Animation:
         self.readRate = 1
         self.waitMultiplier = 1
 
+    # Creates animations used in chat
+
     def animateHeaderInChat(self, message):
         # Code 1
 
@@ -297,6 +299,8 @@ class Animation:
 
         uiInstance.animationColor = newColor
 
+    # Creates animations used in setup
+
     @staticmethod
     def animateHeaderInSetup(message):
         # Code 5
@@ -340,33 +344,6 @@ class Animation:
 
             uiInstance.status.text_color = (R, G, B)
             sleep(uiInstance.rate)
-
-    @staticmethod
-    def fadeColorsInSetup(newColor):
-        # Code 7
-
-        (R, G, B) = uiInstance.color
-
-        while not R == newColor[0] or not G == newColor[1] or not B == newColor[2]:
-            if R > newColor[0]:
-                R -= 1
-            if G > newColor[1]:
-                G -= 1
-            if B > newColor[2]:
-                B -= 1
-            if R < newColor[0]:
-                R += 1
-            if G < newColor[1]:
-                G += 1
-            if B < newColor[2]:
-                B += 1
-
-            uiInstance.connectText.text_color = (R, G, B)
-            uiInstance.inputTextBox.text_color = (R, G, B)
-
-            sleep(uiInstance.rate)
-
-        uiInstance.color = newColor
 
     @staticmethod
     def fadeIndicator(key, newColor):
@@ -430,6 +407,33 @@ class Animation:
 
             sleep(uiInstance.rate)
 
+    @staticmethod
+    def fadeColorsInSetup(newColor):
+        # Code 7
+
+        (R, G, B) = uiInstance.color
+
+        while not R == newColor[0] or not G == newColor[1] or not B == newColor[2]:
+            if R > newColor[0]:
+                R -= 1
+            if G > newColor[1]:
+                G -= 1
+            if B > newColor[2]:
+                B -= 1
+            if R < newColor[0]:
+                R += 1
+            if G < newColor[1]:
+                G += 1
+            if B < newColor[2]:
+                B += 1
+
+            uiInstance.connectText.text_color = (R, G, B)
+            uiInstance.inputTextBox.text_color = (R, G, B)
+
+            sleep(uiInstance.rate)
+
+        uiInstance.color = newColor
+
     def animationThread(self):
         # This is the new thread in place of the hundreds of unterminated threads called before
         # The format for this thread is [[Class animation method code, *args]]
@@ -483,11 +487,11 @@ class Animation:
                     self.animateHeaderInSetup(self.queue[0][1])
 
                 elif self.queue[0][0] == 6:
-                    if not connectionInstance.connected:
-                        self.fadeIndicator(self.queue[0][1], self.queue[0][2])
+                    self.fadeColorsInSetup(self.queue[0][1])
 
                 elif self.queue[0][0] == 7:
-                    self.fadeColorsInSetup(self.queue[0][1])
+                    if not connectionInstance.connected:
+                        self.fadeIndicator(self.queue[0][1], self.queue[0][2])
 
                 self.queue.pop(0)
 
@@ -1007,7 +1011,7 @@ class UI:
                         self.hasRequestedInput = False
 
                         animationInstance.queue.append([4, color])
-                        animationInstance.queue.append([7, color])
+                        animationInstance.queue.append([6, color])
 
                         return color
 
@@ -1123,12 +1127,12 @@ class UI:
                     if __name__ == '__main__':
                         self.inputTextBox.clear()
 
-                    animationInstance.queue.append([6, check, (255, 255, 255)])
+                    animationInstance.queue.append([7, check, (255, 255, 255)])
 
             # Marks every completed input with color
             for check in range(7):
                 if connectionInstance.hasInputs[check] and not connectionInstance.inputRequest == check:
-                    animationInstance.queue.append([6, check, connectionInstance.color])
+                    animationInstance.queue.append([7, check, connectionInstance.color])
 
             if connectionInstance.inputRequest < 0:
                 connectionInstance.inputRequest = 6
@@ -1148,7 +1152,7 @@ class UI:
             # Whereas enter key does not bypass (as it is True), so it may request with the "try again" message
             if event.tk_event.keysym == "Left":
                 if 7 > connectionInstance.inputRequest > -1:
-                    animationInstance.queue.append([6, connectionInstance.inputRequest, uiInstance.bg])
+                    animationInstance.queue.append([7, connectionInstance.inputRequest, uiInstance.bg])
 
                     connectionInstance.inputRequest -= 1
 
@@ -1156,7 +1160,7 @@ class UI:
 
             if event.tk_event.keysym == "Right":
                 if 7 > connectionInstance.inputRequest > -1:
-                    animationInstance.queue.append([6, connectionInstance.inputRequest, uiInstance.bg])
+                    animationInstance.queue.append([7, connectionInstance.inputRequest, uiInstance.bg])
 
                     connectionInstance.inputRequest += 1
 
