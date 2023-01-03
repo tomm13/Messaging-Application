@@ -17,7 +17,7 @@ class Animation:
         self.readRate = 1
         self.waitMultiplier = 1
 
-    def animateHeader(self, message):
+    def animateHeaderInChat(self, message):
         # Code 1
 
         if not uiInstance.darkMode:
@@ -228,7 +228,7 @@ class Animation:
         return
 
     @staticmethod
-    def fadeColor(newColor):
+    def fadeColorsInChat(newColor):
         # Code 3
 
         (R, G, B) = uiInstance.color
@@ -247,20 +247,16 @@ class Animation:
             if B < newColor[2]:
                 B += 1
 
-            if connectionInstance.connected:
-                uiInstance.userList.text_color = (R, G, B)
-                uiInstance.chatHistory.text_color = (R, G, B)
-                uiInstance.messageInput.text_color = (R, G, B)
-
-            else:
-                uiInstance.connectText.text_color = (R, G, B)
+            uiInstance.userList.text_color = (R, G, B)
+            uiInstance.chatHistory.text_color = (R, G, B)
+            uiInstance.messageInput.text_color = (R, G, B)
 
             sleep(uiInstance.rate)
 
         uiInstance.color = newColor
 
     @staticmethod
-    def fadeBorder(newColor):
+    def fadeBordersInChat(newColor):
         # Code 4
 
         (R, G, B) = uiInstance.animationColor
@@ -302,7 +298,7 @@ class Animation:
         uiInstance.animationColor = newColor
 
     @staticmethod
-    def animateStatus(message):
+    def animateHeaderInSetup(message):
         # Code 5
         (R, G, B) = (255, 255, 255)
 
@@ -344,6 +340,33 @@ class Animation:
 
             uiInstance.status.text_color = (R, G, B)
             sleep(uiInstance.rate)
+
+    @staticmethod
+    def fadeColorsInSetup(newColor):
+        # Code 7
+
+        (R, G, B) = uiInstance.color
+
+        while not R == newColor[0] or not G == newColor[1] or not B == newColor[2]:
+            if R > newColor[0]:
+                R -= 1
+            if G > newColor[1]:
+                G -= 1
+            if B > newColor[2]:
+                B -= 1
+            if R < newColor[0]:
+                R += 1
+            if G < newColor[1]:
+                G += 1
+            if B < newColor[2]:
+                B += 1
+
+            uiInstance.connectText.text_color = (R, G, B)
+            uiInstance.inputTextBox.text_color = (R, G, B)
+
+            sleep(uiInstance.rate)
+
+        uiInstance.color = newColor
 
     @staticmethod
     def fadeIndicator(key, newColor):
@@ -427,7 +450,7 @@ class Animation:
                         else:
                             self.waitMultiplier = 3.0
 
-                        self.animateHeader(self.queue[0][1])
+                        self.animateHeaderInChat(self.queue[0][1])
 
                     else:
                         communicationInstance.addMessage(self.queue[0][1])
@@ -444,10 +467,10 @@ class Animation:
                         self.switchTheme()
 
                 elif self.queue[0][0] == 3:
-                    self.fadeColor(self.queue[0][1])
+                    self.fadeColorsInChat(self.queue[0][1])
 
                 elif self.queue[0][0] == 4:
-                    self.fadeBorder(self.queue[0][1])
+                    self.fadeBordersInChat(self.queue[0][1])
 
                 elif self.queue[0][0] == 5:
                     if len(str(self.queue[0][0])) < 10:
@@ -457,11 +480,14 @@ class Animation:
                     else:
                         self.waitMultiplier = 3.0
 
-                    self.animateStatus(self.queue[0][1])
+                    self.animateHeaderInSetup(self.queue[0][1])
 
                 elif self.queue[0][0] == 6:
                     if not connectionInstance.connected:
                         self.fadeIndicator(self.queue[0][1], self.queue[0][2])
+
+                elif self.queue[0][0] == 7:
+                    self.fadeColorsInSetup(self.queue[0][1])
 
                 self.queue.pop(0)
 
@@ -578,7 +604,6 @@ class Communication:
                         uiInstance.messageInput.clear()
 
         except BrokenPipeError:
-            connectionInstance.connected = False
             connectionInstance.leave()
 
     def setUsers(self, message):
@@ -750,13 +775,8 @@ class Communication:
                     else:
                         self.addMessage(message)
 
-        except ConnectionResetError:
-            connectionInstance.connected = False
+        except (ConnectionResetError, OSError):
             connectionInstance.leave()
-            print("Closed thread successfully")
-
-        finally:
-            return
 
 
 class Connection:
@@ -796,6 +816,8 @@ class Connection:
         try:
             self.socket.settimeout(self.timeoutduration)
             self.socket.connect((self.host, int(self.port, base=10)))
+            self.socket.settimeout(None)
+
             self.socket.send(self.username.encode())
             self.connected = True
 
@@ -984,8 +1006,8 @@ class UI:
                         connectionInstance.hasInputs[1] = True
                         self.hasRequestedInput = False
 
-                        animationInstance.queue.append([3, color])
                         animationInstance.queue.append([4, color])
+                        animationInstance.queue.append([7, color])
 
                         return color
 
@@ -1254,10 +1276,10 @@ class UI:
         self.status = Text(header, text="Welcome", width="fill", height=40)
         self.status.text_color = (255, 255, 255)
         self.status.text_size = self.fontSize + 10
-        self.status.bg = uiInstance.animationColor
+        self.status.bg = self.animationColor
 
         self.inputTextBox = TextBox(contents, width=30, align="left")
-        self.inputTextBox.text_color = (255, 255, 255)
+        self.inputTextBox.text_color = self.color
         self.inputTextBox.text_size = self.fontSize
         self.inputTextBox.bg = self.darkbg
 
