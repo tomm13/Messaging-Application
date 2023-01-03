@@ -972,8 +972,6 @@ class UI:
                 connectionInstance.hasInputs[0] = True
                 self.hasRequestedInput = False
 
-        uiInstance.inputTextBox.clear()
-
     def getColor(self, key, value):
         if not self.hasRequestedInput or not key:
             animationInstance.queue.append([5, f"{connectionInstance.username}, choose a color"])
@@ -1001,14 +999,10 @@ class UI:
                         animationInstance.queue.append([3, color])
                         animationInstance.queue.append([4, color])
 
-                        uiInstance.inputTextBox.clear()
-
                         return color
 
                 except ValueError:
                     animationInstance.queue.append([5, "Try a different color"])
-
-        uiInstance.inputTextBox.clear()
 
         return uiInstance.animationColor
 
@@ -1028,8 +1022,6 @@ class UI:
                 connectionInstance.hasHost = True
                 connectionInstance.hasInputs[2] = True
                 self.hasRequestedInput = False
-
-        uiInstance.inputTextBox.clear()
 
         return
 
@@ -1051,8 +1043,6 @@ class UI:
                 connectionInstance.hasInputs[3] = True
                 self.hasRequestedInput = False
 
-        uiInstance.inputTextBox.clear()
-
         return
 
     def getPublicKey(self, key, value):
@@ -1072,8 +1062,6 @@ class UI:
                 connectionInstance.hasPublicKey = True
                 connectionInstance.hasInputs[4] = True
                 self.hasRequestedInput = False
-
-        uiInstance.inputTextBox.clear()
 
         return
 
@@ -1095,8 +1083,6 @@ class UI:
                 connectionInstance.hasInputs[5] = True
                 self.hasRequestedInput = False
 
-        uiInstance.inputTextBox.clear()
-
         return
 
     def getCipherKey(self, key, value):
@@ -1117,8 +1103,6 @@ class UI:
                 connectionInstance.hasInputs[6] = True
                 self.hasRequestedInput = False
 
-        uiInstance.inputTextBox.clear()
-
         return
 
     def requestInput(self, key, value):
@@ -1134,6 +1118,9 @@ class UI:
 
                     else:
                         self.getInputs[check](key, value)
+
+                    if __name__ == '__main__':
+                        self.inputTextBox.clear()
 
                     animationInstance.queue.append([6, check, (255, 255, 255)])
 
