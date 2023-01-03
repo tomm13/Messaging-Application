@@ -794,6 +794,9 @@ class Connection:
         self.publicKey = None
         self.cipherKey = None
 
+        # Testing - Inputs list
+        self.inputs = [None for i in range(7)]
+
         # Attributes
         self.encryptedCipherKey = None
         self.e = None
@@ -987,6 +990,10 @@ class UI:
                 connectionInstance.hasInputs[0] = True
                 self.hasRequestedInput = False
 
+                return value
+
+        return None
+
     def getColor(self, key, value):
         if not self.hasRequestedInput or not key:
             animationInstance.queue.append([5, f"{connectionInstance.username}, choose a color"])
@@ -1036,7 +1043,9 @@ class UI:
                 connectionInstance.hasInputs[2] = True
                 self.hasRequestedInput = False
 
-        return
+                return value
+
+        return None
 
     def getPort(self, key, value):
         if not self.hasRequestedInput or not key:
@@ -1054,7 +1063,9 @@ class UI:
                 connectionInstance.hasInputs[3] = True
                 self.hasRequestedInput = False
 
-        return
+                return value
+
+        return None
 
     def getPublicKey(self, key, value):
         if not self.hasRequestedInput or not key:
@@ -1072,7 +1083,9 @@ class UI:
                 connectionInstance.hasInputs[4] = True
                 self.hasRequestedInput = False
 
-        return
+                return value
+
+        return None
 
     def getPrivateKey(self, key, value):
         if not self.hasRequestedInput or not key:
@@ -1090,7 +1103,9 @@ class UI:
                 connectionInstance.hasInputs[5] = True
                 self.hasRequestedInput = False
 
-        return
+                return value
+
+        return None
 
     def getCipherKey(self, key, value):
         if not self.hasRequestedInput or not key:
@@ -1108,31 +1123,30 @@ class UI:
                 connectionInstance.hasInputs[6] = True
                 self.hasRequestedInput = False
 
-        return
+                return value
+
+        return None
 
     def requestInput(self, key, value):
         if not connectionInstance.connected:
-            # Creates a series of input requests
-            connectionInstance.color = uiInstance.animationColor
+            # Copies the default color into the inputs list
+            connectionInstance.inputs[1] = uiInstance.animationColor
 
-            # Creates white block cursor
+            # Creates a series of input requests
             for check in range(7):
                 if connectionInstance.inputRequest == check:
-                    if connectionInstance.inputRequest == 1:
-                        connectionInstance.color = self.getInputs[1](key, value)
-
-                    else:
-                        self.getInputs[check](key, value)
+                    connectionInstance.inputs[check] = self.getInputs[check](key, value)
 
                     if __name__ == '__main__':
                         self.inputTextBox.clear()
 
+                    # Creates white block cursor
                     animationInstance.queue.append([7, check, (255, 255, 255)])
 
             # Marks every completed input with color
             for check in range(7):
                 if connectionInstance.hasInputs[check] and not connectionInstance.inputRequest == check:
-                    animationInstance.queue.append([7, check, connectionInstance.color])
+                    animationInstance.queue.append([7, check, connectionInstance.inputs[1]])
 
             if connectionInstance.inputRequest < 0:
                 connectionInstance.inputRequest = 6
@@ -1144,6 +1158,8 @@ class UI:
 
             if all(connectionInstance.hasInputs) and key and not connectionInstance.connected:
                 connectionInstance.connect()
+
+            print(f"----- Inputs:{connectionInstance.inputs}")
 
     def keyPressed(self, event):
         # Detects key presses with emphasis on enter, left and right
