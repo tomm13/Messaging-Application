@@ -22,208 +22,232 @@ class Animation:
     def animateHeaderInChat(self, message):
         # Code 1
 
-        if not uiInstance.darkMode:
-            (R, G, B) = (255, 255, 255)
+        if uiInstance.LDM is False:
+            if uiInstance.darkMode is False:
+                (R, G, B) = (255, 255, 255)
 
-            while not R == uiInstance.animationColor[0] or not G == uiInstance.animationColor[1] \
-                    or not B == uiInstance.animationColor[2]:
-                # Text fades from white to color
-                if R < uiInstance.animationColor[0]:
-                    R += 1
-                if G < uiInstance.animationColor[1]:
-                    G += 1
-                if B < uiInstance.animationColor[2]:
-                    B += 1
-                if R > uiInstance.animationColor[0]:
-                    R -= 1
-                if G > uiInstance.animationColor[1]:
-                    G -= 1
-                if B > uiInstance.animationColor[2]:
-                    B -= 1
+                while (R, G, B) != uiInstance.animationColor:
+                    # Text fades from white to color
+                    if R < uiInstance.animationColor[0]:
+                        R += 1
+                    if G < uiInstance.animationColor[1]:
+                        G += 1
+                    if B < uiInstance.animationColor[2]:
+                        B += 1
+                    if R > uiInstance.animationColor[0]:
+                        R -= 1
+                    if G > uiInstance.animationColor[1]:
+                        G -= 1
+                    if B > uiInstance.animationColor[2]:
+                        B -= 1
 
-                uiInstance.header.text_color = (R, G, B)
-                sleep(uiInstance.rate)
+                    uiInstance.header.text_color = (R, G, B)
+                    sleep(uiInstance.rate)
 
-            uiInstance.header.value = message
+                uiInstance.header.value = message
 
-            while not R == 255 or not G == 255 or not B == 255:
-                # Fades background from color to white
-                if R < 255:
-                    R += 1
-                if G < 255:
-                    G += 1
-                if B < 255:
-                    B += 1
-                if R > 255:
-                    R -= 1
-                if G > 255:
-                    G -= 1
-                if B > 255:
-                    B -= 1
+                while (R, G, B) != (255, 255, 255):
+                    # Fades background from color to white
+                    if R < 255:
+                        R += 1
+                    if G < 255:
+                        G += 1
+                    if B < 255:
+                        B += 1
+                    if R > 255:
+                        R -= 1
+                    if G > 255:
+                        G -= 1
+                    if B > 255:
+                        B -= 1
 
-                uiInstance.header.bg = (R, G, B)
-                sleep(uiInstance.rate)
+                    uiInstance.header.bg = (R, G, B)
+                    sleep(uiInstance.rate)
 
-            sleep(self.readRate * self.waitMultiplier)
+                sleep(self.readRate * self.waitMultiplier)
 
-            while not R == uiInstance.animationColor[0] or not G == uiInstance.animationColor[1] \
-                    or not B == uiInstance.animationColor[2]:
-                # Fades background from white to color
-                if R < uiInstance.animationColor[0]:
-                    R += 1
-                if G < uiInstance.animationColor[1]:
-                    G += 1
-                if B < uiInstance.animationColor[2]:
-                    B += 1
-                if R > uiInstance.animationColor[0]:
-                    R -= 1
-                if G > uiInstance.animationColor[1]:
-                    G -= 1
-                if B > uiInstance.animationColor[2]:
-                    B -= 1
+                while (R, G, B) != uiInstance.animationColor:
+                    # Fades background from white to color
+                    if R < uiInstance.animationColor[0]:
+                        R += 1
+                    if G < uiInstance.animationColor[1]:
+                        G += 1
+                    if B < uiInstance.animationColor[2]:
+                        B += 1
+                    if R > uiInstance.animationColor[0]:
+                        R -= 1
+                    if G > uiInstance.animationColor[1]:
+                        G -= 1
+                    if B > uiInstance.animationColor[2]:
+                        B -= 1
 
-                uiInstance.header.bg = (R, G, B)
-                sleep(uiInstance.rate)
+                    uiInstance.header.bg = (R, G, B)
+                    sleep(uiInstance.rate)
 
-            uiInstance.header.value = "Welcome " + connectionInstance.inputs[0]
+                uiInstance.header.value = "Welcome " + connectionInstance.inputs[0]
 
-            while not R == 255 or not G == 255 or not B == 255:
-                # Text fades from white to black
-                if R < 255:
-                    R += 1
-                if G < 255:
-                    G += 1
-                if B < 255:
-                    B += 1
-                if R > 255:
-                    R -= 1
-                if G > 255:
-                    G -= 1
-                if B > 255:
-                    B -= 1
+                while (R, G, B) != (255, 255, 255):
+                    # Text fades from white to black
+                    if R < 255:
+                        R += 1
+                    if G < 255:
+                        G += 1
+                    if B < 255:
+                        B += 1
+                    if R > 255:
+                        R -= 1
+                    if G > 255:
+                        G -= 1
+                    if B > 255:
+                        B -= 1
 
-                uiInstance.header.text_color = (R, G, B)
-                sleep(uiInstance.rate)
+                    uiInstance.header.text_color = (R, G, B)
+                    sleep(uiInstance.rate)
+
+            else:
+                (R, G, B) = uiInstance.darkbg
+
+                while (R, G, B) != uiInstance.animationColor:
+                    # Text fades from black to color
+                    if R < uiInstance.animationColor[0]:
+                        R += 1
+                    if G < uiInstance.animationColor[1]:
+                        G += 1
+                    if B < uiInstance.animationColor[2]:
+                        B += 1
+                    if R > uiInstance.animationColor[0]:
+                        R -= 1
+                    if G > uiInstance.animationColor[1]:
+                        G -= 1
+                    if B > uiInstance.animationColor[2]:
+                        B -= 1
+
+                    uiInstance.header.text_color = (R, G, B)
+                    sleep(uiInstance.rate)
+
+                uiInstance.header.value = message
+
+                while (R, G, B) != uiInstance.darkbg:
+                    # Fades background from color to black
+                    if R < uiInstance.darkbg[0]:
+                        R += 1
+                    if G < uiInstance.darkbg[1]:
+                        G += 1
+                    if B < uiInstance.darkbg[2]:
+                        B += 1
+                    if R > uiInstance.darkbg[0]:
+                        R -= 1
+                    if G > uiInstance.darkbg[1]:
+                        G -= 1
+                    if B > uiInstance.darkbg[2]:
+                        B -= 1
+
+                    uiInstance.header.bg = (R, G, B)
+                    sleep(uiInstance.rate)
+
+                sleep(self.readRate * self.waitMultiplier)
+
+                while (R, G, B) != uiInstance.animationColor:
+                    # Fades background from black to color
+                    if R > uiInstance.animationColor[0]:
+                        R -= 1
+                    if G > uiInstance.animationColor[1]:
+                        G -= 1
+                    if B > uiInstance.animationColor[2]:
+                        B -= 1
+                    if R < uiInstance.animationColor[0]:
+                        R += 1
+                    if G < uiInstance.animationColor[1]:
+                        G += 1
+                    if B < uiInstance.animationColor[2]:
+                        B += 1
+
+                    uiInstance.header.bg = (R, G, B)
+                    sleep(uiInstance.rate)
+
+                uiInstance.header.value = f"Welcome {connectionInstance.inputs[0]}"
+
+                while (R, G, B) != uiInstance.darkbg:
+                    # Text fades from any color to black
+                    if R < uiInstance.darkbg[0]:
+                        R += 1
+                    if G < uiInstance.darkbg[1]:
+                        G += 1
+                    if B < uiInstance.darkbg[2]:
+                        B += 1
+                    if R > uiInstance.darkbg[0]:
+                        R -= 1
+                    if G > uiInstance.darkbg[1]:
+                        G -= 1
+                    if B > uiInstance.darkbg[2]:
+                        B -= 1
+
+                    uiInstance.header.text_color = (R, G, B)
+                    sleep(uiInstance.rate)
 
         else:
-            (R, G, B) = uiInstance.darkbg
-
-            while not R == uiInstance.animationColor[0] or not G == uiInstance.animationColor[1] \
-                    or not B == uiInstance.animationColor[2]:
-                # Text fades from black to color
-                if R < uiInstance.animationColor[0]:
-                    R += 1
-                if G < uiInstance.animationColor[1]:
-                    G += 1
-                if B < uiInstance.animationColor[2]:
-                    B += 1
-                if R > uiInstance.animationColor[0]:
-                    R -= 1
-                if G > uiInstance.animationColor[1]:
-                    G -= 1
-                if B > uiInstance.animationColor[2]:
-                    B -= 1
-
-                uiInstance.header.text_color = (R, G, B)
-                sleep(uiInstance.rate)
-
-            uiInstance.header.value = message
-
-            while not R == uiInstance.darkbg[0] or not G == uiInstance.darkbg[1] or not B == uiInstance.darkbg[2]:
-                # Fades background from color to black
-                if R < uiInstance.darkbg[0]:
-                    R += 1
-                if G < uiInstance.darkbg[1]:
-                    G += 1
-                if B < uiInstance.darkbg[2]:
-                    B += 1
-                if R > uiInstance.darkbg[0]:
-                    R -= 1
-                if G > uiInstance.darkbg[1]:
-                    G -= 1
-                if B > uiInstance.darkbg[2]:
-                    B -= 1
-
-                uiInstance.header.bg = (R, G, B)
-                sleep(uiInstance.rate)
-
-            sleep(self.readRate * self.waitMultiplier)
-
-            while not R == uiInstance.animationColor[0] or not G == uiInstance.animationColor[1] \
-                    or not B == uiInstance.animationColor[2]:
-                # Fades background from black to color
-                if R > uiInstance.animationColor[0]:
-                    R -= 1
-                if G > uiInstance.animationColor[1]:
-                    G -= 1
-                if B > uiInstance.animationColor[2]:
-                    B -= 1
-                if R < uiInstance.animationColor[0]:
-                    R += 1
-                if G < uiInstance.animationColor[1]:
-                    G += 1
-                if B < uiInstance.animationColor[2]:
-                    B += 1
-
-                uiInstance.header.bg = (R, G, B)
-                sleep(uiInstance.rate)
-
-            uiInstance.header.value = f"Welcome {connectionInstance.inputs[0]}"
-
-            while not R == uiInstance.darkbg[0] or not G == uiInstance.darkbg[1] or not B == uiInstance.darkbg[2]:
-                # Text fades from any color to black
-                if R < uiInstance.darkbg[0]:
-                    R += 1
-                if G < uiInstance.darkbg[1]:
-                    G += 1
-                if B < uiInstance.darkbg[2]:
-                    B += 1
-                if R > uiInstance.darkbg[0]:
-                    R -= 1
-                if G > uiInstance.darkbg[1]:
-                    G -= 1
-                if B > uiInstance.darkbg[2]:
-                    B -= 1
-
-                uiInstance.header.text_color = (R, G, B)
-                sleep(uiInstance.rate)
+            communicationInstance.addMessage(message)
 
     @staticmethod
     def switchTheme():
         # Code 2
-        if uiInstance.darkMode:
-            while uiInstance.darkMode:
+        if uiInstance.LDM is False:
+            if uiInstance.darkMode is True:
+                while uiInstance.darkMode is True:
+                    # To turn Dark Mode off
+                    (R, G, B) = (70, 70, 70)
+
+                    while (R, G, B) != (255, 255, 255):
+                        R += 1
+                        G += 1
+                        B += 1
+
+                        uiInstance.header.text_color = (R, G, B)
+                        uiInstance.chatHistory.bg = (R, G, B)
+                        uiInstance.messageInput.bg = (R, G, B)
+                        uiInstance.userList.bg = (R, G, B)
+                        sleep(uiInstance.rate)
+
+                    uiInstance.darkMode = False
+
+            else:
+                while uiInstance.darkMode is False:
+                    # To turn Dark Mode on
+                    (R, G, B) = (255, 255, 255)
+
+                    while (R, G, B) != uiInstance.darkbg:
+                        R -= 1
+                        G -= 1
+                        B -= 1
+
+                        uiInstance.header.text_color = (R, G, B)
+                        uiInstance.chatHistory.bg = (R, G, B)
+                        uiInstance.messageInput.bg = (R, G, B)
+                        uiInstance.userList.bg = (R, G, B)
+                        sleep(uiInstance.rate)
+
+                    uiInstance.darkMode = True
+
+        else:
+            if uiInstance.darkMode is True:
                 # To turn Dark Mode off
-                (R, G, B) = (70, 70, 70)
+                (R, G, B) = (255, 255, 255)
 
-                while not (R, G, B) == (255, 255, 255):
-                    R += 1
-                    G += 1
-                    B += 1
-
-                    uiInstance.header.text_color = (R, G, B)
-                    uiInstance.chatHistory.bg = (R, G, B)
-                    uiInstance.messageInput.bg = (R, G, B)
-                    uiInstance.userList.bg = (R, G, B)
-                    sleep(uiInstance.rate)
+                uiInstance.header.text_color = (R, G, B)
+                uiInstance.chatHistory.bg = (R, G, B)
+                uiInstance.messageInput.bg = (R, G, B)
+                uiInstance.userList.bg = (R, G, B)
 
                 uiInstance.darkMode = False
 
-        else:
-            while not uiInstance.darkMode:
+            else:
                 # To turn Dark Mode on
-                (R, G, B) = (255, 255, 255)
+                (R, G, B) = uiInstance.darkbg
 
-                while not (R, G, B) == uiInstance.darkbg:
-                    R -= 1
-                    G -= 1
-                    B -= 1
-
-                    uiInstance.header.text_color = (R, G, B)
-                    uiInstance.chatHistory.bg = (R, G, B)
-                    uiInstance.messageInput.bg = (R, G, B)
-                    uiInstance.userList.bg = (R, G, B)
-                    sleep(uiInstance.rate)
+                uiInstance.header.text_color = (R, G, B)
+                uiInstance.chatHistory.bg = (R, G, B)
+                uiInstance.messageInput.bg = (R, G, B)
+                uiInstance.userList.bg = (R, G, B)
 
                 uiInstance.darkMode = True
 
@@ -231,27 +255,35 @@ class Animation:
     def fadeColorsInChat(newColor):
         # Code 3
 
-        (R, G, B) = uiInstance.color
+        if uiInstance.LDM is False:
+            (R, G, B) = uiInstance.color
 
-        while not R == newColor[0] or not G == newColor[1] or not B == newColor[2]:
-            if R > newColor[0]:
-                R -= 1
-            if G > newColor[1]:
-                G -= 1
-            if B > newColor[2]:
-                B -= 1
-            if R < newColor[0]:
-                R += 1
-            if G < newColor[1]:
-                G += 1
-            if B < newColor[2]:
-                B += 1
+            while (R, G, B) != newColor:
+                if R > newColor[0]:
+                    R -= 1
+                if G > newColor[1]:
+                    G -= 1
+                if B > newColor[2]:
+                    B -= 1
+                if R < newColor[0]:
+                    R += 1
+                if G < newColor[1]:
+                    G += 1
+                if B < newColor[2]:
+                    B += 1
+
+                uiInstance.userList.text_color = (R, G, B)
+                uiInstance.chatHistory.text_color = (R, G, B)
+                uiInstance.messageInput.text_color = (R, G, B)
+
+                sleep(uiInstance.rate)
+
+        else:
+            (R, G, B) = newColor
 
             uiInstance.userList.text_color = (R, G, B)
             uiInstance.chatHistory.text_color = (R, G, B)
             uiInstance.messageInput.text_color = (R, G, B)
-
-            sleep(uiInstance.rate)
 
         uiInstance.color = newColor
 
@@ -259,23 +291,23 @@ class Animation:
     def fadeBordersInChat(newColor):
         # Code 4
 
-        (R, G, B) = uiInstance.animationColor
+        if uiInstance.LDM is False:
+            (R, G, B) = uiInstance.animationColor
 
-        while not (R, G, B) == newColor:
-            if R < newColor[0]:
-                R += 1
-            if G < newColor[1]:
-                G += 1
-            if B < newColor[2]:
-                B += 1
-            if R > newColor[0]:
-                R -= 1
-            if G > newColor[1]:
-                G -= 1
-            if B > newColor[2]:
-                B -= 1
+            while (R, G, B) != newColor:
+                if R < newColor[0]:
+                    R += 1
+                if G < newColor[1]:
+                    G += 1
+                if B < newColor[2]:
+                    B += 1
+                if R > newColor[0]:
+                    R -= 1
+                if G > newColor[1]:
+                    G -= 1
+                if B > newColor[2]:
+                    B -= 1
 
-            if connectionInstance.connected:
                 uiInstance.header.bg = (R, G, B)
                 uiInstance.chatHistoryTopBorder.bg = (R, G, B)
                 uiInstance.chatHistoryRightBorder.bg = (R, G, B)
@@ -290,10 +322,24 @@ class Animation:
                 uiInstance.messageInputBottomBorder.bg = (R, G, B)
                 uiInstance.messageInputLeftBorder.bg = (R, G, B)
 
-            else:
-                uiInstance.status.bg = (R, G, B)
+                sleep(uiInstance.rate)
 
-            sleep(uiInstance.rate)
+        else:
+            (R, G, B) = newColor
+
+            uiInstance.header.bg = (R, G, B)
+            uiInstance.chatHistoryTopBorder.bg = (R, G, B)
+            uiInstance.chatHistoryRightBorder.bg = (R, G, B)
+            uiInstance.chatHistoryBottomBorder.bg = (R, G, B)
+            uiInstance.chatHistoryLeftBorder.bg = (R, G, B)
+            uiInstance.userListTopBorder.bg = (R, G, B)
+            uiInstance.userListRightBorder.bg = (R, G, B)
+            uiInstance.userListBottomBorder.bg = (R, G, B)
+            uiInstance.userListLeftBorder.bg = (R, G, B)
+            uiInstance.messageInputTopBorder.bg = (R, G, B)
+            uiInstance.messageInputRightBorder.bg = (R, G, B)
+            uiInstance.messageInputBottomBorder.bg = (R, G, B)
+            uiInstance.messageInputLeftBorder.bg = (R, G, B)
 
         uiInstance.animationColor = newColor
 
@@ -302,71 +348,84 @@ class Animation:
     @staticmethod
     def animateHeaderInSetup(message):
         # Code 5
-        (R, G, B) = (255, 255, 255)
 
-        while not R == uiInstance.animationColor[0] or not G == uiInstance.animationColor[1] \
-                or not B == uiInstance.animationColor[2]:
-            # Text fades from white to color
-            if R < uiInstance.animationColor[0]:
-                R += 1
-            if G < uiInstance.animationColor[1]:
-                G += 1
-            if B < uiInstance.animationColor[2]:
-                B += 1
-            if R > uiInstance.animationColor[0]:
-                R -= 1
-            if G > uiInstance.animationColor[1]:
-                G -= 1
-            if B > uiInstance.animationColor[2]:
-                B -= 1
+        if uiInstance.LDM is False:
+            (R, G, B) = (255, 255, 255)
 
-            uiInstance.status.text_color = (R, G, B)
-            sleep(uiInstance.rate)
+            while (R, G, B) != uiInstance.animationColor:
+                # Text fades from white to color
+                if R < uiInstance.animationColor[0]:
+                    R += 1
+                if G < uiInstance.animationColor[1]:
+                    G += 1
+                if B < uiInstance.animationColor[2]:
+                    B += 1
+                if R > uiInstance.animationColor[0]:
+                    R -= 1
+                if G > uiInstance.animationColor[1]:
+                    G -= 1
+                if B > uiInstance.animationColor[2]:
+                    B -= 1
 
-        uiInstance.status.value = message
+                uiInstance.status.text_color = (R, G, B)
+                sleep(uiInstance.rate)
 
-        while not R == 255 or not G == 255 or not B == 255:
-            # Text fades from white to black
-            if R < 255:
-                R += 1
-            if G < 255:
-                G += 1
-            if B < 255:
-                B += 1
-            if R > 255:
-                R -= 1
-            if G > 255:
-                G -= 1
-            if B > 255:
-                B -= 1
+            uiInstance.status.value = message
 
-            uiInstance.status.text_color = (R, G, B)
-            sleep(uiInstance.rate)
+            while (R, G, B) != (255, 255, 255):
+                # Text fades from white to black
+                if R < 255:
+                    R += 1
+                if G < 255:
+                    G += 1
+                if B < 255:
+                    B += 1
+                if R > 255:
+                    R -= 1
+                if G > 255:
+                    G -= 1
+                if B > 255:
+                    B -= 1
+
+                uiInstance.status.text_color = (R, G, B)
+                sleep(uiInstance.rate)
+
+        else:
+            uiInstance.status.value = message
 
     @staticmethod
     def fadeColorsInSetup(newColor):
         # Code 6
 
-        (R, G, B) = uiInstance.color
+        if uiInstance.LDM is False:
+            (R, G, B) = uiInstance.color
 
-        while not R == newColor[0] or not G == newColor[1] or not B == newColor[2]:
-            if R > newColor[0]:
-                R -= 1
-            if G > newColor[1]:
-                G -= 1
-            if B > newColor[2]:
-                B -= 1
-            if R < newColor[0]:
-                R += 1
-            if G < newColor[1]:
-                G += 1
-            if B < newColor[2]:
-                B += 1
+            while (R, G, B) != newColor:
+                if R > newColor[0]:
+                    R -= 1
+                if G > newColor[1]:
+                    G -= 1
+                if B > newColor[2]:
+                    B -= 1
+                if R < newColor[0]:
+                    R += 1
+                if G < newColor[1]:
+                    G += 1
+                if B < newColor[2]:
+                    B += 1
+
+                uiInstance.connectText.text_color = (R, G, B)
+                uiInstance.inputTextBox.text_color = (R, G, B)
+                uiInstance.status.bg = (R, G, B)
+
+                sleep(uiInstance.rate)
+
+        else:
+            (R, G, B) = newColor
 
             uiInstance.connectText.text_color = (R, G, B)
             uiInstance.inputTextBox.text_color = (R, G, B)
-
-            sleep(uiInstance.rate)
+            uiInstance.status.bg = (R, G, B)
 
         uiInstance.color = newColor
 
@@ -395,19 +454,47 @@ class Animation:
         elif key == 6:
             (R, G, B) = colorutils.web_to_rgb(uiInstance.cipherKeyIndicator.bg)
 
-        while not (R, G, B) == newColor:
-            if R < newColor[0]:
-                R += 1
-            if G < newColor[1]:
-                G += 1
-            if B < newColor[2]:
-                B += 1
-            if R > newColor[0]:
-                R -= 1
-            if G > newColor[1]:
-                G -= 1
-            if B > newColor[2]:
-                B -= 1
+        if uiInstance.LDM is False:
+
+            while (R, G, B) != newColor:
+                if R < newColor[0]:
+                    R += 1
+                if G < newColor[1]:
+                    G += 1
+                if B < newColor[2]:
+                    B += 1
+                if R > newColor[0]:
+                    R -= 1
+                if G > newColor[1]:
+                    G -= 1
+                if B > newColor[2]:
+                    B -= 1
+
+                if key == 0:
+                    uiInstance.usernameIndicator.bg = (R, G, B)
+
+                elif key == 1:
+                    uiInstance.colorIndicator.bg = (R, G, B)
+
+                elif key == 2:
+                    uiInstance.hostIndicator.bg = (R, G, B)
+
+                elif key == 3:
+                    uiInstance.portIndicator.bg = (R, G, B)
+
+                elif key == 4:
+                    uiInstance.publicKeyIndicator.bg = (R, G, B)
+
+                elif key == 5:
+                    uiInstance.privateKeyIndicator.bg = (R, G, B)
+
+                elif key == 6:
+                    uiInstance.cipherKeyIndicator.bg = (R, G, B)
+
+                sleep(uiInstance.rate)
+
+        else:
+            (R, G, B) = newColor
 
             if key == 0:
                 uiInstance.usernameIndicator.bg = (R, G, B)
@@ -430,8 +517,6 @@ class Animation:
             elif key == 6:
                 uiInstance.cipherKeyIndicator.bg = (R, G, B)
 
-            sleep(uiInstance.rate)
-
     def animationThread(self):
         # This is the new thread in place of the hundreds of unterminated threads called before
         # The format for this thread is [[Class animation method code, *args]]
@@ -443,18 +528,14 @@ class Animation:
                     self.queue.pop(1)
 
                 if self.queue[0][0] == 1:
-                    if not uiInstance.LDM:
-                        if len(str(self.queue[0][0])) < 10:
-                            self.waitMultiplier = 2.0
-                        elif len(str(self.queue[0][0])) < 15:
-                            self.waitMultiplier = 2.5
-                        else:
-                            self.waitMultiplier = 3.0
-
-                        self.animateHeaderInChat(self.queue[0][1])
-
+                    if len(str(self.queue[0][0])) < 10:
+                        self.waitMultiplier = 2.0
+                    elif len(str(self.queue[0][0])) < 15:
+                        self.waitMultiplier = 2.5
                     else:
-                        communicationInstance.addMessage(self.queue[0][1])
+                        self.waitMultiplier = 3.0
+
+                    self.animateHeaderInChat(self.queue[0][1])
 
                 elif self.queue[0][0] == 2:
                     if (uiInstance.darkMode and uiInstance.color == (255, 255, 255)) \
@@ -462,7 +543,7 @@ class Animation:
                             or (not uiInstance.darkMode and uiInstance.color == (0, 0, 0)) \
                             or (not uiInstance.darkMode and uiInstance.animationColor == (0, 0, 0)):
 
-                        self.queue.append([1, "You cannot change the theme due to contrast"])
+                            self.queue.append([1, "You cannot change the theme due to contrast"])
 
                     else:
                         self.switchTheme()
@@ -816,6 +897,7 @@ class Connection:
             self.connected = True
 
             uiInstance.color = self.inputs[1]
+            uiInstance.animationColor = self.inputs[1]
             uiInstance.openChat()
 
         except (ConnectionRefusedError, OSError, TimeoutError):
@@ -901,10 +983,12 @@ class UI:
             self.fontSize = 18
             self.rate = 0.00000
             self.linesLimit = 9
+            self.LDM = True
         else:
             self.fontSize = 12
             self.rate = 0.00000
             self.linesLimit = 13
+            self.LDM = True
 
     # Methods below alter UI attributes
 
@@ -986,7 +1070,6 @@ class UI:
 
                         else:
                             # The inputted color is accepted, and the UI elements will fade to this new color
-                            animationInstance.queue.append([4, color])
                             animationInstance.queue.append([6, color])
 
                             return color
