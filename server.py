@@ -1,4 +1,4 @@
-# 2/1/2023
+# 4/1/2023
 # V13.3
 
 import math
@@ -94,9 +94,9 @@ class Security:
         self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey)
 
         print(f"[Server] Server hosted on {str(connectionInstance.host)} with port {str(connectionInstance.port)}")
-        print(f"[Server] Public RSA key = {e}{N}")
-        print(f"[Server] Private RSA key = {d}{N}")
-        print(f"[Server] RSA encrypted cipher key = {self.encryptedCipherKey}")
+        print(f"[Server] Public key = {e}{N}")
+        print(f"[Server] Private key = {d}{N}")
+        print(f"[Server] Cipher key = {self.encryptedCipherKey}")
 
     def rsaEncrypt(self, key):
         newKey = pow(key, self.e, self.N)
