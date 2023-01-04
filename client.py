@@ -582,10 +582,9 @@ class Communication:
                                                "please rejoin under a different username"])
             sleep(1)
 
-    def sendToServer(self):
+    def sendToServer(self, message):
         # Gets the value of the input, encrypts, then broadcasts
         try:
-            message = uiInstance.messageInput.value
             if message:
                 if message == "/leave":
                     connectionInstance.leave()
@@ -1068,7 +1067,7 @@ class UI:
 
             if event.tk_event.keysym == "Return":
                 if connectionInstance.connected:
-                    communicationInstance.sendToServer()
+                    communicationInstance.sendToServer(uiInstance.messageInput.value)
 
                 else:
                     self.requestInput(True, uiInstance.inputTextBox.value)
