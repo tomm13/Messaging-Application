@@ -519,7 +519,6 @@ class Animation:
     def animationThread(self):
         # This is the new thread in place of the hundreds of unterminated threads called before
         # The format for this thread is [[Class animation method code, *args]]
-        print(f"Started animation thread at {str(time())}")
         while True:
             if self.queue:
                 # Check if queue has duplicate items
@@ -700,7 +699,6 @@ class Communication:
                 self.users.append(user)
 
                 animationInstance.queue.append([1, f"{str(user)} has connected"])
-                print(f"Appended {user} in userlist and self.users")
 
             else:
                 uiInstance.userList.append(user)
@@ -809,7 +807,6 @@ class Communication:
         # Starts when the user is connected
         # Looks out for server broadcasts
         try:
-            print(f"Started update thread at {str(time())}")
             while connectionInstance.connected:
                 message = self.caesarDecrypt(connectionInstance.socket.recv(1024).decode())
 
@@ -830,9 +827,6 @@ class Communication:
 
                     elif message[0:4] == "/mod":
                         uiInstance.setMod(message[5:])
-
-                    elif message[0:5] == "/rate":
-                        uiInstance.setRate(message[6:])
 
                     elif message[0:6] == "/color":
                         uiInstance.chooseColor(3, message[7:])
@@ -976,23 +970,18 @@ class UI:
         if platform.system() == "Darwin":
             # For macOS
             self.fontSize = 22
-            self.rate = 0.00035
             self.linesLimit = 19
+            self.rate = 0.00035
             self.LDM = False
-
-        elif platform.system() == "Windows":
-            # For windows
-            self.fontSize = 18
-            self.rate = None
-            self.linesLimit = 11
-            self.LDM = True
 
         else:
             # For other platforms
-            self.fontSize = 20
+            self.fontSize = 22
+            self.linesLimit = 17
             self.rate = None
-            self.linesLimit = 13
             self.LDM = True
+
+            print("Unfortunately your system does not support animations, therefore they have been disabled.")
 
     # Methods below alter UI attributes
 
@@ -1025,31 +1014,21 @@ class UI:
             uiInstance.chooseColor(4, "khaki")
 
     @staticmethod
-    def setRate(rate):
-        # Called by /rate [Rate]
-        try:
-            rate = float(rate)
-            if 0 < rate < 3:
-                animationInstance.readRate = rate
-                animationInstance.queue.append(
-                    [1, f"You changed the animation hold to {str(animationInstance.readRate)}"])
-
-            else:
-                animationInstance.queue.append([1, "You can only use a rate value between 0-3"])
-
-        except ValueError:
-            animationInstance.queue.append([1, "You cannot use this value"])
-
-    @staticmethod
     def setLDM():
         # Called by /ldm
-        if uiInstance.LDM:
-            uiInstance.LDM = False
-            animationInstance.queue.append([1, "You turned LDM off"])
+        if platform.system() == "Darwin":
+            # For macOS
+            if uiInstance.LDM:
+                uiInstance.LDM = False
+                animationInstance.queue.append([1, "You turned LDM off"])
+
+            else:
+                uiInstance.LDM = True
+                animationInstance.queue.append([1, "You turned LDM on"])
 
         else:
-            uiInstance.LDM = True
-            animationInstance.queue.append([1, "You turned LDM on"])
+            animationInstance.queue.append(
+                [1, "Animations are forcefully disabled on your OS."])
 
     # Gets the 7 inputs
     def getInputs(self, check, key, value):
@@ -1291,8 +1270,6 @@ class UI:
 
         self.setupWindow.display()
 
-
-print(f"Started code at {str(time())}")
 
 animationInstance = Animation()
 communicationInstance = Communication()
