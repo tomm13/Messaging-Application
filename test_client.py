@@ -11,6 +11,7 @@ def test_initialise_inputs():
     client.uiInstance.requestInput(True, None)
 
     assert all(item is None for item in client.connectionInstance.inputs) is True
+    assert client.connectionInstance.inputRequest == 0
 
 
 def test_getting_username():
@@ -18,6 +19,7 @@ def test_getting_username():
     client.uiInstance.requestInput(True, "Username")
 
     assert client.connectionInstance.inputs[0] == "Username"
+    assert client.connectionInstance.inputRequest == 1
     assert all(item is None for item in client.connectionInstance.inputs[1:6]) is True
 
 
@@ -25,10 +27,17 @@ def test_getting_color():
     client.uiInstance.requestInput(True, "invalidcolor")
 
     assert client.connectionInstance.inputs[1] is None
+    assert client.connectionInstance.inputRequest == 1
+
+    client.uiInstance.requestInput(True, "white")
+
+    assert client.connectionInstance.inputs[1] is None
+    assert client.connectionInstance.inputRequest == 1
 
     client.uiInstance.requestInput(True, "red")
 
     assert client.connectionInstance.inputs[1] == (255, 0, 0)
+    assert client.connectionInstance.inputRequest == 2
     assert all(item is None for item in client.connectionInstance.inputs[2:6]) is True
 
 
@@ -36,6 +45,7 @@ def test_getting_host():
     client.uiInstance.requestInput(True, "127.0.0.1")
 
     assert client.connectionInstance.inputs[2] == "127.0.0.1"
+    assert client.connectionInstance.inputRequest == 3
     assert all(item is None for item in client.connectionInstance.inputs[3:6]) is True
 
 
@@ -43,6 +53,7 @@ def test_getting_port():
     client.uiInstance.requestInput(True, "12345")
 
     assert client.connectionInstance.inputs[3] == "12345"
+    assert client.connectionInstance.inputRequest == 4
     assert all(item is None for item in client.connectionInstance.inputs[4:6]) is True
 
 
@@ -50,6 +61,7 @@ def test_getting_publicKey():
     client.uiInstance.requestInput(True, "244177280043")
 
     assert client.connectionInstance.inputs[4] == "244177280043"
+    assert client.connectionInstance.inputRequest == 5
     assert all(item is None for item in client.connectionInstance.inputs[5:6]) is True
 
 
@@ -58,6 +70,7 @@ def test_getting_privateKey():
 
     assert client.connectionInstance.inputs[5] == "257713280043"
     assert client.connectionInstance.inputs[4][6:12] == client.connectionInstance.inputs[5][6:12]
+    assert client.connectionInstance.inputRequest == 6
     assert all(item is None for item in client.connectionInstance.inputs[6:6]) is True
 
 
@@ -65,6 +78,7 @@ def test_getting_cipherKey():
     client.uiInstance.requestInput(True, "1144")
 
     assert client.connectionInstance.inputs[6] == "1144"
+    assert client.connectionInstance.inputRequest == 0
     assert all(item is not None for item in client.connectionInstance.inputs) is True
 
 
@@ -72,10 +86,12 @@ def test_arrow_keys_in_input():
     # Simulate an arrow key being pressed
     client.uiInstance.requestInput(False, None)
 
+    assert client.connectionInstance.inputRequest == 0
     assert all(item is not None for item in client.connectionInstance.inputs) is True
 
     client.uiInstance.requestInput(False, "random string")
 
+    assert client.connectionInstance.inputRequest == 0
     assert all(item is not None for item in client.connectionInstance.inputs) is True
 
 # Test proper indexing and separation of keys
