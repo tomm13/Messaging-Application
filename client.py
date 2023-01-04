@@ -962,7 +962,6 @@ class UI:
         self.waitTime = 1
         self.linesSent = 0
         self.darkMode = False
-        self.LDM = False
         self.hasRequestedInput = False
         self.page = 0
 
@@ -979,10 +978,11 @@ class UI:
             self.fontSize = 22
             self.rate = 0.00035
             self.linesLimit = 13
+            self.LDM = False
         elif platform.system() == "Windows":
             self.fontSize = 18
-            self.rate = 0.00000
-            self.linesLimit = 9
+            self.rate = None
+            self.linesLimit = 11
             self.LDM = True
         else:
             self.fontSize = 12
