@@ -1169,6 +1169,7 @@ class UI:
         self.chatWindow = Window(self.setupWindow, width=1280, height=720, title="Chatroom", bg=self.bg)
         self.chatWindow.when_closed = connectionInstance.leave
         self.chatWindow.when_key_pressed = self.keyPressed
+        self.chatWindow.set_full_screen()
 
         topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
         leftPadding = Box(self.chatWindow, width=50, height="fill", align="left")
