@@ -966,24 +966,27 @@ class UI:
 
     # Gets the 7 inputs
     def getInputs(self, check, key, value):
-        if check == 1:
-            if not self.hasRequestedInput or not key:
-                animationInstance.queue.append([5, self.getInputsMessages[check][0]])
+        if not self.hasRequestedInput or not key:
+            animationInstance.queue.append([5, self.getInputsMessages[check][0]])
 
-                self.hasRequestedInput = True
+            self.hasRequestedInput = True
+
+        else:
+            if not value:
+                animationInstance.queue.append([5, self.getInputsMessages[check][1]])
 
             else:
-                if not value:
-                    animationInstance.queue.append([5, self.getInputsMessages[check][1]])
-
-                else:
+                # If the requested input is color
+                if check == 1:
                     try:
                         color = colorutils.web_to_rgb(value)
 
+                        # Prevent matching background and text colors
                         if color == (255, 255, 255):
                             animationInstance.queue.append([5, self.getInputsMessages[check][1]])
 
                         else:
+                            # The inputted color is accepted, and the UI elements will fade to this new color
                             animationInstance.queue.append([4, color])
                             animationInstance.queue.append([6, color])
 
@@ -992,22 +995,10 @@ class UI:
                     except ValueError:
                         animationInstance.queue.append([5, self.getInputsMessages[check][1]])
 
-            return None
-
-        else:
-            if not self.hasRequestedInput or not key:
-                animationInstance.queue.append([5, self.getInputsMessages[check][0]])
-
-                self.hasRequestedInput = True
-
-            else:
-                if not value:
-                    animationInstance.queue.append([5, self.getInputsMessages[check][1]])
-
                 else:
                     return value
 
-            return None
+        return None
 
     def requestInput(self, key, value):
         if not connectionInstance.connected:
