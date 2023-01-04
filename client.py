@@ -1,4 +1,4 @@
-# 3/1/2023
+# 4/1/2023
 # V13.3
 
 import platform
@@ -344,8 +344,35 @@ class Animation:
             sleep(uiInstance.rate)
 
     @staticmethod
-    def fadeIndicator(key, newColor):
+    def fadeColorsInSetup(newColor):
         # Code 6
+
+        (R, G, B) = uiInstance.color
+
+        while not R == newColor[0] or not G == newColor[1] or not B == newColor[2]:
+            if R > newColor[0]:
+                R -= 1
+            if G > newColor[1]:
+                G -= 1
+            if B > newColor[2]:
+                B -= 1
+            if R < newColor[0]:
+                R += 1
+            if G < newColor[1]:
+                G += 1
+            if B < newColor[2]:
+                B += 1
+
+            uiInstance.connectText.text_color = (R, G, B)
+            uiInstance.inputTextBox.text_color = (R, G, B)
+
+            sleep(uiInstance.rate)
+
+        uiInstance.color = newColor
+
+    @staticmethod
+    def fadeIndicator(key, newColor):
+        # Code 7
 
         if key == 0:
             (R, G, B) = colorutils.web_to_rgb(uiInstance.usernameIndicator.bg)
@@ -404,33 +431,6 @@ class Animation:
                 uiInstance.cipherKeyIndicator.bg = (R, G, B)
 
             sleep(uiInstance.rate)
-
-    @staticmethod
-    def fadeColorsInSetup(newColor):
-        # Code 7
-
-        (R, G, B) = uiInstance.color
-
-        while not R == newColor[0] or not G == newColor[1] or not B == newColor[2]:
-            if R > newColor[0]:
-                R -= 1
-            if G > newColor[1]:
-                G -= 1
-            if B > newColor[2]:
-                B -= 1
-            if R < newColor[0]:
-                R += 1
-            if G < newColor[1]:
-                G += 1
-            if B < newColor[2]:
-                B += 1
-
-            uiInstance.connectText.text_color = (R, G, B)
-            uiInstance.inputTextBox.text_color = (R, G, B)
-
-            sleep(uiInstance.rate)
-
-        uiInstance.color = newColor
 
     def animationThread(self):
         # This is the new thread in place of the hundreds of unterminated threads called before
@@ -805,9 +805,6 @@ class Connection:
         self.inputRequest = 0
         self.timeoutduration = 5
 
-        # Input booleans in list
-        self.hasInputs = [False for i in range(7)]
-
     def connect(self):
         # Called when the user has filled out all 7 inputs
         # Connects to the socket, calculates the RSA encryption key, decryption key, and
@@ -1108,11 +1105,11 @@ class UI:
             # Creates a series of input requests
             for check in range(7):
                 if connectionInstance.inputRequest == check:
-                    connectionInstance.inputs[check] = self.getInputs[check](key, value)
+                    val = self.getInputs[check](key, value)
 
-                    # Given that a value exists for an input, move on to the next input and mark the current as complete
-                    if connectionInstance.inputs[check] is not None:
-                        connectionInstance.hasInputs[check] = True
+                    # Get best value
+                    if val is not None:
+                        connectionInstance.inputs[check] = val
                         connectionInstance.inputRequest += 1
 
                         self.hasRequestedInput = False
@@ -1126,10 +1123,10 @@ class UI:
 
             # Marks every completed input with color
             for check in range(7):
-                if connectionInstance.hasInputs[check] and not connectionInstance.inputRequest == check:
+                if connectionInstance.inputs[check] and not connectionInstance.inputRequest == check:
 
                     # Use the inputted color if given, otherwise use the default lightblue
-                    if connectionInstance.inputs[1] is not None and connectionInstance.hasInputs[1] is True:
+                    if connectionInstance.inputs[1] is not None:
                         animationInstance.queue.append([7, check, connectionInstance.inputs[1]])
 
                     else:
@@ -1144,11 +1141,10 @@ class UI:
                 connectionInstance.inputRequest = 0
                 self.requestInput(key, value)
 
-            if all(connectionInstance.hasInputs) and key and not connectionInstance.connected:
+            if all(check is not None for check in connectionInstance.inputs) and key and not connectionInstance.connected:
                 connectionInstance.connect()
 
             print(f"----- Inputs:{connectionInstance.inputs}")
-            print(f"----- Has:{connectionInstance.hasInputs}")
 
     def keyPressed(self, event):
         # Detects key presses with emphasis on enter, left and right
