@@ -85,7 +85,7 @@ class Animation:
                 uiInstance.header.bg = (R, G, B)
                 sleep(uiInstance.rate)
 
-            uiInstance.header.value = "Welcome " + connectionInstance.username
+            uiInstance.header.value = "Welcome " + connectionInstance.inputs[0]
 
             while not R == 255 or not G == 255 or not B == 255:
                 # Text fades from white to black
@@ -168,7 +168,7 @@ class Animation:
                 uiInstance.header.bg = (R, G, B)
                 sleep(uiInstance.rate)
 
-            uiInstance.header.value = f"Welcome {connectionInstance.username}"
+            uiInstance.header.value = f"Welcome {connectionInstance.inputs[0]}"
 
             while not R == uiInstance.darkbg[0] or not G == uiInstance.darkbg[1] or not B == uiInstance.darkbg[2]:
                 # Text fades from any color to black
@@ -590,7 +590,7 @@ class Communication:
                 if message == "/leave":
                     connectionInstance.leave()
                 else:
-                    if len(message) + len(connectionInstance.username) + 2 >= 45:
+                    if len(message) + len(connectionInstance.inputs[0]) + 2 >= 45:
                         if not self.messageTooLongWarning:
                             animationInstance.queue.append([1, "Your message is too long"])
                             self.messageTooLongWarning = True
@@ -607,37 +607,40 @@ class Communication:
         except BrokenPipeError:
             connectionInstance.leave()
 
-    def setUsers(self, message):
+    def addUsers(self, users):
         # Called by /add [Users spilt by space]
-        message = message.split()
-        message.sort()
+        users = users.split()
+        users.sort()
 
         uiInstance.userList.clear()
         uiInstance.userList.append("Users online:")
 
-        for user in message:
+        for user in users:
             if user not in self.users:
                 uiInstance.userList.append(user)
                 self.users.append(user)
 
-                message = f"{str(user)} has connected"
-                animationInstance.queue.append([1, message])
-                print(f"Appended /add user at {str(time())}")
+                animationInstance.queue.append([1, f"{str(user)} has connected"])
+                print(f"Appended {user} in userlist and self.users")
 
             else:
                 uiInstance.userList.append(user)
 
-    def removeUsers(self, message):
+    def removeUser(self, user):
         # Called by /remove [Users split by space]
-        if message == connectionInstance.username:
-            while True:
-                uiInstance.animationColor = (255, 0, 0)
-                animationInstance.queue.append([1, "You have been kicked / disconnected"])
-                sleep(1)
+        try:
+            if user == connectionInstance.inputs[0]:
+                while True:
+                    uiInstance.animationColor = (255, 0, 0)
+                    animationInstance.queue.append([1, "You have been kicked / disconnected"])
+                    sleep(1)
 
-        uiInstance.userList.remove(message[8:])
-        self.users.remove(message[8:])
-        animationInstance.queue.append([1, f"{message[8:]} has disconnected"])
+            uiInstance.userList.remove(user)
+            self.users.remove(user)
+            animationInstance.queue.append([1, f"{user} has disconnected"])
+
+        except ValueError as e:
+            print(f"Tried to remove -{user}-. Failed due to {e}")
 
     def previousPage(self):
         # Called by /previous
@@ -759,10 +762,10 @@ class Communication:
                         uiInstance.chooseColor(4, message[8:])
 
                     elif message[0:4] == "/add":
-                        self.setUsers(message[5:])
+                        self.addUsers(message[5:])
 
                     elif message[0:7] == "/remove":
-                        self.removeUsers(message[8:])
+                        self.removeUser(message[8:])
 
                     elif message == "/next":
                         self.nextPage()
@@ -782,24 +785,15 @@ class Communication:
 
 class Connection:
     def __init__(self):
-        # Inputs
-        self.username = None
-        self.color = None
-        self.host = None
-        self.port = None
-        self.privateKey = None
-        self.publicKey = None
-        self.cipherKey = None
-
-        # Testing - Inputs list
+        # Inputs list
         self.inputs = [None for i in range(7)]
 
         # Attributes
-        self.encryptedCipherKey = None
+        self.socket = socket.socket()
         self.e = None
         self.d = None
         self.N = None
-        self.socket = socket.socket()
+        self.cipherKey = None
         self.connected = False
         self.mod = False
         self.inputRequest = 0
@@ -809,20 +803,20 @@ class Connection:
         # Called when the user has filled out all 7 inputs
         # Connects to the socket, calculates the RSA encryption key, decryption key, and
         # The cipher key.
-        self.e = int(str(self.publicKey[0:6]), base=10)
-        self.d = int(str(self.privateKey[0:6]), base=10)
-        self.N = int(str(self.privateKey[6:12]), base=10)
-        self.cipherKey = communicationInstance.rsaDecrypt(int(self.encryptedCipherKey, base=10))
+        self.e = int(str(self.inputs[4][0:6]), base=10)
+        self.d = int(str(self.inputs[5][0:6]), base=10)
+        self.N = int(str(self.inputs[5][6:12]), base=10)
+        self.cipherKey = communicationInstance.rsaDecrypt(int(self.inputs[6], base=10))
 
         try:
             self.socket.settimeout(self.timeoutduration)
-            self.socket.connect((self.host, int(self.port, base=10)))
+            self.socket.connect((self.inputs[2], int(self.inputs[3], base=10)))
             self.socket.settimeout(None)
 
-            self.socket.send(self.username.encode())
+            self.socket.send(self.inputs[0].encode())
             self.connected = True
 
-            uiInstance.color = connectionInstance.color
+            uiInstance.color = self.inputs[1]
             uiInstance.openChat()
 
         except (ConnectionRefusedError, OSError, TimeoutError):
@@ -891,9 +885,14 @@ class UI:
         self.hasRequestedInput = False
         self.page = 0
 
-        # Method list
-        self.getInputs = [self.getUsername, self.getColor, self.getHost, self.getPort, self.getPublicKey,
-                          self.getPrivateKey, self.getCipherKey]
+        # Messages List
+        self.getInputsMessages = [["Choose a username", "Try a different username"],
+                                  ["Choose a color", "Try a different color"],
+                                  ["Enter the host IP", "Try a different IP"],
+                                  ["Enter the host port", "Try a different port"],
+                                  ["Enter the public key", "Try a different public key"],
+                                  ["Enter the private key", "Try a different private key"],
+                                  ["Enter the cipher key", "Try a different cipher key"]]
 
         if platform.system() == "Darwin":
             self.fontSize = 22
@@ -929,7 +928,7 @@ class UI:
     @staticmethod
     def setMod(message):
         # Called by /mod [User]
-        if message == connectionInstance.username and not connectionInstance.mod:
+        if message == connectionInstance.inputs[0] and not connectionInstance.mod:
             if not uiInstance.darkMode:
                 animationInstance.queue.append([2, False])
 
@@ -965,147 +964,57 @@ class UI:
             uiInstance.LDM = True
             animationInstance.queue.append([1, "You turned LDM on"])
 
-    # The next 7 methods request for user inputs prior to connecting
+    # Gets the 7 inputs
+    def getInputs(self, check, key, value):
+        if check == 1:
+            if not self.hasRequestedInput or not key:
+                animationInstance.queue.append([5, self.getInputsMessages[check][0]])
 
-    def getUsername(self, key, value):
-        if not self.hasRequestedInput or not key:
-            animationInstance.queue.append([5, "Choose a username"])
-
-            self.hasRequestedInput = True
-
-        else:
-            if not value or value in [" ", "[", "]", "Username", "username"]:
-                # Checks: if username is not empty, not Username and does not contain spaces or [ and ]
-                animationInstance.queue.append([5, "Try a different username"])
+                self.hasRequestedInput = True
 
             else:
-                connectionInstance.username = value
+                if not value:
+                    animationInstance.queue.append([5, self.getInputsMessages[check][1]])
 
-                return value
+                else:
+                    try:
+                        color = colorutils.web_to_rgb(value)
 
-        return None
+                        if color == (255, 255, 255):
+                            animationInstance.queue.append([5, self.getInputsMessages[check][1]])
 
-    def getColor(self, key, value):
-        if not self.hasRequestedInput or not key:
-            animationInstance.queue.append([5, f"{connectionInstance.username}, choose a color"])
+                        else:
+                            animationInstance.queue.append([4, color])
+                            animationInstance.queue.append([6, color])
 
-            self.hasRequestedInput = True
+                            return color
 
-        else:
-            if not value:
-                animationInstance.queue.append([5, "Try a different color"])
+                    except ValueError:
+                        animationInstance.queue.append([5, self.getInputsMessages[check][1]])
 
-            else:
-                try:
-                    color = colorutils.web_to_rgb(value)
-
-                    if color == (255, 255, 255):
-                        animationInstance.queue.append([5, "Try a different color"])
-
-                    else:
-                        connectionInstance.color = color
-
-                        animationInstance.queue.append([4, color])
-                        animationInstance.queue.append([6, color])
-
-                        return color
-
-                except ValueError:
-                    animationInstance.queue.append([5, "Try a different color"])
-
-        return None
-
-    def getHost(self, key, value):
-        if not self.hasRequestedInput or not key:
-            animationInstance.queue.append([5, f"{connectionInstance.username}, enter your IP"])
-
-            self.hasRequestedInput = True
+            return None
 
         else:
-            if not value or "." not in value:
-                animationInstance.queue.append([5, "Try a different IP"])
+            if not self.hasRequestedInput or not key:
+                animationInstance.queue.append([5, self.getInputsMessages[check][0]])
+
+                self.hasRequestedInput = True
 
             else:
-                connectionInstance.host = value
+                if not value:
+                    animationInstance.queue.append([5, self.getInputsMessages[check][1]])
 
-                return value
+                else:
+                    return value
 
-        return None
-
-    def getPort(self, key, value):
-        if not self.hasRequestedInput or not key:
-            animationInstance.queue.append([5, f"{connectionInstance.username}, enter your port"])
-
-            self.hasRequestedInput = True
-
-        else:
-            if not len(str(value)) == 5:
-                animationInstance.queue.append([5, "Try a different port"])
-
-            else:
-                connectionInstance.port = value
-
-                return value
-
-        return None
-
-    def getPublicKey(self, key, value):
-        if not self.hasRequestedInput or not key:
-            animationInstance.queue.append([5, f"{connectionInstance.username}, enter the public RSA key"])
-
-            self.hasRequestedInput = True
-
-        else:
-            if not len(value) == 12:
-                animationInstance.queue.append([5, "Try reentering the public RSA key"])
-
-            else:
-                connectionInstance.publicKey = value
-
-                return value
-
-        return None
-
-    def getPrivateKey(self, key, value):
-        if not self.hasRequestedInput or not key:
-            animationInstance.queue.append([5, f"{connectionInstance.username}, enter your private RSA key"])
-
-            self.hasRequestedInput = True
-
-        else:
-            if not len(value) == 12:
-                animationInstance.queue.append([5, "Try reentering the private RSA key"])
-
-            else:
-                connectionInstance.privateKey = value
-
-                return value
-
-        return None
-
-    def getCipherKey(self, key, value):
-        if not self.hasRequestedInput or not key:
-            animationInstance.queue.append([5, f"{connectionInstance.username}, enter the public Cipher key"])
-
-            self.hasRequestedInput = True
-
-        else:
-            if not value:
-                animationInstance.queue.append([5, "Try a different public Cipher key"])
-
-            else:
-                connectionInstance.encryptedCipherKey = value
-
-                return value
-
-        return None
+            return None
 
     def requestInput(self, key, value):
         if not connectionInstance.connected:
             # Creates a series of input requests
             for check in range(7):
                 if connectionInstance.inputRequest == check:
-                    val = self.getInputs[check](key, value)
+                    val = self.getInputs(check, key, value)
 
                     # Get best value
                     if val is not None:
@@ -1141,10 +1050,9 @@ class UI:
                 connectionInstance.inputRequest = 0
                 self.requestInput(key, value)
 
-            if all(check is not None for check in connectionInstance.inputs) and key and not connectionInstance.connected:
+            if all(check is not None for check in connectionInstance.inputs) \
+                    and key and not connectionInstance.connected:
                 connectionInstance.connect()
-
-            print(f"----- Inputs:{connectionInstance.inputs}")
 
     def keyPressed(self, event):
         # Detects key presses with emphasis on enter, left and right
@@ -1219,7 +1127,7 @@ class UI:
         self.userList.text_size = self.fontSize
         self.userList.bg = (255, 255, 255)
 
-        self.header = Text(header, text=f"Welcome {connectionInstance.username}", width="fill", height=50)
+        self.header = Text(header, text=f"Welcome {connectionInstance.inputs[0]}", width="fill", height=50)
         self.header.text_color = (255, 255, 255)
         self.header.text_size = self.fontSize + 14
         self.header.bg = self.color
