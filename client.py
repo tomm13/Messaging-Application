@@ -985,8 +985,8 @@ class UI:
             self.linesLimit = 11
             self.LDM = True
         else:
-            self.fontSize = 12
-            self.rate = 0.00000
+            self.fontSize = 20
+            self.rate = None
             self.linesLimit = 13
             self.LDM = True
 
