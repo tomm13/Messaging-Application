@@ -4,7 +4,6 @@
 import platform
 import socket
 import colorutils
-import sys
 from time import sleep, localtime, strftime, time
 from threading import Thread
 from guizero import *
@@ -908,12 +907,12 @@ class Connection:
             self.socket.send("/leave".encode())
             self.connected = False
 
-            uiInstance.chatWindow.hide()
+            uiInstance.chatWindow.exit_full_screen()
+            uiInstance.chatWindow.destroy()
 
-        uiInstance.setupWindow.hide()
+        uiInstance.setupWindow.destroy()
 
         self.socket.close()
-        sys.exit("You have disconnected")
 
 
 class UI:
@@ -962,7 +961,6 @@ class UI:
         self.waitTime = 1
         self.linesSent = 0
         self.darkMode = False
-        self.LDM = False
         self.hasRequestedInput = False
         self.page = 0
 
@@ -976,17 +974,23 @@ class UI:
                                   ["Enter the cipher key", "Try a different cipher key"]]
 
         if platform.system() == "Darwin":
+            # For macOS
             self.fontSize = 22
             self.rate = 0.00035
-            self.linesLimit = 13
+            self.linesLimit = 19
+            self.LDM = False
+
         elif platform.system() == "Windows":
+            # For windows
             self.fontSize = 18
-            self.rate = 0.00000
-            self.linesLimit = 9
+            self.rate = None
+            self.linesLimit = 11
             self.LDM = True
+
         else:
-            self.fontSize = 12
-            self.rate = 0.00000
+            # For other platforms
+            self.fontSize = 20
+            self.rate = None
             self.linesLimit = 13
             self.LDM = True
 
@@ -1169,6 +1173,7 @@ class UI:
         self.chatWindow = Window(self.setupWindow, width=1280, height=720, title="Chatroom", bg=self.bg)
         self.chatWindow.when_closed = connectionInstance.leave
         self.chatWindow.when_key_pressed = self.keyPressed
+        self.chatWindow.set_full_screen()
 
         topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
         leftPadding = Box(self.chatWindow, width=50, height="fill", align="left")
