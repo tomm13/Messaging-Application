@@ -4,7 +4,6 @@
 import platform
 import socket
 import colorutils
-import sys
 from time import sleep, localtime, strftime, time
 from threading import Thread
 from guizero import *
@@ -908,12 +907,12 @@ class Connection:
             self.socket.send("/leave".encode())
             self.connected = False
 
-            uiInstance.chatWindow.hide()
+            uiInstance.chatWindow.exit_full_screen()
+            uiInstance.chatWindow.destroy()
 
-        uiInstance.setupWindow.hide()
+        uiInstance.setupWindow.destroy()
 
         self.socket.close()
-        sys.exit("You have disconnected")
 
 
 class UI:
@@ -975,16 +974,21 @@ class UI:
                                   ["Enter the cipher key", "Try a different cipher key"]]
 
         if platform.system() == "Darwin":
+            # For macOS
             self.fontSize = 22
             self.rate = 0.00035
-            self.linesLimit = 13
+            self.linesLimit = 19
             self.LDM = False
+
         elif platform.system() == "Windows":
+            # For windows
             self.fontSize = 18
             self.rate = None
             self.linesLimit = 11
             self.LDM = True
+
         else:
+            # For other platforms
             self.fontSize = 20
             self.rate = None
             self.linesLimit = 13
