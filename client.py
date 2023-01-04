@@ -549,7 +549,7 @@ class Communication:
                 elif letter.isupper():
                     step = 65
 
-                index = (ord(letter) - connectionInstance.cipherKey - step) % 26
+                index = (ord(letter) - connectionInstance.cipherKey - step + 1) % 26
 
                 newMessage += chr(index + step)
 
