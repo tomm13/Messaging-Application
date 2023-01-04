@@ -6,10 +6,12 @@ import client
 # Test inputs getter
 # Simulate nothing showing up until the first enter key is presssed
 
+
 def test_initialise_inputs():
     client.uiInstance.requestInput(True, None)
 
     assert all(item is None for item in client.connectionInstance.inputs) is True
+
 
 def test_getting_username():
     # "Choose a username" is displayed, and "Username" is inputted
@@ -17,6 +19,7 @@ def test_getting_username():
 
     assert client.connectionInstance.inputs[0] == "Username"
     assert all(item is None for item in client.connectionInstance.inputs[1:6]) is True
+
 
 def test_getting_color():
     client.uiInstance.requestInput(True, "invalidcolor")
@@ -28,11 +31,13 @@ def test_getting_color():
     assert client.connectionInstance.inputs[1] == (255, 0, 0)
     assert all(item is None for item in client.connectionInstance.inputs[2:6]) is True
 
+
 def test_getting_host():
     client.uiInstance.requestInput(True, "127.0.0.1")
 
     assert client.connectionInstance.inputs[2] == "127.0.0.1"
     assert all(item is None for item in client.connectionInstance.inputs[3:6]) is True
+
 
 def test_getting_port():
     client.uiInstance.requestInput(True, "12345")
@@ -40,11 +45,13 @@ def test_getting_port():
     assert client.connectionInstance.inputs[3] == "12345"
     assert all(item is None for item in client.connectionInstance.inputs[4:6]) is True
 
+
 def test_getting_publicKey():
     client.uiInstance.requestInput(True, "244177280043")
 
     assert client.connectionInstance.inputs[4] == "244177280043"
     assert all(item is None for item in client.connectionInstance.inputs[5:6]) is True
+
 
 def test_getting_privateKey():
     client.uiInstance.requestInput(True, "257713280043")
@@ -53,11 +60,13 @@ def test_getting_privateKey():
     assert client.connectionInstance.inputs[4][6:12] == client.connectionInstance.inputs[5][6:12]
     assert all(item is None for item in client.connectionInstance.inputs[6:6]) is True
 
+
 def test_getting_cipherKey():
     client.uiInstance.requestInput(True, "1144")
 
     assert client.connectionInstance.inputs[6] == "1144"
     assert all(item is not None for item in client.connectionInstance.inputs) is True
+
 
 def test_arrow_keys_in_input():
     # Simulate an arrow key being pressed
@@ -69,17 +78,23 @@ def test_arrow_keys_in_input():
 
     assert all(item is not None for item in client.connectionInstance.inputs) is True
 
+# Test proper indexing and separation of keys
+
+
 def test_key_separation():
-    # Simulate proper deciphering and indexing
     assert client.connectionInstance.e == 244177
     assert client.connectionInstance.d == 257713
     assert client.connectionInstance.N == 280043
     assert client.connectionInstance.cipherKey == 14
 
+# Test algorithmic accuracy
 
 
+def test_key_retrieval():
+    key = 9
+    assert key == client.communicationInstance.rsaDecrypt(client.communicationInstance.rsaEncrypt(key))
 
 
-
-
-
+def test_string_retrieval():
+    message = "my name is tomm 12345"
+    assert message == client.communicationInstance.caesarDecrypt(client.communicationInstance.caesarEncrypt(message))
