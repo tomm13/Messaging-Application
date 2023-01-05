@@ -89,7 +89,7 @@ class Security:
         self.cipherKey = random.randint(1, 26)
         self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey)
 
-        print(f"[Server] Server hosted on {str(connectionInstance.host)} with port {str(connectionInstance.port)}")
+        print(f"[Server] Server hosted on {str(connectionInstance.host)} on port {str(connectionInstance.port)}")
         print(f"[Server] Public key = {e}{N}")
         print(f"[Server] Private key = {d}{N}")
         print(f"[Server] Cipher key = {self.encryptedCipherKey}")
@@ -172,7 +172,6 @@ class Actions:
 
     def voteWaiter(self):
         # Executed in a thread, waits for a timer to end
-        print("[Server] Started vote-timer thread")
 
         while self.voteTimeRemaining > 0:
             self.voteTimeRemaining -= 1
@@ -298,22 +297,16 @@ class Actions:
                         self.mods.append(clientSocket)
                         self.modOnline += 1
 
-                        action = "/mod " + username
-                        sendInstance.privateBroadcast(action, clientSocket)
-
-                        message = username + " is now a mod"
-                        sendInstance.broadcastDisplay(message)
+                        sendInstance.privateBroadcast(f"/mod {username}", clientSocket)
+                        sendInstance.broadcastDisplay(f"{username} is now a mod")
 
                     elif modSocket in self.mods and modUsername in self.modUsers:
                         self.modUsers.append(username)
                         self.mods.append(clientSocket)
                         self.modOnline += 1
 
-                        action = "/mod " + username
-                        sendInstance.privateBroadcast(action, clientSocket)
-
-                        message = username + " is now a mod"
-                        sendInstance.broadcastDisplay(message)
+                        sendInstance.privateBroadcast(f"/mod {username}", clientSocket)
+                        sendInstance.broadcastDisplay(f"{username} is now a mod")
 
                     else:
                         sendInstance.privateBroadcastDisplay("You need to be a mod to do this", modSocket)
@@ -405,22 +398,21 @@ class Connection:
             self.clients.append(clientSocket)
 
             username = clientSocket.recv(1024).decode()
-            if username in self.users or username == "" or username == "Username" or " " in username or "[" in username \
-                    or "]" in username or len(username) > 10:
+            if username in self.users or " " in username or 1 > len(username) > 10:
                 sendInstance.privateBroadcast("/disconnect", clientSocket)
                 self.clients.remove(clientSocket)
 
             else:
+                # Adds user to the list of users and updates everyone's user lists
                 self.users.append(username)
+                self.userOnline += 1
 
                 message = "/add "
 
                 for user in self.users:
-                    message += user + " "
+                    message += f"{user} "
 
                 sendInstance.broadcast(message)
-
-                self.userOnline += 1
 
                 Thread(target=self.listen, args=[clientSocket]).start()
                 print(f"[Thread] Started {username}'s update thread")
@@ -430,13 +422,14 @@ class Connection:
         index = self.clients.index(clientSocket)
         username = self.users[index]
         messagesSentRecently = 0
-        lastMessageSentTime = time.time()
+        lastMessageSentTime = 0
         warnUser = False
+        detectSpam = False
 
         while True:
             try:
                 message = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode())
-                unifiedmessage = username + ": " + message
+                unifiedmessage = f"{username}: {message}"
 
                 if message:
                     if message[0] == "/":
@@ -447,26 +440,30 @@ class Connection:
                         else:
                             sendInstance.command(message, clientSocket)
                     else:
-                        if messagesSentRecently >= 3:
-                            if not warnUser:
-                                sendInstance.privateBroadcastDisplay("You are sending messages too quickly",
-                                                                     clientSocket)
-                                warnUser = True
+                        if detectSpam is True:
+                            if messagesSentRecently >= 3:
+                                if warnUser is False:
+                                    sendInstance.privateBroadcastDisplay("You are sending messages too quickly",
+                                                                         clientSocket)
+                                    warnUser = True
 
-                            if time.time() > lastMessageSentTime + 5:
-                                messagesSentRecently = 0
-                                warnUser = False
+                                if time.time() > lastMessageSentTime + 5:
+                                    messagesSentRecently = 0
+                                    warnUser = False
+
+                            else:
+                                sendInstance.broadcast(unifiedmessage)
+
+                                if lastMessageSentTime + 1 > time.time():
+                                    messagesSentRecently += 1
+
+                                elif messagesSentRecently > 0:
+                                    messagesSentRecently -= 1
+
+                                lastMessageSentTime = time.time()
 
                         else:
                             sendInstance.broadcast(unifiedmessage)
-
-                            if lastMessageSentTime + 1 > time.time():
-                                messagesSentRecently += 1
-
-                            elif messagesSentRecently > 0:
-                                messagesSentRecently -= 1
-
-                            lastMessageSentTime = time.time()
 
             except (ConnectionResetError, OSError) as e:
                 print(f"[Thread] Closed {username}'s update thread {e}")
@@ -492,8 +489,7 @@ class Connection:
 
                 sendInstance.broadcastDisplay("The vote has been called off as a mod has left")
 
-        message = "/remove " + username
-        sendInstance.broadcast(message)
+        sendInstance.broadcast(f"/remove {username}")
 
 
 actionsInstance = Actions()
