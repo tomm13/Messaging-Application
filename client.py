@@ -824,8 +824,8 @@ class Communication:
                     elif message[0:7] == "/border":
                         uiInstance.chooseColor(4, message[8:])
 
-                    elif message[0:4] == "/add":
-                        self.addUsers(message[5:])
+                    elif message[0:7] == "/accept":
+                        self.addUsers(message[8:])
 
                     elif message[0:7] == "/remove":
                         self.removeUser(message[8:])
