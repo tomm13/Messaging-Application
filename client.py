@@ -1,4 +1,4 @@
-# 4/1/2023
+# 5/1/2023
 # V13.3
 
 import platform
@@ -958,6 +958,9 @@ class UI:
         self.hasRequestedInput = False
         self.page = 0
 
+        # Font sizes list for different OS's
+        self.fontSizes = [[22, None], [36, None], [24, None], [32, None], [32, None] , [22, None], [24, None]]
+
         # Messages List
         self.getInputsMessages = [["Choose a username", "Try a different username"],
                                   ["Choose a color", "Try a different color"],
@@ -970,6 +973,7 @@ class UI:
         if platform.system() == "Darwin":
             # For macOS
             self.fontSize = 22
+            self.fontIndex = 0
             self.linesLimit = 19
             self.rate = 0.00035
             self.LDM = False
@@ -977,6 +981,7 @@ class UI:
         else:
             # For other platforms
             self.fontSize = 22
+            self.fontIndex = 1
             self.linesLimit = 17
             self.rate = None
             self.LDM = True
@@ -1181,12 +1186,12 @@ class UI:
 
         self.userList = ListBox(userListBox, items=["Users online:"], width=150, height="fill", align="right")
         self.userList.text_color = self.color
-        self.userList.text_size = self.fontSize
+        self.userList.text_size = self.fontSizes[0][self.fontIndex]
         self.userList.bg = (255, 255, 255)
 
         self.header = Text(header, text=f"Welcome {connectionInstance.inputs[0]}", width="fill", height=50)
         self.header.text_color = (255, 255, 255)
-        self.header.text_size = self.fontSize + 14
+        self.header.text_size = self.fontSizes[1][self.fontIndex]
         self.header.bg = self.color
 
         self.chatHistoryTopBorder = Box(userBox, width="fill", height=10, align="top")
@@ -1200,7 +1205,7 @@ class UI:
 
         self.chatHistory = TextBox(userBox, width="fill", height="fill", align="top", multiline=True)
         self.chatHistory.text_color = self.color
-        self.chatHistory.text_size = self.fontSize + 2
+        self.chatHistory.text_size = self.fontSizes[2][self.fontIndex]
         self.chatHistory.bg = (255, 255, 255)
         self.chatHistory.disable()
 
@@ -1216,7 +1221,7 @@ class UI:
 
         self.messageInput = TextBox(inputBox, width="fill", align="bottom")
         self.messageInput.text_color = self.color
-        self.messageInput.text_size = self.fontSize + 10
+        self.messageInput.text_size = self.fontSizes[3][self.fontIndex]
         self.messageInput.bg = (255, 255, 255)
         self.messageInput.when_key_pressed = self.keyPressed
 
@@ -1228,7 +1233,7 @@ class UI:
 
     def openSetup(self):
         # Creates setup window
-        self.setupWindow = App(title="Connect", width=800, height=275)
+        self.setupWindow = App(title="Setup", width=800, height=275)
         self.setupWindow.bg = self.bg
         self.setupWindow.font = self.font
         self.setupWindow.when_key_pressed = self.keyPressed
@@ -1245,17 +1250,17 @@ class UI:
 
         self.status = Text(header, text="Welcome", width="fill", height=40)
         self.status.text_color = (255, 255, 255)
-        self.status.text_size = self.fontSize + 10
+        self.status.text_size = self.fontSizes[4][self.fontIndex]
         self.status.bg = self.animationColor
 
         self.inputTextBox = TextBox(contents, width=30, align="left")
         self.inputTextBox.text_color = self.color
-        self.inputTextBox.text_size = self.fontSize
+        self.inputTextBox.text_size = self.fontSizes[5][self.fontIndex]
         self.inputTextBox.bg = self.darkbg
 
         self.connectText = Text(contents, text="Press Enter to continue", align="right")
         self.connectText.text_color = self.animationColor
-        self.connectText.text_size = self.fontSize + 2
+        self.connectText.text_size = self.fontSizes[6][self.fontIndex]
 
         self.usernameIndicator = Box(indicator, width=114, height="fill", align="left")
         self.colorIndicator = Box(indicator, width=114, height="fill", align="left")
