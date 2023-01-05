@@ -351,9 +351,11 @@ class Send:
         clientSocket.send(securityInstance.caesarEncrypt(f"/display {message}").encode())
 
     @staticmethod
-    def command(message, clientSocket):
+    def command(message, username, clientSocket):
         # Use list to prevent doubled code
-        if message == "/theme":
+        if message == "/leave":
+            connectionInstance.removeUser(username, clientSocket)
+        elif message == "/theme":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:6] == "/color":
             sendInstance.privateBroadcast(message, clientSocket)
@@ -395,16 +397,15 @@ class Connection:
             # This also broadcasts to other online users that a new user has connected.
 
             clientSocket, Address = self.socket.accept()
-            self.clients.append(clientSocket)
 
-            username = clientSocket.recv(1024).decode()
+            username = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode())
             if username in self.users or " " in username or 1 > len(username) > 10:
-                sendInstance.privateBroadcast("/disconnect", clientSocket)
-                self.clients.remove(clientSocket)
+                sendInstance.privateBroadcast("/reject", clientSocket)
 
             else:
                 # Adds user to the list of users and updates everyone's user lists
                 self.users.append(username)
+                self.clients.append(clientSocket)
                 self.userOnline += 1
 
                 message = "/add "
@@ -414,31 +415,26 @@ class Connection:
 
                 sendInstance.broadcast(message)
 
-                Thread(target=self.listen, args=[clientSocket]).start()
+                Thread(target=self.listen, args=[username, clientSocket]).start()
                 print(f"[Thread] Started {username}'s update thread")
 
-    def listen(self, clientSocket):
+    def listen(self, username, clientSocket):
         # A listening thread linked to every unique client, and detects input from them
-        index = self.clients.index(clientSocket)
-        username = self.users[index]
         messagesSentRecently = 0
         lastMessageSentTime = 0
         warnUser = False
-        detectSpam = False
+        detectSpam = True
+        e = "No error raised"
 
-        while True:
+        while username in self.users and clientSocket in self.clients:
             try:
                 message = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode())
                 unifiedmessage = f"{username}: {message}"
 
                 if message:
                     if message[0] == "/":
-                        if message == "/leave":
-                            if clientSocket in self.clients:
-                                self.removeUser(username, clientSocket)
-                            break
-                        else:
-                            sendInstance.command(message, clientSocket)
+                        sendInstance.command(message, username, clientSocket)
+
                     else:
                         if detectSpam is True:
                             if messagesSentRecently >= 3:
@@ -466,12 +462,12 @@ class Connection:
                             sendInstance.broadcast(unifiedmessage)
 
             except (ConnectionResetError, OSError) as e:
-                print(f"[Thread] Closed {username}'s update thread {e}")
                 self.removeUser(username, clientSocket)
-                break
+
+        print(f"[Thread] Closed {username}'s update thread. {e}")
 
     def removeUser(self, username, clientSocket):
-        # Called when a user has a duplicate username or more commonly, leaves
+        # Called when a user has a duplicate username or leaves
         connectionInstance.clients.remove(clientSocket)
         connectionInstance.users.remove(username)
 
