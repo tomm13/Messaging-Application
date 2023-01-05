@@ -953,13 +953,14 @@ class UI:
         self.bg = (70, 70, 70)
         self.darkbg = (40, 40, 40)
         self.waitTime = 1
+        self.page = 0
         self.linesSent = 0
+        self.linesLimit = 19
         self.darkMode = False
         self.hasRequestedInput = False
-        self.page = 0
 
         # Font sizes list for different OS's
-        self.fontSizes = [[22, None], [36, None], [24, None], [32, None], [32, None] , [22, None], [24, None]]
+        self.fontSizes = [[22, 17], [36, 26], [24, 19], [32, 28], [32, 23], [22, 19], [24, 17]]
 
         # Messages List
         self.getInputsMessages = [["Choose a username", "Try a different username"],
@@ -972,17 +973,13 @@ class UI:
 
         if platform.system() == "Darwin":
             # For macOS
-            self.fontSize = 22
             self.fontIndex = 0
-            self.linesLimit = 19
             self.rate = 0.00035
             self.LDM = False
 
         else:
             # For other platforms
-            self.fontSize = 22
             self.fontIndex = 1
-            self.linesLimit = 17
             self.rate = None
             self.LDM = True
 
