@@ -898,6 +898,8 @@ class Connection:
 
         self.socket.close()
 
+        print("You may now terminate the code.")
+
 
 class UI:
     def __init__(self):
