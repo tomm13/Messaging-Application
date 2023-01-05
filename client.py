@@ -1022,7 +1022,7 @@ class UI:
 
         else:
             animationInstance.queue.append(
-                [1, "Animations are forcefully disabled on your OS."])
+                [1, "Animations are disabled on your OS."])
 
     # Gets the 7 inputs
     def getInputs(self, check, key, value):
