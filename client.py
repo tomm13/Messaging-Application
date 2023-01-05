@@ -846,7 +846,7 @@ class Communication:
                     elif message == "/previous":
                         self.previousPage()
 
-                    elif message == "/disconnect":
+                    elif message == "/reject":
                         self.disconnectLoop()
 
                     else:
@@ -886,7 +886,7 @@ class Connection:
             self.socket.connect((self.inputs[2], int(self.inputs[3], base=10)))
             self.socket.settimeout(None)
 
-            self.socket.send(self.inputs[0].encode())
+            self.socket.send(communicationInstance.caesarEncrypt(self.inputs[0]).encode())
             self.connected = True
 
             uiInstance.color = self.inputs[1]
@@ -898,7 +898,7 @@ class Connection:
 
     def leave(self):
         if connectionInstance.connected:
-            self.socket.send("/leave".encode())
+            self.socket.send(communicationInstance.caesarEncrypt("/leave").encode())
             self.connected = False
 
             uiInstance.chatWindow.exit_full_screen()
