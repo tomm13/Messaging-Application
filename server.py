@@ -408,7 +408,7 @@ class Connection:
                 self.clients.append(clientSocket)
                 self.userOnline += 1
 
-                message = "/add "
+                message = "/accept "
 
                 for user in self.users:
                     message += f"{user} "
