@@ -651,16 +651,6 @@ class Communication:
         else:
             animationInstance.queue.append([1, "You can't save to this location"])
 
-    @staticmethod
-    def disconnectLoop():
-        # Called by using an existing username when connecting
-        uiInstance.animationColor = (255, 0, 0)
-
-        while True:
-            animationInstance.queue.append([1, "You cannot use this username, "
-                                               "please rejoin under a different username"])
-            sleep(1)
-
     def sendToServer(self, message):
         # Gets the value of the input, encrypts, then broadcasts
         try:
