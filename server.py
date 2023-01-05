@@ -1,4 +1,4 @@
-# 4/1/2023
+# 5/1/2023
 # V13.3
 
 import math
@@ -51,8 +51,6 @@ class Security:
         primes = []
         coprimes = []
 
-        print("[Server] Initialising generation of primes...")
-
         for prime in range(lower, upper):
             isPrime = True
             for factor in range(2, int(math.sqrt(prime) + 1)):
@@ -69,8 +67,6 @@ class Security:
             # N is the 7-12th digits of either the public or private key
             N = P * Q
             phiN = (P - 1) * (Q - 1)
-
-        print(f"[Server] Completed generation of primes")
 
         # Generate e such that e < phiN, 6 digits long, as well as coprime with phiN
         for coprime in range(100000, phiN):
@@ -375,38 +371,24 @@ class Send:
     @staticmethod
     def command(message, clientSocket):
         # Use list to prevent doubled code
-        if message == "/online":
-            sendInstance.privateBroadcastDisplay(str(connectionInstance.userOnline), clientSocket)
-        elif message == "/users":
-            for user in connectionInstance.users:
-                sendInstance.privateBroadcastDisplay(str(user), clientSocket)
-                time.sleep(0.1)
-        elif message == "/ip":
-            sendInstance.privateBroadcastDisplay(str(connectionInstance.host), clientSocket)
-        elif message == "/port":
-            sendInstance.privateBroadcastDisplay(str(connectionInstance.port), clientSocket)
-        elif message == "/key":
-            sendInstance.privateBroadcastDisplay(str(securityInstance.d) + str(securityInstance.N), clientSocket)
-        elif message == "/theme":
+        if message == "/theme":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:6] == "/color":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:9] == "/savechat":
             sendInstance.privateBroadcast(message, clientSocket)
-        elif message[0:4] == "/mod":
-            actionsInstance.mod(message, clientSocket)
-        elif message[0:5] == "/kick" or message[0:5] == "/vote":
-            actionsInstance.vote(message, clientSocket)
-        elif message[0:5] == "/rate":
-            sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:7] == "/border":
+            sendInstance.privateBroadcast(message, clientSocket)
+        elif message == "/ldm":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message == "/previous":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message == "/next":
             sendInstance.privateBroadcast(message, clientSocket)
-        elif message == "/ldm":
-            sendInstance.privateBroadcast(message, clientSocket)
+        elif message[0:4] == "/mod":
+            actionsInstance.mod(message, clientSocket)
+        elif message[0:5] == "/kick" or message[0:5] == "/vote":
+            actionsInstance.vote(message, clientSocket)
         else:
             sendInstance.privateBroadcastDisplay("Your command is unknown", clientSocket)
 
