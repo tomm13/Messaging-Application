@@ -424,7 +424,6 @@ class Connection:
         lastMessageSentTime = 0
         warnUser = False
         detectSpam = True
-        e = "No error raised"
 
         while username in self.users and clientSocket in self.clients:
             try:
@@ -462,9 +461,10 @@ class Connection:
                             sendInstance.broadcast(unifiedmessage)
 
             except (ConnectionResetError, OSError) as e:
+                print(e)
                 self.removeUser(username, clientSocket)
 
-        print(f"[Thread] Closed {username}'s update thread. {e}")
+        print(f"[Thread] Closed {username}'s update thread")
 
     def removeUser(self, username, clientSocket):
         # Called when a user has a duplicate username or leaves
