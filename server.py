@@ -330,43 +330,32 @@ class Send:
     @staticmethod
     def broadcast(message):
         # Send a public message to every client
-        time.sleep(0.1)
-        print("[Client] " + message)
+        print(f"[Client] {message}")
 
-        message = securityInstance.caesarEncrypt(message)
         for client in connectionInstance.clients:
-            client.send(message.encode())
+            client.send(securityInstance.caesarEncrypt(message).encode())
 
     @staticmethod
     def broadcastDisplay(message):
         # Sends a public animated banner with {message} parameter
-        time.sleep(0.1)
-        print("[PublicDisplay] " + message)
-
-        message = "/display " + message
-        message = securityInstance.caesarEncrypt(message)
+        print(f"[PublicDisplay] {message}")
 
         for client in connectionInstance.clients:
-            client.send(message.encode())
+            client.send(securityInstance.caesarEncrypt(f"/display {message}").encode())
 
     @staticmethod
     def privateBroadcast(message, clientSocket):
         # Send a private message to 1 specific client
-        time.sleep(0.1)
-        print("[Private] " + message)
+        print(f"[Private] {message}")
 
-        message = securityInstance.caesarEncrypt(message)
-        clientSocket.send(message.encode())
+        clientSocket.send(securityInstance.caesarEncrypt(message).encode())
 
     @staticmethod
     def privateBroadcastDisplay(message, clientSocket):
         # Sends a private animted banner with {message} parameter
-        time.sleep(0.1)
-        print("[PrivateDisplay] " + message)
+        print(f"[PrivateDisplay] {message}")
 
-        message = "/display " + message
-        message = securityInstance.caesarEncrypt(message)
-        clientSocket.send(message.encode())
+        clientSocket.send(securityInstance.caesarEncrypt(f"/display {message}").encode())
 
     @staticmethod
     def command(message, clientSocket):
