@@ -453,6 +453,9 @@ class Animation:
         elif key == 6:
             (R, G, B) = colorutils.web_to_rgb(uiInstance.cipherKeyIndicator.bg)
 
+        else:
+            raise ValueError("Invalid indexing of indicators")
+
         if uiInstance.LDM is False:
 
             while (R, G, B) != newColor:
@@ -536,12 +539,12 @@ class Animation:
                     self.animateHeaderInChat(self.queue[0][1])
 
                 elif self.queue[0][0] == 2:
-                    if (uiInstance.darkMode and uiInstance.color == uiInstance.lightbg) \
-                            or (uiInstance.darkMode and uiInstance.animationColor == uiInstance.lightbg) \
-                            or (not uiInstance.darkMode and uiInstance.color == (0, 0, 0)) \
-                            or (not uiInstance.darkMode and uiInstance.animationColor == (0, 0, 0)):
+                    if (uiInstance.darkMode is True and uiInstance.color == uiInstance.lightbg) \
+                            or (uiInstance.darkMode is True and uiInstance.animationColor == uiInstance.lightbg) \
+                            or (uiInstance.darkMode is False and uiInstance.color == (0, 0, 0)) \
+                            or (uiInstance.darkMode is False and uiInstance.animationColor == (0, 0, 0)):
 
-                            self.queue.append([1, "You cannot change the theme due to contrast"])
+                        self.queue.append([1, "You cannot change the theme due to contrast"])
 
                     else:
                         self.switchTheme()
@@ -553,20 +556,22 @@ class Animation:
                     self.fadeBordersInChat(self.queue[0][1])
 
                 elif self.queue[0][0] == 5:
-                    if len(str(self.queue[0][0])) < 10:
-                        self.waitMultiplier = 2.0
-                    elif len(str(self.queue[0][0])) < 15:
-                        self.waitMultiplier = 2.5
-                    else:
-                        self.waitMultiplier = 3.0
+                    if connectionInstance.connected is False:
+                        if len(str(self.queue[0][0])) < 10:
+                            self.waitMultiplier = 2.0
+                        elif len(str(self.queue[0][0])) < 15:
+                            self.waitMultiplier = 2.5
+                        else:
+                            self.waitMultiplier = 3.0
 
-                    self.animateHeaderInSetup(self.queue[0][1])
+                        self.animateHeaderInSetup(self.queue[0][1])
 
                 elif self.queue[0][0] == 6:
-                    self.fadeColorsInSetup(self.queue[0][1])
+                    if connectionInstance.connected is False:
+                        self.fadeColorsInSetup(self.queue[0][1])
 
                 elif self.queue[0][0] == 7:
-                    if not connectionInstance.connected:
+                    if connectionInstance.connected is False:
                         self.fadeIndicator(self.queue[0][1], self.queue[0][2])
 
                 self.queue.pop(0)
@@ -598,13 +603,16 @@ class Communication:
         newMessage = ""
         for letter in message:
 
-            if letter.isalpha():
+            if letter.isalpha() is True:
 
-                if letter.islower():
+                if letter.islower() is True:
                     step = 97
 
-                elif letter.isupper():
+                elif letter.isupper() is True:
                     step = 65
+
+                else:
+                    raise ValueError("Invalid character")
 
                 index = (ord(letter) + connectionInstance.cipherKey - step) % 26
 
@@ -620,13 +628,16 @@ class Communication:
         newMessage = ""
         for letter in message:
 
-            if letter.isalpha():
+            if letter.isalpha() is True:
 
-                if letter.islower():
+                if letter.islower() is True:
                     step = 97
 
-                elif letter.isupper():
+                elif letter.isupper() is True:
                     step = 65
+
+                else:
+                    raise ValueError("Invalid character")
 
                 index = (ord(letter) - connectionInstance.cipherKey - step) % 26
 
@@ -853,7 +864,8 @@ class Communication:
                     else:
                         self.addMessage(message)
 
-        except (ConnectionResetError, OSError):
+        except (ConnectionResetError, OSError) as e:
+            print(f"An error occured: {e}")
             connectionInstance.leave()
 
 
@@ -883,10 +895,7 @@ class Connection:
         self.cipherKey = communicationInstance.rsaDecrypt(int(self.inputs[6], base=10))
 
         try:
-            self.socket.settimeout(self.timeoutduration)
             self.socket.connect((self.inputs[2], int(self.inputs[3], base=10)))
-            self.socket.settimeout(None)
-
             self.socket.send(communicationInstance.caesarEncrypt(self.inputs[0]).encode())
             self.connected = True
 
@@ -898,7 +907,7 @@ class Connection:
             animationInstance.queue.append([5, "Connection refused, try checking the host IP and port"])
 
     def leave(self):
-        if connectionInstance.connected:
+        if connectionInstance.connected is True:
             self.socket.send(communicationInstance.caesarEncrypt("/leave").encode())
             self.connected = False
 
@@ -1001,7 +1010,7 @@ class UI:
         try:
             color = colorutils.web_to_rgb(message)
 
-            if (uiInstance.darkMode and color == (0, 0, 0)) or \
+            if (uiInstance.darkMode is True and color == (0, 0, 0)) or \
                     (uiInstance.darkMode is False and color == uiInstance.lightbg):
                 animationInstance.queue.append([1, "You cannot do this due to contrast"])
 
@@ -1015,7 +1024,7 @@ class UI:
     def setMod(message):
         # Called by /mod [User]
         if message == connectionInstance.inputs[0] and connectionInstance.mod is False:
-            if not uiInstance.darkMode:
+            if uiInstance.darkMode is False:
                 animationInstance.queue.append([2, False])
 
             connectionInstance.mod = True
@@ -1028,7 +1037,7 @@ class UI:
         # Called by /ldm
         if platform.system() == "Darwin":
             # For macOS
-            if uiInstance.LDM:
+            if uiInstance.LDM is True:
                 uiInstance.LDM = False
                 animationInstance.queue.append([1, "You turned LDM off"])
 
@@ -1076,7 +1085,7 @@ class UI:
         return None
 
     def requestInput(self, key, value):
-        if not connectionInstance.connected:
+        if connectionInstance.connected is False:
             # Creates a series of input requests
             for check in range(7):
                 if connectionInstance.inputRequest == check:
@@ -1116,8 +1125,7 @@ class UI:
                 connectionInstance.inputRequest = 0
                 self.requestInput(key, value)
 
-            if all(check is not None for check in connectionInstance.inputs) \
-                    and key and not connectionInstance.connected:
+            if all(check is not None for check in connectionInstance.inputs) and key:
                 connectionInstance.connect()
 
     def keyPressed(self, event):
@@ -1149,10 +1157,10 @@ class UI:
                     self.requestInput(True, uiInstance.inputTextBox.value)
 
             else:
-                if connectionInstance.connected and event.tk_event.keysym:
+                if connectionInstance.connected is True:
                     uiInstance.messageInput.focus()
 
-                elif not connectionInstance.connected and event.tk_event.keysym:
+                elif connectionInstance.connected is False:
                     uiInstance.inputTextBox.focus()
 
     # Methods below create the UI
