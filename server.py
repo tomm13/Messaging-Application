@@ -89,7 +89,7 @@ class Security:
         self.cipherKey = random.randint(1, 26)
         self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey)
 
-        print(f"[Server] Server hosted on {str(connectionInstance.host)} with port {str(connectionInstance.port)}")
+        print(f"[Server] Server hosted on {str(connectionInstance.host)} on port {str(connectionInstance.port)}")
         print(f"[Server] Public key = {e}{N}")
         print(f"[Server] Private key = {d}{N}")
         print(f"[Server] Cipher key = {self.encryptedCipherKey}")
@@ -172,7 +172,6 @@ class Actions:
 
     def voteWaiter(self):
         # Executed in a thread, waits for a timer to end
-        print("[Server] Started vote-timer thread")
 
         while self.voteTimeRemaining > 0:
             self.voteTimeRemaining -= 1
@@ -298,22 +297,16 @@ class Actions:
                         self.mods.append(clientSocket)
                         self.modOnline += 1
 
-                        action = "/mod " + username
-                        sendInstance.privateBroadcast(action, clientSocket)
-
-                        message = username + " is now a mod"
-                        sendInstance.broadcastDisplay(message)
+                        sendInstance.privateBroadcast(f"/mod {username}", clientSocket)
+                        sendInstance.broadcastDisplay(f"{username} is now a mod")
 
                     elif modSocket in self.mods and modUsername in self.modUsers:
                         self.modUsers.append(username)
                         self.mods.append(clientSocket)
                         self.modOnline += 1
 
-                        action = "/mod " + username
-                        sendInstance.privateBroadcast(action, clientSocket)
-
-                        message = username + " is now a mod"
-                        sendInstance.broadcastDisplay(message)
+                        sendInstance.privateBroadcast(f"/mod {username}", clientSocket)
+                        sendInstance.broadcastDisplay(f"{username} is now a mod")
 
                     else:
                         sendInstance.privateBroadcastDisplay("You need to be a mod to do this", modSocket)
@@ -330,48 +323,39 @@ class Send:
     @staticmethod
     def broadcast(message):
         # Send a public message to every client
-        time.sleep(0.1)
-        print("[Client] " + message)
+        print(f"[Client] {message}")
 
-        message = securityInstance.caesarEncrypt(message)
         for client in connectionInstance.clients:
-            client.send(message.encode())
+            client.send(securityInstance.caesarEncrypt(message).encode())
 
     @staticmethod
     def broadcastDisplay(message):
         # Sends a public animated banner with {message} parameter
-        time.sleep(0.1)
-        print("[PublicDisplay] " + message)
-
-        message = "/display " + message
-        message = securityInstance.caesarEncrypt(message)
+        print(f"[PublicDisplay] {message}")
 
         for client in connectionInstance.clients:
-            client.send(message.encode())
+            client.send(securityInstance.caesarEncrypt(f"/display {message}").encode())
 
     @staticmethod
     def privateBroadcast(message, clientSocket):
         # Send a private message to 1 specific client
-        time.sleep(0.1)
-        print("[Private] " + message)
+        print(f"[Private] {message}")
 
-        message = securityInstance.caesarEncrypt(message)
-        clientSocket.send(message.encode())
+        clientSocket.send(securityInstance.caesarEncrypt(message).encode())
 
     @staticmethod
     def privateBroadcastDisplay(message, clientSocket):
         # Sends a private animted banner with {message} parameter
-        time.sleep(0.1)
-        print("[PrivateDisplay] " + message)
+        print(f"[PrivateDisplay] {message}")
 
-        message = "/display " + message
-        message = securityInstance.caesarEncrypt(message)
-        clientSocket.send(message.encode())
+        clientSocket.send(securityInstance.caesarEncrypt(f"/display {message}").encode())
 
     @staticmethod
-    def command(message, clientSocket):
+    def command(message, username, clientSocket):
         # Use list to prevent doubled code
-        if message == "/theme":
+        if message == "/leave":
+            connectionInstance.removeUser(username, clientSocket)
+        elif message == "/theme":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:6] == "/color":
             sendInstance.privateBroadcast(message, clientSocket)
@@ -413,79 +397,77 @@ class Connection:
             # This also broadcasts to other online users that a new user has connected.
 
             clientSocket, Address = self.socket.accept()
-            self.clients.append(clientSocket)
 
-            username = clientSocket.recv(1024).decode()
-            if username in self.users or username == "" or username == "Username" or " " in username or "[" in username \
-                    or "]" in username or len(username) > 10:
-                sendInstance.privateBroadcast("/disconnect", clientSocket)
-                self.clients.remove(clientSocket)
+            username = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode())
+            if username in self.users or " " in username or 1 > len(username) > 10:
+                sendInstance.privateBroadcast("/reject", clientSocket)
 
             else:
+                # Adds user to the list of users and updates everyone's user lists
                 self.users.append(username)
+                self.clients.append(clientSocket)
+                self.userOnline += 1
 
                 message = "/add "
 
                 for user in self.users:
-                    message += user + " "
+                    message += f"{user} "
 
                 sendInstance.broadcast(message)
 
-                self.userOnline += 1
-
-                Thread(target=self.listen, args=[clientSocket]).start()
+                Thread(target=self.listen, args=[username, clientSocket]).start()
                 print(f"[Thread] Started {username}'s update thread")
 
-    def listen(self, clientSocket):
+    def listen(self, username, clientSocket):
         # A listening thread linked to every unique client, and detects input from them
-        index = self.clients.index(clientSocket)
-        username = self.users[index]
         messagesSentRecently = 0
-        lastMessageSentTime = time.time()
+        lastMessageSentTime = 0
         warnUser = False
+        detectSpam = True
+        e = "No error raised"
 
-        while True:
+        while username in self.users and clientSocket in self.clients:
             try:
                 message = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode())
-                unifiedmessage = username + ": " + message
+                unifiedmessage = f"{username}: {message}"
 
                 if message:
                     if message[0] == "/":
-                        if message == "/leave":
-                            if clientSocket in self.clients:
-                                self.removeUser(username, clientSocket)
-                            break
-                        else:
-                            sendInstance.command(message, clientSocket)
-                    else:
-                        if messagesSentRecently >= 3:
-                            if not warnUser:
-                                sendInstance.privateBroadcastDisplay("You are sending messages too quickly",
-                                                                     clientSocket)
-                                warnUser = True
+                        sendInstance.command(message, username, clientSocket)
 
-                            if time.time() > lastMessageSentTime + 5:
-                                messagesSentRecently = 0
-                                warnUser = False
+                    else:
+                        if detectSpam is True:
+                            if messagesSentRecently >= 3:
+                                if warnUser is False:
+                                    sendInstance.privateBroadcastDisplay("You are sending messages too quickly",
+                                                                         clientSocket)
+                                    warnUser = True
+
+                                if time.time() > lastMessageSentTime + 5:
+                                    messagesSentRecently = 0
+                                    warnUser = False
+
+                            else:
+                                sendInstance.broadcast(unifiedmessage)
+
+                                if lastMessageSentTime + 1 > time.time():
+                                    messagesSentRecently += 1
+
+                                elif messagesSentRecently > 0:
+                                    messagesSentRecently -= 1
+
+                                lastMessageSentTime = time.time()
 
                         else:
                             sendInstance.broadcast(unifiedmessage)
 
-                            if lastMessageSentTime + 1 > time.time():
-                                messagesSentRecently += 1
-
-                            elif messagesSentRecently > 0:
-                                messagesSentRecently -= 1
-
-                            lastMessageSentTime = time.time()
-
             except (ConnectionResetError, OSError) as e:
-                print(f"[Thread] Closed {username}'s update thread {e}")
                 self.removeUser(username, clientSocket)
-                break
+
+        print(f"[Thread] Closed {username}'s update thread. {e}")
 
     def removeUser(self, username, clientSocket):
-        # Called when a user has a duplicate username or more commonly, leaves
+        # Called when a user has a duplicate username or leaves
         connectionInstance.clients.remove(clientSocket)
         connectionInstance.users.remove(username)
 
@@ -503,8 +485,7 @@ class Connection:
 
                 sendInstance.broadcastDisplay("The vote has been called off as a mod has left")
 
-        message = "/remove " + username
-        sendInstance.broadcast(message)
+        sendInstance.broadcast(f"/remove {username}")
 
 
 actionsInstance = Actions()
