@@ -56,10 +56,10 @@ class Security:
             for factor in range(2, int(math.sqrt(prime) + 1)):
                 if prime % factor == 0:
                     isPrime = False
-            if isPrime:
+            if isPrime is True:
                 primes.append(prime)
 
-        while not len(str(N)) == 6:
+        while len(str(N)) != 6:
             # Generate 2 primes P and Q where the product N is 6 digits
             P = primes[random.randint(0, len(primes))]
             Q = primes[random.randint(0, len(primes))]
@@ -78,7 +78,7 @@ class Security:
         for k in range(1, upper ** 2):
             # Generate d such that d = e^-1 mod phiN and is 6 digits long
             if (k * phiN + 1) % e == 0:
-                if not (k * phiN + 1) // e == e and len(str((k * phiN + 1) // e)) == 6:
+                if (k * phiN + 1) // e != e and len(str((k * phiN + 1) // e)) == 6:
                     d = (k * phiN + 1) // e
                     break
 
@@ -108,13 +108,16 @@ class Security:
         newMessage = ""
         for letter in message:
 
-            if letter.isalpha():
+            if letter.isalpha() is True:
 
-                if letter.islower():
+                if letter.islower() is True:
                     step = 97
 
-                elif letter.isupper():
+                elif letter.isupper() is True:
                     step = 65
+
+                else:
+                    raise ValueError("Invalid character")
 
                 index = (ord(letter) + self.cipherKey - step) % 26
 
@@ -129,13 +132,16 @@ class Security:
         newMessage = ""
         for letter in message:
 
-            if letter.isalpha():
+            if letter.isalpha() is True:
 
-                if letter.islower():
+                if letter.islower() is True:
                     step = 97
 
-                elif letter.isupper():
+                elif letter.isupper() is True:
                     step = 65
+
+                else:
+                    raise ValueError("Invalid character")
 
                 index = (ord(letter) - self.cipherKey - step) % 26
 
@@ -202,7 +208,7 @@ class Actions:
 
                 if modSocket in self.mods and modUsername in self.modUsers:
                     if clientSocket not in self.mods and username not in self.modUsers:
-                        if not self.voteActive:
+                        if self.voteActive is False:
                             if self.modOnline == 1:
                                 sendInstance.broadcastDisplay(modUsername + " has kicked " + username)
                                 connectionInstance.removeUser(username, clientSocket)
@@ -230,7 +236,7 @@ class Actions:
                 sendInstance.privateBroadcastDisplay("You can't kick this person", modSocket)
 
         elif message[0:5] == "/vote":
-            if self.voteActive:
+            if self.voteActive is True:
                 if message[6:] == "details":
                     sendInstance.privateBroadcastDisplay("Being kicked: " + self.userToKick, modSocket)
 
@@ -264,7 +270,7 @@ class Actions:
             else:
                 sendInstance.privateBroadcastDisplay("You cannot do this as there is no ongoing vote", modSocket)
 
-        if self.voteActive:
+        if self.voteActive is True:
             if self.voteFor == self.voteTarget or self.voteAgainst == self.voteTarget or self.voteFor + \
                     self.voteAgainst == self.voteTarget:
 
@@ -291,7 +297,7 @@ class Actions:
             clientSocket = connectionInstance.clients[index]
 
             if clientSocket not in self.mods and username not in self.modUsers:
-                if not actionsInstance.userToKickSocket == clientSocket and not actionsInstance.userToKick == username:
+                if actionsInstance.userToKickSocket != clientSocket and actionsInstance.userToKick != username:
                     if self.modOnline == 0:
                         self.modUsers.append(username)
                         self.mods.append(clientSocket)
@@ -480,7 +486,7 @@ class Connection:
             actionsInstance.modUsers.remove(username)
             actionsInstance.modOnline -= 1
 
-            if actionsInstance.voteActive:
+            if actionsInstance.voteActive is True:
                 actionsInstance.resetVote()
 
                 sendInstance.broadcastDisplay("The vote has been called off as a mod has left")
