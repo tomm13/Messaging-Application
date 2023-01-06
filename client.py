@@ -897,6 +897,7 @@ class Connection:
 
             if self.threadInitialized is False:
                 Thread(target=communicationInstance.updateThread).start()
+                self.threadInitialized = True
 
         except (ConnectionRefusedError, OSError, TimeoutError) as e:
             print(f"An error occured: {e}")
