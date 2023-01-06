@@ -53,16 +53,19 @@ class Security:
 
         for prime in range(lower, upper):
             isPrime = True
+
             for factor in range(2, int(math.sqrt(prime) + 1)):
                 if prime % factor == 0:
                     isPrime = False
-            if isPrime:
+                    break
+
+            if isPrime is True:
                 primes.append(prime)
 
-        while not len(str(N)) == 6:
+        while len(str(N)) != 6:
             # Generate 2 primes P and Q where the product N is 6 digits
-            P = primes[random.randint(0, len(primes))]
-            Q = primes[random.randint(0, len(primes))]
+            P = primes[random.randint(0, len(primes) - 1)]
+            Q = primes[random.randint(0, len(primes) - 1)]
 
             # N is the 7-12th digits of either the public or private key
             N = P * Q
@@ -78,7 +81,7 @@ class Security:
         for k in range(1, upper ** 2):
             # Generate d such that d = e^-1 mod phiN and is 6 digits long
             if (k * phiN + 1) % e == 0:
-                if not (k * phiN + 1) // e == e and len(str((k * phiN + 1) // e)) == 6:
+                if (k * phiN + 1) // e != e and len(str((k * phiN + 1) // e)) == 6:
                     d = (k * phiN + 1) // e
                     break
 
@@ -108,13 +111,16 @@ class Security:
         newMessage = ""
         for letter in message:
 
-            if letter.isalpha():
+            if letter.isalpha() is True:
 
-                if letter.islower():
+                if letter.islower() is True:
                     step = 97
 
-                elif letter.isupper():
+                elif letter.isupper() is True:
                     step = 65
+
+                else:
+                    raise ValueError("Invalid character")
 
                 index = (ord(letter) + self.cipherKey - step) % 26
 
@@ -129,13 +135,16 @@ class Security:
         newMessage = ""
         for letter in message:
 
-            if letter.isalpha():
+            if letter.isalpha() is True:
 
-                if letter.islower():
+                if letter.islower() is True:
                     step = 97
 
-                elif letter.isupper():
+                elif letter.isupper() is True:
                     step = 65
+
+                else:
+                    raise ValueError("Invalid character")
 
                 index = (ord(letter) - self.cipherKey - step) % 26
 
@@ -202,7 +211,7 @@ class Actions:
 
                 if modSocket in self.mods and modUsername in self.modUsers:
                     if clientSocket not in self.mods and username not in self.modUsers:
-                        if not self.voteActive:
+                        if self.voteActive is False:
                             if self.modOnline == 1:
                                 sendInstance.broadcastDisplay(modUsername + " has kicked " + username)
                                 connectionInstance.removeUser(username, clientSocket)
@@ -225,12 +234,12 @@ class Actions:
                     else:
                         sendInstance.privateBroadcastDisplay("You cannot kick a mod", modSocket)
                 else:
-                    sendInstance.privateBroadcastDisplay("You need to be a mod to kick", modSocket)
+                    sendInstance.privateBroadcastDisplay(f"You need to be a mod to kick {username}", modSocket)
             else:
-                sendInstance.privateBroadcastDisplay("You can't kick this person", modSocket)
+                sendInstance.privateBroadcastDisplay("You can't kick what doesn't exist", modSocket)
 
         elif message[0:5] == "/vote":
-            if self.voteActive:
+            if self.voteActive is True:
                 if message[6:] == "details":
                     sendInstance.privateBroadcastDisplay("Being kicked: " + self.userToKick, modSocket)
 
@@ -264,7 +273,7 @@ class Actions:
             else:
                 sendInstance.privateBroadcastDisplay("You cannot do this as there is no ongoing vote", modSocket)
 
-        if self.voteActive:
+        if self.voteActive is True:
             if self.voteFor == self.voteTarget or self.voteAgainst == self.voteTarget or self.voteFor + \
                     self.voteAgainst == self.voteTarget:
 
@@ -291,7 +300,7 @@ class Actions:
             clientSocket = connectionInstance.clients[index]
 
             if clientSocket not in self.mods and username not in self.modUsers:
-                if not actionsInstance.userToKickSocket == clientSocket and not actionsInstance.userToKick == username:
+                if actionsInstance.userToKickSocket != clientSocket and actionsInstance.userToKick != username:
                     if self.modOnline == 0:
                         self.modUsers.append(username)
                         self.mods.append(clientSocket)
@@ -355,24 +364,14 @@ class Send:
         # Use list to prevent doubled code
         if message == "/leave":
             connectionInstance.removeUser(username, clientSocket)
-        elif message == "/theme":
-            sendInstance.privateBroadcast(message, clientSocket)
-        elif message[0:6] == "/color":
-            sendInstance.privateBroadcast(message, clientSocket)
-        elif message[0:9] == "/savechat":
-            sendInstance.privateBroadcast(message, clientSocket)
-        elif message[0:7] == "/border":
-            sendInstance.privateBroadcast(message, clientSocket)
-        elif message == "/ldm":
-            sendInstance.privateBroadcast(message, clientSocket)
-        elif message == "/previous":
-            sendInstance.privateBroadcast(message, clientSocket)
-        elif message == "/next":
-            sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:4] == "/mod":
             actionsInstance.mod(message, clientSocket)
-        elif message[0:5] == "/kick" or message[0:5] == "/vote":
+        elif message[0:5] in ["/kick", "/vote"]:
             actionsInstance.vote(message, clientSocket)
+        elif message[0:6] == "/color" or message[0:7] == "/border" or message[0:9] == "/savechat":
+            sendInstance.privateBroadcast(message, clientSocket)
+        elif message in ["/theme", "/ldm", "/previous", "/next"]:
+            sendInstance.privateBroadcast(message, clientSocket)
         else:
             sendInstance.privateBroadcastDisplay("Your command is unknown", clientSocket)
 
@@ -461,26 +460,26 @@ class Connection:
                             sendInstance.broadcast(unifiedmessage)
 
             except (ConnectionResetError, OSError) as e:
-                print(e)
+                print(f"[Thread] Error occured in {username}'s update thread. {e}")
                 self.removeUser(username, clientSocket)
 
         print(f"[Thread] Closed {username}'s update thread")
 
     def removeUser(self, username, clientSocket):
         # Called when a user has a duplicate username or leaves
-        connectionInstance.clients.remove(clientSocket)
-        connectionInstance.users.remove(username)
-
         clientSocket.close()
 
-        self.userOnline -= 1
+        if clientSocket in connectionInstance.clients and username in connectionInstance.users:
+            connectionInstance.clients.remove(clientSocket)
+            connectionInstance.users.remove(username)
+            self.userOnline -= 1
 
         if clientSocket in actionsInstance.mods and username in actionsInstance.modUsers:
             actionsInstance.mods.remove(clientSocket)
             actionsInstance.modUsers.remove(username)
             actionsInstance.modOnline -= 1
 
-            if actionsInstance.voteActive:
+            if actionsInstance.voteActive is True:
                 actionsInstance.resetVote()
 
                 sendInstance.broadcastDisplay("The vote has been called off as a mod has left")
