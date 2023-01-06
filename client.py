@@ -910,7 +910,7 @@ class Connection:
                 Thread(target=communicationInstance.updateThread).start()
 
         except (ConnectionRefusedError, OSError, TimeoutError) as e:
-            uiInstance.setupWindow.error("Error", "An Error occured: {e}")
+            print(f"An error occured: {e}")
 
     def leave(self):
         if connectionInstance.accepted is True:
