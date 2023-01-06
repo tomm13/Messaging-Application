@@ -1,4 +1,4 @@
-# 4/1/2023
+# 6/1/2023
 # V13.3
 
 import server
@@ -32,3 +32,10 @@ def test_key_retrieval():
 def test_string_retrieval():
     message = "my name is tomm 12345"
     assert message == server.securityInstance.caesarDecrypt(server.securityInstance.caesarEncrypt(message))
+
+
+def test_username_validation():
+    assert server.connectionInstance.validateUsername("p p") is False
+    assert server.connectionInstance.validateUsername("1234567891011") is False
+    assert server.connectionInstance.validateUsername("") is False
+    assert server.connectionInstance.validateUsername("random") is True
