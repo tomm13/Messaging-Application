@@ -398,27 +398,35 @@ class Connection:
             clientSocket, Address = self.socket.accept()
 
             username = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode())
-            if username in self.users or " " in username or 1 > len(username) > 10:
-                sendInstance.privateBroadcast("/reject", clientSocket)
+
+            # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
+            if self.validateUsername(username) is True:
+                # Initialise an update thread given the username is valid
+                Thread(target=self.listen, args=[username, clientSocket, True]).start()
+                print(f"[Thread] Started {username}'s update thread. Username is valid")
 
             else:
-                # Adds user to the list of users and updates everyone's user lists
-                self.users.append(username)
-                self.clients.append(clientSocket)
-                self.userOnline += 1
+                sendInstance.privateBroadcast("/reject", clientSocket)
 
-                message = "/accept "
+                # Initialise an update thread given the username is invalid
+                Thread(target=self.listen, args=[username, clientSocket, False]).start()
+                print(f"[Thread] Started {username}'s update thread. Username is invalid")
 
-                for user in self.users:
-                    message += f"{user} "
-
-                sendInstance.broadcast(message)
-
-                Thread(target=self.listen, args=[username, clientSocket]).start()
-                print(f"[Thread] Started {username}'s update thread")
-
-    def listen(self, username, clientSocket):
+    def listen(self, username, clientSocket, hasValidUsername):
         # A listening thread linked to every unique client, and detects input from them
+        if hasValidUsername is False:
+            while hasValidUsername is False:
+                username = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode())
+
+                if self.validateUsername(username) is True:
+                    hasValidUsername = True
+
+                else:
+                    sendInstance.privateBroadcast("/reject", clientSocket)
+
+        # Allows the user to join the chatroom, send and receive messages
+        self.addUser(username, clientSocket)
+
         messagesSentRecently = 0
         lastMessageSentTime = 0
         warnUser = False
@@ -465,6 +473,19 @@ class Connection:
 
         print(f"[Thread] Closed {username}'s update thread")
 
+    def addUser(self, username, clientSocket):
+        # Adds user to the list of users and updates everyone's user lists
+        self.users.append(username)
+        self.clients.append(clientSocket)
+        self.userOnline += 1
+
+        message = "/accept "
+
+        for user in self.users:
+            message += f"{user} "
+
+        sendInstance.broadcast(message)
+
     def removeUser(self, username, clientSocket):
         # Called when a user has a duplicate username or leaves
         clientSocket.close()
@@ -485,6 +506,14 @@ class Connection:
                 sendInstance.broadcastDisplay("The vote has been called off as a mod has left")
 
         sendInstance.broadcast(f"/remove {username}")
+
+    def validateUsername(self, username):
+        # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
+        if username in self.users or " " in username or 1 > len(username) > 10:
+            return False
+
+        else:
+            return True
 
 
 actionsInstance = Actions()
