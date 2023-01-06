@@ -3,8 +3,10 @@
 
 import platform
 import socket
+import time
+
 import colorutils
-from time import sleep, localtime, strftime, time
+from time import sleep, localtime, strftime
 from threading import Thread
 from guizero import *
 
@@ -797,8 +799,8 @@ class Communication:
     def updateThread(self):
         # Starts when the user is connected
         # Looks out for server broadcasts
-        try:
-            while True:
+        while True:
+            try:
                 message = self.caesarDecrypt(connectionInstance.socket.recv(1024).decode())
 
                 if message:
@@ -847,9 +849,9 @@ class Communication:
                     else:
                         self.addMessage(message)
 
-        except (ConnectionResetError, OSError) as e:
-            print(f"An error occured: {e}")
-            connectionInstance.leave()
+            except (ConnectionResetError, OSError):
+                print("Closed update thread")
+                break
 
 
 class Connection:
@@ -900,7 +902,7 @@ class Connection:
                 self.threadInitialized = True
 
         except (ConnectionRefusedError, OSError, TimeoutError) as e:
-            print(f"An error occured: {e}")
+            print(f"An error occured 2 : {e}")
 
     def leave(self):
         if connectionInstance.connected is True:
