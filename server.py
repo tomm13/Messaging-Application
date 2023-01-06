@@ -454,7 +454,11 @@ class Connection:
                                     warnUser = False
 
                             else:
-                                sendInstance.broadcast(unifiedmessage)
+                                if self.validateMessageLength(unifiedmessage) is False:
+                                    sendInstance.privateBroadcastDisplay("Your message is too long", clientSocket)
+
+                                else:
+                                    sendInstance.broadcast(unifiedmessage)
 
                                 if lastMessageSentTime + 1 > time.time():
                                     messagesSentRecently += 1
@@ -465,10 +469,14 @@ class Connection:
                                 lastMessageSentTime = time.time()
 
                         else:
-                            sendInstance.broadcast(unifiedmessage)
+                            if self.validateMessageLength(unifiedmessage) is False:
+                                sendInstance.privateBroadcastDisplay("Your message is too long", clientSocket)
+
+                            else:
+                                sendInstance.broadcast(unifiedmessage)
 
             except (ConnectionResetError, OSError) as e:
-                print(f"[Thread] Error occured in {username}'s update thread. {e}")
+                print(f"[Thread] An error occured in {username}'s update thread. {e}")
                 self.removeUser(username, clientSocket)
 
         print(f"[Thread] Closed {username}'s update thread")
@@ -509,7 +517,15 @@ class Connection:
 
     def validateUsername(self, username):
         # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
-        if username in self.users or " " in username or len(username) > 10 or len(username) < 1:
+        if username in self.users or " " in username or len(username) > 7 or len(username) < 1:
+            return False
+
+        else:
+            return True
+
+    @staticmethod
+    def validateMessageLength(message):
+        if len(message) > 50:
             return False
 
         else:
