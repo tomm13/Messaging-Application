@@ -819,7 +819,7 @@ class Communication:
         # Starts when the user is connected
         # Looks out for server broadcasts
         try:
-            while connectionInstance.connected is True:
+            while True:
                 message = self.caesarDecrypt(connectionInstance.socket.recv(1024).decode())
 
                 if message:
@@ -847,6 +847,8 @@ class Communication:
                         uiInstance.chooseColor(4, message[8:])
 
                     elif message[0:4] == "/add":
+                        uiInstance.openChat()
+
                         self.addUsers(message[5:])
 
                     elif message[0:7] == "/remove":
@@ -894,7 +896,7 @@ class Connection:
         self.d = int(str(self.inputs[5][0:6]), base=10)
         self.N = int(str(self.inputs[5][6:12]), base=10)
         self.cipherKey = communicationInstance.rsaDecrypt(int(self.inputs[6], base=10))
-        
+
         # Inherit the inputted colors to the UI
         uiInstance.color = self.inputs[1]
         uiInstance.animationColor = self.inputs[1]
@@ -902,13 +904,10 @@ class Connection:
         try:
             self.socket.connect((self.inputs[2], int(self.inputs[3], base=10)))
             self.socket.send(communicationInstance.caesarEncrypt(self.inputs[0]).encode())
+            self.connected = True
 
             if self.threadInitialized is False:
                 Thread(target=communicationInstance.updateThread).start()
-
-            self.connected = True
-
-            uiInstance.openChat()
 
         except (ConnectionRefusedError, OSError, TimeoutError):
             animationInstance.queue.append([5, "Connection refused, try checking the host IP and port"])
