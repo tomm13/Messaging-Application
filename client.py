@@ -1,4 +1,4 @@
-# 5/1/2023
+# 6/1/2023
 # V13.3
 
 import platform
@@ -427,6 +427,7 @@ class Animation:
             uiInstance.status.bg = (R, G, B)
 
         uiInstance.color = newColor
+        uiInstance.animationColor = newColor
 
     @staticmethod
     def fadeIndicator(key, newColor):
@@ -556,7 +557,7 @@ class Animation:
                     self.fadeBordersInChat(self.queue[0][1])
 
                 elif self.queue[0][0] == 5:
-                    if connectionInstance.connected is False:
+                    if connectionInstance.accepted is False:
                         if len(str(self.queue[0][0])) < 10:
                             self.waitMultiplier = 2.0
                         elif len(str(self.queue[0][0])) < 15:
@@ -567,11 +568,11 @@ class Animation:
                         self.animateHeaderInSetup(self.queue[0][1])
 
                 elif self.queue[0][0] == 6:
-                    if connectionInstance.connected is False:
+                    if connectionInstance.accepted is False:
                         self.fadeColorsInSetup(self.queue[0][1])
 
                 elif self.queue[0][0] == 7:
-                    if connectionInstance.connected is False:
+                    if connectionInstance.accepted is False:
                         self.fadeIndicator(self.queue[0][1], self.queue[0][2])
 
                 self.queue.pop(0)
@@ -661,16 +662,6 @@ class Communication:
 
         else:
             animationInstance.queue.append([1, "You can't save to this location"])
-
-    @staticmethod
-    def disconnectLoop():
-        # Called by using an existing username when connecting
-        uiInstance.animationColor = (255, 0, 0)
-
-        while True:
-            animationInstance.queue.append([1, "You cannot use this username, "
-                                               "please rejoin under a different username"])
-            sleep(1)
 
     def sendToServer(self, message):
         # Gets the value of the input, encrypts, then broadcasts
@@ -819,7 +810,7 @@ class Communication:
         # Starts when the user is connected
         # Looks out for server broadcasts
         try:
-            while connectionInstance.connected is True:
+            while True:
                 message = self.caesarDecrypt(connectionInstance.socket.recv(1024).decode())
 
                 if message:
@@ -846,26 +837,29 @@ class Communication:
                     elif message[0:7] == "/border":
                         uiInstance.chooseColor(4, message[8:])
 
-                    elif message[0:4] == "/add":
-                        self.addUsers(message[5:])
-
-                    elif message[0:7] == "/remove":
-                        self.removeUser(message[8:])
-
                     elif message == "/next":
                         self.nextPage()
 
                     elif message == "/previous":
                         self.previousPage()
 
+                    elif message[0:7] == "/accept":
+                        connectionInstance.accepted = True
+                        uiInstance.openChat()
+
+                        self.addUsers(message[8:])
+
                     elif message == "/reject":
-                        self.disconnectLoop()
+                        connectionInstance.accepted = False
+                        uiInstance.resetInputs()
+
+                    elif message[0:7] == "/remove":
+                        self.removeUser(message[8:])
 
                     else:
                         self.addMessage(message)
 
         except (ConnectionResetError, OSError) as e:
-            print(f"An error occured: {e}")
             connectionInstance.leave()
 
 
@@ -875,12 +869,16 @@ class Connection:
         self.inputs = [None for i in range(7)]
 
         # Attributes
+        # Connected = when the client connects to the server
+        # Accepted = when the username sent has been accepted (None means pending)
         self.socket = socket.socket()
         self.e = None
         self.d = None
         self.N = None
         self.cipherKey = None
         self.connected = False
+        self.accepted = False
+        self.threadInitialized = False
         self.mod = False
         self.inputRequest = 0
         self.timeoutduration = 5
@@ -894,29 +892,38 @@ class Connection:
         self.N = int(str(self.inputs[5][6:12]), base=10)
         self.cipherKey = communicationInstance.rsaDecrypt(int(self.inputs[6], base=10))
 
+        # Inherit the inputted colors to the UI
+        uiInstance.color = self.inputs[1]
+        uiInstance.animationColor = self.inputs[1]
+
         try:
-            self.socket.connect((self.inputs[2], int(self.inputs[3], base=10)))
-            self.socket.send(communicationInstance.caesarEncrypt(self.inputs[0]).encode())
-            self.connected = True
+            if self.connected is False:
+                self.socket.connect((self.inputs[2], int(self.inputs[3], base=10)))
+                self.connected = True
 
-            uiInstance.color = self.inputs[1]
-            uiInstance.animationColor = self.inputs[1]
-            uiInstance.openChat()
+            if self.accepted is False:
+                # Send username to determine if it's acceptable
+                self.socket.send(communicationInstance.caesarEncrypt(self.inputs[0]).encode())
+                self.accepted = None
 
-        except (ConnectionRefusedError, OSError, TimeoutError):
-            animationInstance.queue.append([5, "Connection refused, try checking the host IP and port"])
+            if self.threadInitialized is False:
+                Thread(target=communicationInstance.updateThread).start()
+
+        except (ConnectionRefusedError, OSError, TimeoutError) as e:
+            print(f"An error occured: {e}")
 
     def leave(self):
-        if connectionInstance.connected is True:
+        if connectionInstance.accepted is True:
             self.socket.send(communicationInstance.caesarEncrypt("/leave").encode())
-            self.connected = False
 
             uiInstance.chatWindow.exit_full_screen()
             uiInstance.chatWindow.destroy()
 
-        uiInstance.setupWindow.destroy()
+        else:
+            uiInstance.setupWindow.destroy()
 
-        self.socket.close()
+        if connectionInstance.connected is True:
+            self.socket.close()
 
 
 class UI:
@@ -1004,14 +1011,13 @@ class UI:
 
     # Methods below alter UI attributes
 
-    @staticmethod
-    def chooseColor(code, message):
+    def chooseColor(self, code, message):
         # Called by /color [Color]
         try:
             color = colorutils.web_to_rgb(message)
 
-            if (uiInstance.darkMode is True and color == (0, 0, 0)) or \
-                    (uiInstance.darkMode is False and color == uiInstance.lightbg):
+            if (self.darkMode is True and color == (0, 0, 0)) or \
+                    (self.darkMode is False and color == self.lightbg):
                 animationInstance.queue.append([1, "You cannot do this due to contrast"])
 
             else:
@@ -1020,11 +1026,10 @@ class UI:
         except ValueError:
             animationInstance.queue.append([1, "You cannot use this color as it is undefined"])
 
-    @staticmethod
-    def setMod(message):
+    def setMod(self, message):
         # Called by /mod [User]
         if message == connectionInstance.inputs[0] and connectionInstance.mod is False:
-            if uiInstance.darkMode is False:
+            if self.darkMode is False:
                 animationInstance.queue.append([2, False])
 
             connectionInstance.mod = True
@@ -1032,22 +1037,41 @@ class UI:
             uiInstance.chooseColor(3, "khaki")
             uiInstance.chooseColor(4, "khaki")
 
-    @staticmethod
-    def setLDM():
+    def setLDM(self):
         # Called by /ldm
         if platform.system() == "Darwin":
             # For macOS
-            if uiInstance.LDM is True:
-                uiInstance.LDM = False
+            if self.LDM is True:
+                self.LDM = False
                 animationInstance.queue.append([1, "You turned LDM off"])
 
             else:
-                uiInstance.LDM = True
+                self.LDM = True
                 animationInstance.queue.append([1, "You turned LDM on"])
 
         else:
-            animationInstance.queue.append(
-                [1, "Animations are forcefully disabled on your OS."])
+            animationInstance.queue.append([1, "Animations are disabled on your OS."])
+
+    # Resets the 7 inputs
+    def resetInputs(self):
+        # Resets every indiactor to be invisible
+        for indicator in range(7):
+            animationInstance.queue.append([7, indicator, self.bg])
+
+        # Create a white block cursor for the input after the last one inputted
+        for check in range(7):
+            if connectionInstance.inputRequest == check:
+                animationInstance.queue.append([7, check, self.lightbg])
+
+        # Reset the inherited colors and fade to the default colors
+        # The animation resets color and animationcolor after running the animation
+        animationInstance.queue.append([6, (173, 216, 230)])
+
+        # Reset inputs
+        connectionInstance.inputs = [None for i in range(7)]
+
+        # Create warning
+        self.setupWindow.error("Error", "The server has rejected your username. All inputs have been reset.")
 
     # Gets the 7 inputs
     def getInputs(self, check, key, value):
@@ -1067,7 +1091,7 @@ class UI:
                         color = colorutils.web_to_rgb(value)
 
                         # Prevent matching background and text colors
-                        if color == uiInstance.lightbg:
+                        if color == self.lightbg:
                             animationInstance.queue.append([5, self.getInputsMessages[check][1]])
 
                         else:
@@ -1085,13 +1109,13 @@ class UI:
         return None
 
     def requestInput(self, key, value):
-        if connectionInstance.connected is False:
+        if connectionInstance.accepted is False:
             # Creates a series of input requests
             for check in range(7):
                 if connectionInstance.inputRequest == check:
                     val = self.getInputs(check, key, value)
 
-                    # Get best value
+                    # Get best value (where None is worse than any username)
                     if val is not None:
                         connectionInstance.inputs[check] = val
                         connectionInstance.inputRequest += 1
@@ -1103,7 +1127,7 @@ class UI:
                         self.inputTextBox.clear()
 
                     # Creates white block cursor
-                    animationInstance.queue.append([7, check, uiInstance.lightbg])
+                    animationInstance.queue.append([7, check, self.lightbg])
 
             # Marks every completed input with color
             for check in range(7):
@@ -1115,7 +1139,7 @@ class UI:
 
                     else:
                         # Copies the default color into the inputs list
-                        animationInstance.queue.append([7, check, uiInstance.animationColor])
+                        animationInstance.queue.append([7, check, self.animationColor])
 
             if connectionInstance.inputRequest < 0:
                 connectionInstance.inputRequest = 6
@@ -1129,39 +1153,44 @@ class UI:
                 connectionInstance.connect()
 
     def keyPressed(self, event):
-        # Detects key presses with emphasis on enter, left and right
+        # Detects key presses with emphasis on enter, escape, left and right
         if event:
             # Left and right keys bypass all if statements in getInputs, therefore will request for inputs every time
             # Whereas enter key does not bypass (as it is True), so it may request with the "try again" message
+            # Escape exits full screen
             if event.tk_event.keysym == "Left":
                 if 7 > connectionInstance.inputRequest > -1:
-                    animationInstance.queue.append([7, connectionInstance.inputRequest, uiInstance.bg])
+                    animationInstance.queue.append([7, connectionInstance.inputRequest, self.bg])
 
                     connectionInstance.inputRequest -= 1
 
-                    self.requestInput(False, uiInstance.inputTextBox.value)
+                    self.requestInput(False, self.inputTextBox.value)
 
             if event.tk_event.keysym == "Right":
                 if 7 > connectionInstance.inputRequest > -1:
-                    animationInstance.queue.append([7, connectionInstance.inputRequest, uiInstance.bg])
+                    animationInstance.queue.append([7, connectionInstance.inputRequest, self.bg])
 
                     connectionInstance.inputRequest += 1
 
-                    self.requestInput(False, uiInstance.inputTextBox.value)
+                    self.requestInput(False, self.inputTextBox.value)
 
             if event.tk_event.keysym == "Return":
-                if connectionInstance.connected:
-                    communicationInstance.sendToServer(uiInstance.messageInput.value)
+                if connectionInstance.accepted:
+                    communicationInstance.sendToServer(self.messageInput.value)
 
                 else:
-                    self.requestInput(True, uiInstance.inputTextBox.value)
+                    self.requestInput(True, self.inputTextBox.value)
+
+            if event.tk_event.keysym == "Escape":
+                if connectionInstance.accepted:
+                    self.chatWindow.exit_full_screen()
 
             else:
-                if connectionInstance.connected is True:
-                    uiInstance.messageInput.focus()
+                if connectionInstance.accepted is True:
+                    self.messageInput.focus()
 
-                elif connectionInstance.connected is False:
-                    uiInstance.inputTextBox.focus()
+                else:
+                    self.inputTextBox.focus()
 
     # Methods below create the UI
 
@@ -1237,9 +1266,6 @@ class UI:
         self.messageInput.text_size = self.fontSizes[3][self.fontIndex]
         self.messageInput.bg = self.themeDependentBg
         self.messageInput.when_key_pressed = self.keyPressed
-
-        # Threads here will start when the chat is open
-        Thread(target=communicationInstance.updateThread).start()
 
         self.setupWindow.hide()
         self.chatWindow.show()
