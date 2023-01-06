@@ -1,4 +1,4 @@
-# 5/1/2023
+# 6/1/2023
 # V13.3
 
 import platform
@@ -881,6 +881,7 @@ class Connection:
         self.N = None
         self.cipherKey = None
         self.connected = False
+        self.threadInitialized = False
         self.mod = False
         self.inputRequest = 0
         self.timeoutduration = 5
@@ -893,14 +894,20 @@ class Connection:
         self.d = int(str(self.inputs[5][0:6]), base=10)
         self.N = int(str(self.inputs[5][6:12]), base=10)
         self.cipherKey = communicationInstance.rsaDecrypt(int(self.inputs[6], base=10))
+        
+        # Inherit the inputted colors to the UI
+        uiInstance.color = self.inputs[1]
+        uiInstance.animationColor = self.inputs[1]
 
         try:
             self.socket.connect((self.inputs[2], int(self.inputs[3], base=10)))
             self.socket.send(communicationInstance.caesarEncrypt(self.inputs[0]).encode())
+
+            if self.threadInitialized is False:
+                Thread(target=communicationInstance.updateThread).start()
+
             self.connected = True
 
-            uiInstance.color = self.inputs[1]
-            uiInstance.animationColor = self.inputs[1]
             uiInstance.openChat()
 
         except (ConnectionRefusedError, OSError, TimeoutError):
@@ -1237,9 +1244,6 @@ class UI:
         self.messageInput.text_size = self.fontSizes[3][self.fontIndex]
         self.messageInput.bg = self.themeDependentBg
         self.messageInput.when_key_pressed = self.keyPressed
-
-        # Threads here will start when the chat is open
-        Thread(target=communicationInstance.updateThread).start()
 
         self.setupWindow.hide()
         self.chatWindow.show()
