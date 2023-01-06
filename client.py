@@ -846,10 +846,10 @@ class Communication:
                     elif message[0:7] == "/border":
                         uiInstance.chooseColor(4, message[8:])
 
-                    elif message[0:4] == "/add":
+                    elif message[0:7] == "/accept":
                         uiInstance.openChat()
 
-                        self.addUsers(message[5:])
+                        self.addUsers(message[8:])
 
                     elif message[0:7] == "/remove":
                         self.removeUser(message[8:])
