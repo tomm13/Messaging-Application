@@ -332,7 +332,7 @@ class Send:
     @staticmethod
     def broadcast(message):
         # Send a public message to every client
-        print(f"[Client] {message}")
+        print(f"[Public] {message}")
 
         for client in connectionInstance.clients:
             client.send(securityInstance.caesarEncrypt(message).encode())
