@@ -39,6 +39,7 @@ def test_username_validation():
     assert server.connectionInstance.validateUsername("p p") is False
     assert server.connectionInstance.validateUsername("") is False
     assert server.connectionInstance.validateUsername("12345678") is False
+    assert server.connectionInstance.validateUsername("None") is False
     assert server.connectionInstance.validateUsername("random") is True
 
 
