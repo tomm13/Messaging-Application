@@ -860,7 +860,6 @@ class Communication:
                         self.addMessage(message)
 
         except (ConnectionResetError, OSError) as e:
-            print(f"An error occured: {e}")
             connectionInstance.leave()
 
 
@@ -910,20 +909,21 @@ class Connection:
             if self.threadInitialized is False:
                 Thread(target=communicationInstance.updateThread).start()
 
-        except (ConnectionRefusedError, OSError, TimeoutError):
-            animationInstance.queue.append([5, "Connection refused, try checking the host IP and port"])
+        except (ConnectionRefusedError, OSError, TimeoutError) as e:
+            uiInstance.setupWindow.error("Error", "An Error occured: {e}")
 
     def leave(self):
-        if connectionInstance.connected is True:
+        if connectionInstance.accepted is True:
             self.socket.send(communicationInstance.caesarEncrypt("/leave").encode())
-            self.connected = False
 
             uiInstance.chatWindow.exit_full_screen()
             uiInstance.chatWindow.destroy()
 
-        uiInstance.setupWindow.destroy()
+        else:
+            uiInstance.setupWindow.destroy()
 
-        self.socket.close()
+        if connectionInstance.connected is True:
+            self.socket.close()
 
 
 class UI:
@@ -1070,7 +1070,8 @@ class UI:
         # Reset inputs
         connectionInstance.inputs = [None for i in range(7)]
 
-        animationInstance.queue.append([5, "Failed lmao."])
+        # Create warning
+        self.setupWindow.error("Error", "The server has rejected your username. All inputs have been reset.")
 
     # Gets the 7 inputs
     def getInputs(self, check, key, value):
@@ -1152,10 +1153,11 @@ class UI:
                 connectionInstance.connect()
 
     def keyPressed(self, event):
-        # Detects key presses with emphasis on enter, left and right
+        # Detects key presses with emphasis on enter, escape, left and right
         if event:
             # Left and right keys bypass all if statements in getInputs, therefore will request for inputs every time
             # Whereas enter key does not bypass (as it is True), so it may request with the "try again" message
+            # Escape exits full screen
             if event.tk_event.keysym == "Left":
                 if 7 > connectionInstance.inputRequest > -1:
                     animationInstance.queue.append([7, connectionInstance.inputRequest, self.bg])
@@ -1179,12 +1181,16 @@ class UI:
                 else:
                     self.requestInput(True, self.inputTextBox.value)
 
+            if event.tk_event.keysym == "Escape":
+                if connectionInstance.accepted:
+                    self.chatWindow.exit_full_screen()
+
             else:
                 if connectionInstance.accepted is True:
-                    uiInstance.messageInput.focus()
+                    self.messageInput.focus()
 
                 else:
-                    uiInstance.inputTextBox.focus()
+                    self.inputTextBox.focus()
 
     # Methods below create the UI
 
