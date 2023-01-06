@@ -35,10 +35,11 @@ def test_string_retrieval():
 
 
 def test_username_validation():
-    # Length 0, 8 or above is rejected
+    # Length 0, 8 or above, space and "None" are rejected
     assert server.connectionInstance.validateUsername("p p") is False
     assert server.connectionInstance.validateUsername("") is False
     assert server.connectionInstance.validateUsername("12345678") is False
+    assert server.connectionInstance.validateUsername("None") is False
     assert server.connectionInstance.validateUsername("random") is True
 
 

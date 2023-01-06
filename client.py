@@ -3,8 +3,10 @@
 
 import platform
 import socket
+import time
+
 import colorutils
-from time import sleep, localtime, strftime, time
+from time import sleep, localtime, strftime
 from threading import Thread
 from guizero import *
 
@@ -797,8 +799,8 @@ class Communication:
     def updateThread(self):
         # Starts when the user is connected
         # Looks out for server broadcasts
-        try:
-            while True:
+        while True:
+            try:
                 message = self.caesarDecrypt(connectionInstance.socket.recv(1024).decode())
 
                 if message:
@@ -847,9 +849,9 @@ class Communication:
                     else:
                         self.addMessage(message)
 
-        except (ConnectionResetError, OSError) as e:
-            print(f"An error occured: {e}")
-            connectionInstance.leave()
+            except (ConnectionResetError, OSError):
+                print("Closed update thread")
+                break
 
 
 class Connection:
@@ -897,22 +899,22 @@ class Connection:
 
             if self.threadInitialized is False:
                 Thread(target=communicationInstance.updateThread).start()
+                self.threadInitialized = True
 
         except (ConnectionRefusedError, OSError, TimeoutError) as e:
-            print(f"An error occured: {e}")
+            print(f"An error occured 2 : {e}")
 
     def leave(self):
-        if connectionInstance.accepted is True:
+        if connectionInstance.connected is True:
             self.socket.send(communicationInstance.caesarEncrypt("/leave").encode())
+            self.socket.close()
 
+        if connectionInstance.accepted is True:
             uiInstance.chatWindow.exit_full_screen()
             uiInstance.chatWindow.destroy()
 
         else:
             uiInstance.setupWindow.destroy()
-
-        if connectionInstance.connected is True:
-            self.socket.close()
 
 
 class UI:
@@ -1264,6 +1266,7 @@ class UI:
         self.setupWindow = App(title="Setup", width=800, height=275)
         self.setupWindow.bg = self.bg
         self.setupWindow.font = self.font
+        self.setupWindow.when_closed = connectionInstance.leave
         self.setupWindow.when_key_pressed = self.keyPressed
 
         topPadding = Box(self.setupWindow, width="fill", height=50, align="top")
