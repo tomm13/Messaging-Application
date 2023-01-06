@@ -53,16 +53,19 @@ class Security:
 
         for prime in range(lower, upper):
             isPrime = True
+
             for factor in range(2, int(math.sqrt(prime) + 1)):
                 if prime % factor == 0:
                     isPrime = False
+                    break
+
             if isPrime is True:
                 primes.append(prime)
 
         while len(str(N)) != 6:
             # Generate 2 primes P and Q where the product N is 6 digits
-            P = primes[random.randint(0, len(primes))]
-            Q = primes[random.randint(0, len(primes))]
+            P = primes[random.randint(0, len(primes) - 1)]
+            Q = primes[random.randint(0, len(primes) - 1)]
 
             # N is the 7-12th digits of either the public or private key
             N = P * Q
@@ -231,9 +234,9 @@ class Actions:
                     else:
                         sendInstance.privateBroadcastDisplay("You cannot kick a mod", modSocket)
                 else:
-                    sendInstance.privateBroadcastDisplay("You need to be a mod to kick", modSocket)
+                    sendInstance.privateBroadcastDisplay(f"You need to be a mod to kick {username}", modSocket)
             else:
-                sendInstance.privateBroadcastDisplay("You can't kick this person", modSocket)
+                sendInstance.privateBroadcastDisplay("You can't kick what doesn't exist", modSocket)
 
         elif message[0:5] == "/vote":
             if self.voteActive is True:
@@ -361,24 +364,14 @@ class Send:
         # Use list to prevent doubled code
         if message == "/leave":
             connectionInstance.removeUser(username, clientSocket)
-        elif message == "/theme":
-            sendInstance.privateBroadcast(message, clientSocket)
-        elif message[0:6] == "/color":
-            sendInstance.privateBroadcast(message, clientSocket)
-        elif message[0:9] == "/savechat":
-            sendInstance.privateBroadcast(message, clientSocket)
-        elif message[0:7] == "/border":
-            sendInstance.privateBroadcast(message, clientSocket)
-        elif message == "/ldm":
-            sendInstance.privateBroadcast(message, clientSocket)
-        elif message == "/previous":
-            sendInstance.privateBroadcast(message, clientSocket)
-        elif message == "/next":
-            sendInstance.privateBroadcast(message, clientSocket)
         elif message[0:4] == "/mod":
             actionsInstance.mod(message, clientSocket)
-        elif message[0:5] == "/kick" or message[0:5] == "/vote":
+        elif message[0:5] in ["/kick", "/vote"]:
             actionsInstance.vote(message, clientSocket)
+        elif message[0:6] == "/color" or message[0:7] == "/border" or message[0:9] == "/savechat":
+            sendInstance.privateBroadcast(message, clientSocket)
+        elif message in ["/theme", "/ldm", "/previous", "/next"]:
+            sendInstance.privateBroadcast(message, clientSocket)
         else:
             sendInstance.privateBroadcastDisplay("Your command is unknown", clientSocket)
 
@@ -474,12 +467,12 @@ class Connection:
 
     def removeUser(self, username, clientSocket):
         # Called when a user has a duplicate username or leaves
-        connectionInstance.clients.remove(clientSocket)
-        connectionInstance.users.remove(username)
-
         clientSocket.close()
 
-        self.userOnline -= 1
+        if clientSocket in connectionInstance.clients and username in connectionInstance.users:
+            connectionInstance.clients.remove(clientSocket)
+            connectionInstance.users.remove(username)
+            self.userOnline -= 1
 
         if clientSocket in actionsInstance.mods and username in actionsInstance.modUsers:
             actionsInstance.mods.remove(clientSocket)
