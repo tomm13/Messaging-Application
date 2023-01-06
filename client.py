@@ -903,17 +903,16 @@ class Connection:
             print(f"An error occured: {e}")
 
     def leave(self):
-        if connectionInstance.accepted is True:
+        if connectionInstance.connected is True:
             self.socket.send(communicationInstance.caesarEncrypt("/leave").encode())
+            self.socket.close()
 
+        if connectionInstance.accepted is True:
             uiInstance.chatWindow.exit_full_screen()
             uiInstance.chatWindow.destroy()
 
         else:
             uiInstance.setupWindow.destroy()
-
-        if connectionInstance.connected is True:
-            self.socket.close()
 
 
 class UI:
@@ -1265,6 +1264,7 @@ class UI:
         self.setupWindow = App(title="Setup", width=800, height=275)
         self.setupWindow.bg = self.bg
         self.setupWindow.font = self.font
+        self.setupWindow.when_closed = connectionInstance.leave
         self.setupWindow.when_key_pressed = self.keyPressed
 
         topPadding = Box(self.setupWindow, width="fill", height=50, align="top")
