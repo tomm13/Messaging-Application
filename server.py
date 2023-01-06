@@ -509,7 +509,7 @@ class Connection:
 
     def validateUsername(self, username):
         # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
-        if username in self.users or " " in username or 1 > len(username) > 10:
+        if username in self.users or " " in username or len(username) > 10 or len(username) < 1:
             return False
 
         else:
