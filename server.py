@@ -1,4 +1,4 @@
-# 5/1/2023
+# 6/1/2023
 # V13.3
 
 import math
@@ -407,7 +407,7 @@ class Connection:
                 self.clients.append(clientSocket)
                 self.userOnline += 1
 
-                message = "/add "
+                message = "/accept "
 
                 for user in self.users:
                     message += f"{user} "
