@@ -35,7 +35,14 @@ def test_string_retrieval():
 
 
 def test_username_validation():
+    # Length 0, 8 or above is rejected
     assert server.connectionInstance.validateUsername("p p") is False
-    assert server.connectionInstance.validateUsername("1234567891011") is False
     assert server.connectionInstance.validateUsername("") is False
+    assert server.connectionInstance.validateUsername("12345678") is False
     assert server.connectionInstance.validateUsername("random") is True
+
+
+def test_message_length_validation():
+    # Length 51 or above is rejected
+    assert server.connectionInstance.validateMessageLength("123456789012345678901234567890123456789012345678901") is False
+    assert server.connectionInstance.validateMessageLength("12345678901234567890123456789012345678901234567890") is True

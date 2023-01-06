@@ -669,23 +669,13 @@ class Communication:
             if message:
                 if message == "/leave":
                     connectionInstance.leave()
+
                 else:
-                    if len(message) + len(connectionInstance.inputs[0]) + 2 >= 45:
-                        if self.messageTooLongWarning is False:
-                            animationInstance.queue.append([1, "Your message is too long"])
-                            self.warningTimer = time()
+                    connectionInstance.socket.send(self.caesarEncrypt(message).encode())
+                    uiInstance.messageInput.clear()
 
-                            self.messageTooLongWarning = True
-
-                        else:
-                            if time() > self.warningTimer + 5:
-                                self.messageTooLongWarning = False
-
-                    else:
-                        connectionInstance.socket.send(self.caesarEncrypt(message).encode())
-                        uiInstance.messageInput.clear()
-
-        except BrokenPipeError:
+        except BrokenPipeError as e:
+            print(f"An error occured: {e}")
             connectionInstance.leave()
 
     def addUsers(self, users):
@@ -710,17 +700,15 @@ class Communication:
         # Called by /remove [Users split by space]
         try:
             if user == connectionInstance.inputs[0]:
-                while True:
-                    uiInstance.animationColor = (255, 0, 0)
-                    animationInstance.queue.append([1, "You have been kicked / disconnected"])
-                    sleep(1)
+                connectionInstance.leave()
 
-            uiInstance.userList.remove(user)
-            self.users.remove(user)
-            animationInstance.queue.append([1, f"{user} has disconnected"])
+            else:
+                uiInstance.userList.remove(user)
+                self.users.remove(user)
+                animationInstance.queue.append([1, f"{user} has disconnected"])
 
         except ValueError as e:
-            print(f"Tried to remove -{user}-. Failed due to {e}")
+            print(f"An error occured: {e}")
 
     def previousPage(self):
         # Called by /previous
@@ -860,6 +848,7 @@ class Communication:
                         self.addMessage(message)
 
         except (ConnectionResetError, OSError) as e:
+            print(f"An error occured: {e}")
             connectionInstance.leave()
 
 
