@@ -1,11 +1,10 @@
 # 7/1/2023
 # V13.3
 
-import platform
-import socket
-import time
 
-import colorutils
+from socket import socket
+from colorutils import web_to_rgb
+from platform import system
 from time import sleep, localtime, strftime
 from threading import Thread
 from guizero import *
@@ -436,25 +435,25 @@ class Animation:
         # Code 7
 
         if key == 0:
-            (R, G, B) = colorutils.web_to_rgb(uiInstance.usernameIndicator.bg)
+            (R, G, B) = web_to_rgb(uiInstance.usernameIndicator.bg)
 
         elif key == 1:
-            (R, G, B) = colorutils.web_to_rgb(uiInstance.colorIndicator.bg)
+            (R, G, B) = web_to_rgb(uiInstance.colorIndicator.bg)
 
         elif key == 2:
-            (R, G, B) = colorutils.web_to_rgb(uiInstance.hostIndicator.bg)
+            (R, G, B) = web_to_rgb(uiInstance.hostIndicator.bg)
 
         elif key == 3:
-            (R, G, B) = colorutils.web_to_rgb(uiInstance.portIndicator.bg)
+            (R, G, B) = web_to_rgb(uiInstance.portIndicator.bg)
 
         elif key == 4:
-            (R, G, B) = colorutils.web_to_rgb(uiInstance.publicKeyIndicator.bg)
+            (R, G, B) = web_to_rgb(uiInstance.publicKeyIndicator.bg)
 
         elif key == 5:
-            (R, G, B) = colorutils.web_to_rgb(uiInstance.privateKeyIndicator.bg)
+            (R, G, B) = web_to_rgb(uiInstance.privateKeyIndicator.bg)
 
         elif key == 6:
-            (R, G, B) = colorutils.web_to_rgb(uiInstance.cipherKeyIndicator.bg)
+            (R, G, B) = web_to_rgb(uiInstance.cipherKeyIndicator.bg)
 
         else:
             raise ValueError("Invalid indexing of indicators")
@@ -862,7 +861,7 @@ class Connection:
         # Attributes
         # Connected = when the client connects to the server
         # Accepted = when the username sent has been accepted (None means pending)
-        self.socket = socket.socket()
+        self.socket = socket()
         self.e = None
         self.d = None
         self.N = None
@@ -986,7 +985,7 @@ class UI:
         else:
             self.themeDependentBg = self.lightbg
 
-        if platform.system() == "Darwin":
+        if system() == "Darwin":
             # For macOS
             self.fontIndex = 0
             self.rate = 0.00035
@@ -1005,7 +1004,7 @@ class UI:
     def chooseColor(self, code, message):
         # Called by /color [Color]
         try:
-            color = colorutils.web_to_rgb(message)
+            color = web_to_rgb(message)
 
             if (self.darkMode is True and color == (0, 0, 0)) or \
                     (self.darkMode is False and color == self.lightbg):
@@ -1030,7 +1029,7 @@ class UI:
 
     def setLDM(self):
         # Called by /ldm
-        if platform.system() == "Darwin":
+        if system() == "Darwin":
             # For macOS
             if self.LDM is True:
                 self.LDM = False
@@ -1079,7 +1078,7 @@ class UI:
                 # If the requested input is color
                 if check == 1:
                     try:
-                        color = colorutils.web_to_rgb(value)
+                        color = web_to_rgb(value)
 
                         # Prevent matching background and text colors
                         if color == self.lightbg:
