@@ -684,6 +684,14 @@ class Communication:
         users = users.split()
         users.sort()
 
+        if connectionInstance.inputs[0] in users:
+            # If user is the client itself
+            if connectionInstance.accepted is None:
+                # If the user is being accepted for the first time (as they were pending approval)
+                uiInstance.openChat()
+
+                connectionInstance.accepted = True
+
         uiInstance.userList.clear()
         uiInstance.userList.append("Users online:")
 
@@ -833,17 +841,14 @@ class Communication:
                         self.previousPage()
 
                     elif message[0:7] == "/accept":
-                        connectionInstance.accepted = True
-                        uiInstance.openChat()
-
                         self.addUsers(message[8:])
+
+                    elif message[0:7] == "/remove":
+                        self.removeUser(message[8:])
 
                     elif message == "/reject":
                         connectionInstance.accepted = False
                         uiInstance.resetInputs()
-
-                    elif message[0:7] == "/remove":
-                        self.removeUser(message[8:])
 
                     else:
                         self.addMessage(message)
