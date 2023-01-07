@@ -1,4 +1,4 @@
-# 6/1/2023
+# 7/1/2023
 # V13.3
 
 import platform
@@ -1202,12 +1202,12 @@ class UI:
         header = Box(self.border, width="fill", height=50, align="top")
         headerBlocker = Box(self.border, width="fill", height=50, align="top")
 
-        userListBox = Box(self.border, width=220, height="fill", align="right")
-        userBox = Box(self.border, width="fill", height="fill", align="left")
-        inputBox = Box(userBox, width="fill", height=120, align="bottom")
-        inputBlocker = Box(inputBox, width=50, height="fill", align="right")
+        userListBox = Box(self.border, width=170, height="fill", align="left")
+        userListBlocker = Box(self.border, width=50, height="fill", align="left")
 
-        userListBorder = Box(userListBox, width=50, height="fill", align="left")
+        userBox = Box(self.border, width="fill", height="fill", align="right")
+        inputBox = Box(userBox, width="fill", height=120, align="bottom")
+
         self.userListTopBorder = Box(userListBox, width="fill", height=10, align="top")
         self.userListTopBorder.bg = self.color
         self.userListRightBorder = Box(userListBox, width=10, height="fill", align="right")
