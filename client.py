@@ -1,11 +1,10 @@
 # 7/1/2023
 # V13.3
 
-import platform
-import socket
-import time
 
+import socket
 import colorutils
+from platform import system
 from time import sleep, localtime, strftime
 from threading import Thread
 from guizero import *
@@ -986,7 +985,7 @@ class UI:
         else:
             self.themeDependentBg = self.lightbg
 
-        if platform.system() == "Darwin":
+        if system() == "Darwin":
             # For macOS
             self.fontIndex = 0
             self.rate = 0.00035
@@ -1030,7 +1029,7 @@ class UI:
 
     def setLDM(self):
         # Called by /ldm
-        if platform.system() == "Darwin":
+        if system() == "Darwin":
             # For macOS
             if self.LDM is True:
                 self.LDM = False
