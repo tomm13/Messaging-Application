@@ -2,7 +2,7 @@
 # V13.3
 
 
-import socket
+from socket import socket
 from colorutils import web_to_rgb
 from platform import system
 from time import sleep, localtime, strftime
@@ -861,7 +861,7 @@ class Connection:
         # Attributes
         # Connected = when the client connects to the server
         # Accepted = when the username sent has been accepted (None means pending)
-        self.socket = socket.socket()
+        self.socket = socket()
         self.e = None
         self.d = None
         self.N = None
