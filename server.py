@@ -1,4 +1,4 @@
-# 6/1/2023
+# 7/1/2023
 # V13.3
 
 import math
@@ -9,6 +9,7 @@ from threading import Thread
 
 
 class Security:
+    # Generates key and port, as well as encrypting and decrypting messages/ keys
     def __init__(self):
         self.d = None
         self.e = None
@@ -405,6 +406,9 @@ class Connection:
 
             # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
             if self.validateUsername(username) is True:
+                # Allows the user to join the chatroom, send and receive messages
+                self.addUser(username)
+
                 # Initialise an update thread given the username is valid
                 Thread(target=self.listen, args=[username, clientSocket, True]).start()
                 print(f"[Thread] Started {username}'s update thread. Username is valid")
@@ -429,6 +433,8 @@ class Connection:
                             self.removeUser(None, clientSocket)
 
                         if self.validateUsername(signal) is True:
+                            self.addUser(signal)
+
                             hasValidUsername = True
 
                         else:
@@ -439,9 +445,6 @@ class Connection:
                     self.removeUser(None, clientSocket)
 
         if clientSocket in self.clients:
-            # Allows the user to join the chatroom, send and receive messages
-            self.addUser(username)
-
             messagesSentRecently = 0
             lastMessageSentTime = 0
             warnUser = False
