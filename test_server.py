@@ -3,25 +3,21 @@
 
 import server
 
-# Security
 
-
-def test_generate_port():
-    server.securityInstance.generatePort()
+def test_binding_to_socket():
+    server.connectionInstance.bindToSocket()
 
     assert len(str(server.connectionInstance.port)) == 5
     assert server.connectionInstance.host != '127.0.0.1'
 
 
-def test_generate_key():
-    server.securityInstance.generateKey()
+def test_key_generation():
+    server.securityInstance.getKeys()
 
     for key in [server.securityInstance.e, server.securityInstance.d, server.securityInstance.N]:
         assert len(str(key)) == 6
 
     assert 1 <= server.securityInstance.cipherKey <= 26
-
-# Test algorithmic accuracy
 
 
 def test_key_retrieval():
@@ -47,3 +43,4 @@ def test_message_length_validation():
     # Length 51 or above is rejected
     assert server.connectionInstance.validateMessageLength("123456789012345678901234567890123456789012345678901") is False
     assert server.connectionInstance.validateMessageLength("12345678901234567890123456789012345678901234567890") is True
+    assert server.connectionInstance.validateMessageLength("a") is True
