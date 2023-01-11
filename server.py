@@ -378,7 +378,7 @@ class Connection:
                 if self.host == '127.0.0.1' and __name__ == '__main__':
                     self.host = input("[Server] Failed to bind - Enter an IP to host the server on\n")
 
-                self.socket.bind((socket.gethostbyname(socket.gethostname()), random.randint(49125, 65535)))
+                self.socket.bind((self.host, self.port))
 
             except ConnectionError:
                 self.port = random.randint(49125, 65536)
@@ -391,6 +391,7 @@ class Connection:
                 break
 
     def connect(self):
+        # After binding, receive incoming requests
         self.bindToSocket()
         self.socket.listen()
 
