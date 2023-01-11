@@ -113,8 +113,8 @@ def test_key_separation():
 
 
 def test_key_retrieval():
-    key = 9
-    assert key == client.communicationInstance.rsaDecrypt(client.communicationInstance.rsaEncrypt(key))
+    for key in range(0, 26):
+        assert key == client.communicationInstance.rsaDecrypt(client.communicationInstance.rsaEncrypt(key, 244177, 280043), 257713, 280043)
 
 
 def test_string_retrieval():
