@@ -16,9 +16,9 @@ def test_generate_port():
 def test_generate_key():
     server.securityInstance.generateKey()
 
-    assert len(str(server.securityInstance.e)) == 6
-    assert len(str(server.securityInstance.d)) == 6
-    assert len(str(server.securityInstance.N)) == 6
+    for key in [server.securityInstance.e, server.securityInstance.d, server.securityInstance.N]:
+        assert len(str(key)) == 6
+
     assert 1 <= server.securityInstance.cipherKey <= 26
 
 # Test algorithmic accuracy
@@ -37,10 +37,9 @@ def test_string_retrieval():
 
 def test_username_validation():
     # Length 0, 8 or above, space and "None" are rejected
-    assert server.connectionInstance.validateUsername("p p") is False
-    assert server.connectionInstance.validateUsername("") is False
-    assert server.connectionInstance.validateUsername("12345678") is False
-    assert server.connectionInstance.validateUsername("None") is False
+    for username in ["p p", "", "12345678", "None"]:
+        assert server.connectionInstance.validateUsername(username) is False
+
     assert server.connectionInstance.validateUsername("random") is True
 
 
