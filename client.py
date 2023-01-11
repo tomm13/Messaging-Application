@@ -773,7 +773,7 @@ class Communication:
         return newKey
 
     @staticmethod
-    def caesarEncrypt(message):
+    def caesarEncrypt(message, cipherKey):
         newMessage = ""
         for letter in message:
 
@@ -788,7 +788,7 @@ class Communication:
                 else:
                     raise ValueError("Invalid character")
 
-                index = (ord(letter) + connectionInstance.cipherKey - step) % 26
+                index = (ord(letter) + cipherKey - step) % 26
 
                 newMessage += chr(index + step)
 
@@ -798,7 +798,7 @@ class Communication:
         return newMessage
 
     @staticmethod
-    def caesarDecrypt(message):
+    def caesarDecrypt(message, cipherKey):
         newMessage = ""
         for letter in message:
 
@@ -813,7 +813,7 @@ class Communication:
                 else:
                     raise ValueError("Invalid character")
 
-                index = (ord(letter) - connectionInstance.cipherKey - step) % 26
+                index = (ord(letter) - cipherKey - step) % 26
 
                 newMessage += chr(index + step)
 
@@ -844,7 +844,7 @@ class Communication:
                     connectionInstance.leave()
 
                 else:
-                    connectionInstance.socket.send(self.caesarEncrypt(message).encode())
+                    connectionInstance.socket.send(self.caesarEncrypt(message, connectionInstance.cipherKey).encode())
                     uiInstance.messageInput.clear()
 
         except BrokenPipeError as e:
@@ -980,7 +980,7 @@ class Communication:
         # Looks out for server broadcasts
         while True:
             try:
-                message = self.caesarDecrypt(connectionInstance.socket.recv(1024).decode())
+                message = self.caesarDecrypt(connectionInstance.socket.recv(1024).decode(), connectionInstance.cipherKey)
 
                 if message:
                     print(f"Received message: {message}")
@@ -1074,7 +1074,7 @@ class Connection:
 
             if self.accepted is False:
                 # Send username to determine if it's acceptable
-                self.socket.send(communicationInstance.caesarEncrypt(self.inputs[0]).encode())
+                self.socket.send(communicationInstance.caesarEncrypt(self.inputs[0], self.cipherKey).encode())
                 self.accepted = None
 
             if self.threadInitialized is False:
@@ -1086,7 +1086,7 @@ class Connection:
 
     def leave(self):
         if connectionInstance.connected is True:
-            self.socket.send(communicationInstance.caesarEncrypt("/leave").encode())
+            self.socket.send(communicationInstance.caesarEncrypt("/leave", self.cipherKey).encode())
             self.socket.close()
 
         if connectionInstance.accepted is True:
