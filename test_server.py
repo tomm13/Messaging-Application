@@ -1,4 +1,4 @@
-# 6/1/2023
+# 11/1/2023
 # V13.3
 
 import server
@@ -25,8 +25,8 @@ def test_generate_key():
 
 
 def test_key_retrieval():
-    key = 9
-    assert key == server.securityInstance.rsaDecrypt(server.securityInstance.rsaEncrypt(key))
+    for key in range(0, 26):
+        assert key == server.securityInstance.rsaDecrypt(server.securityInstance.rsaEncrypt(key, 244177, 280043), 257713, 280043)
 
 
 def test_string_retrieval():
