@@ -1,4 +1,4 @@
-# 7/1/2023
+# 11/1/2023
 # V13.3
 
 
@@ -16,8 +16,6 @@ class Animation:
         self.queue = []
         self.readRate = 1
         self.waitMultiplier = 1
-
-    # Creates animations used in chat
 
     def animateHeaderInChat(self, message):
         # Code 1
@@ -343,8 +341,6 @@ class Animation:
 
         uiInstance.animationColor = newColor
 
-    # Creates animations used in setup
-
     @staticmethod
     def animateHeaderInSetup(message):
         # Code 5
@@ -414,7 +410,6 @@ class Animation:
                 if B < newColor[2]:
                     B += 1
 
-                uiInstance.connectText.text_color = (R, G, B)
                 uiInstance.inputTextBox.text_color = (R, G, B)
                 uiInstance.status.bg = (R, G, B)
 
@@ -423,7 +418,6 @@ class Animation:
         else:
             (R, G, B) = newColor
 
-            uiInstance.connectText.text_color = (R, G, B)
             uiInstance.inputTextBox.text_color = (R, G, B)
             uiInstance.status.bg = (R, G, B)
 
@@ -521,6 +515,180 @@ class Animation:
             elif key == 6:
                 uiInstance.cipherKeyIndicator.bg = (R, G, B)
 
+    @staticmethod
+    def animateAfterInputInSetup(newColor):
+        # Code 8
+
+        if uiInstance.LDM is False:
+            (R, G, B) = uiInstance.darkbg
+
+            while (R, G, B) != newColor:
+                if R > newColor[0]:
+                    R -= 1
+                if G > newColor[1]:
+                    G -= 1
+                if B > newColor[2]:
+                    B -= 1
+                if R < newColor[0]:
+                    R += 1
+                if G < newColor[1]:
+                    G += 1
+                if B < newColor[2]:
+                    B += 1
+
+                uiInstance.inputTextBox.bg = (R, G, B)
+
+                sleep(uiInstance.rate)
+
+            while (R, G, B) != uiInstance.darkbg:
+                if R > uiInstance.darkbg[0]:
+                    R -= 1
+                if G > uiInstance.darkbg[1]:
+                    G -= 1
+                if B > uiInstance.darkbg[2]:
+                    B -= 1
+                if R < uiInstance.darkbg[0]:
+                    R += 1
+                if G < uiInstance.darkbg[1]:
+                    G += 1
+                if B < uiInstance.darkbg[2]:
+                    B += 1
+
+                uiInstance.inputTextBox.bg = (R, G, B)
+
+                sleep(uiInstance.rate)
+
+    @staticmethod
+    def animateAfterInputInChat(newColor):
+        # Code 9
+
+        if uiInstance.LDM is False:
+            if uiInstance.darkMode is True:
+                (R, G, B) = uiInstance.darkbg
+
+                while (R, G, B) != newColor:
+                    if R > newColor[0]:
+                        R -= 1
+                    if G > newColor[1]:
+                        G -= 1
+                    if B > newColor[2]:
+                        B -= 1
+                    if R < newColor[0]:
+                        R += 1
+                    if G < newColor[1]:
+                        G += 1
+                    if B < newColor[2]:
+                        B += 1
+
+                    uiInstance.messageInput.bg = (R, G, B)
+
+                    sleep(uiInstance.rate)
+
+                while (R, G, B) != uiInstance.darkbg:
+                    if R > uiInstance.darkbg[0]:
+                        R -= 1
+                    if G > uiInstance.darkbg[1]:
+                        G -= 1
+                    if B > uiInstance.darkbg[2]:
+                        B -= 1
+                    if R < uiInstance.darkbg[0]:
+                        R += 1
+                    if G < uiInstance.darkbg[1]:
+                        G += 1
+                    if B < uiInstance.darkbg[2]:
+                        B += 1
+
+                    uiInstance.messageInput.bg = (R, G, B)
+
+                    sleep(uiInstance.rate)
+
+            else:
+                (R, G, B) = uiInstance.lightbg
+
+                while (R, G, B) != newColor:
+                    if R > newColor[0]:
+                        R -= 1
+                    if G > newColor[1]:
+                        G -= 1
+                    if B > newColor[2]:
+                        B -= 1
+                    if R < newColor[0]:
+                        R += 1
+                    if G < newColor[1]:
+                        G += 1
+                    if B < newColor[2]:
+                        B += 1
+
+                    uiInstance.messageInput.bg = (R, G, B)
+
+                    sleep(uiInstance.rate)
+
+                while (R, G, B) != uiInstance.lightbg:
+                    if R > uiInstance.bg[0]:
+                        R -= 1
+                    if G > uiInstance.bg[1]:
+                        G -= 1
+                    if B > uiInstance.bg[2]:
+                        B -= 1
+                    if R < uiInstance.bg[0]:
+                        R += 1
+                    if G < uiInstance.bg[1]:
+                        G += 1
+                    if B < uiInstance.bg[2]:
+                        B += 1
+
+                    uiInstance.messageInput.bg = (R, G, B)
+
+                    sleep(uiInstance.rate)
+
+    @staticmethod
+    def animateCurrenttext(message):
+        # Code 10
+
+        if uiInstance.LDM is False:
+            (R, G, B) = uiInstance.animationColor
+
+            while (R, G, B) != uiInstance.bg:
+                # Text fades from color to grey
+                if R < uiInstance.bg[0]:
+                    R += 1
+                if G < uiInstance.bg[1]:
+                    G += 1
+                if B < uiInstance.bg[2]:
+                    B += 1
+                if R > uiInstance.bg[0]:
+                    R -= 1
+                if G > uiInstance.bg[1]:
+                    G -= 1
+                if B > uiInstance.bg[2]:
+                    B -= 1
+
+                uiInstance.currentText.text_color = (R, G, B)
+                sleep(uiInstance.rate)
+
+            uiInstance.currentText.value = message
+
+            while (R, G, B) != uiInstance.animationColor:
+                # Text fades from grey to color
+                if R < uiInstance.animationColor[0]:
+                    R += 1
+                if G < uiInstance.animationColor[1]:
+                    G += 1
+                if B < uiInstance.animationColor[2]:
+                    B += 1
+                if R > uiInstance.animationColor[0]:
+                    R -= 1
+                if G > uiInstance.animationColor[1]:
+                    G -= 1
+                if B > uiInstance.animationColor[2]:
+                    B -= 1
+
+                uiInstance.currentText.text_color = (R, G, B)
+                sleep(uiInstance.rate)
+
+        else:
+            uiInstance.currentText.value = message
+
     def animationThread(self):
         # This is the new thread in place of the hundreds of unterminated threads called before
         # The format for this thread is [[Class animation method code, *args]]
@@ -559,13 +727,6 @@ class Animation:
 
                 elif self.queue[0][0] == 5:
                     if connectionInstance.accepted is False:
-                        if len(str(self.queue[0][0])) < 10:
-                            self.waitMultiplier = 2.0
-                        elif len(str(self.queue[0][0])) < 15:
-                            self.waitMultiplier = 2.5
-                        else:
-                            self.waitMultiplier = 3.0
-
                         self.animateHeaderInSetup(self.queue[0][1])
 
                 elif self.queue[0][0] == 6:
@@ -575,6 +736,17 @@ class Animation:
                 elif self.queue[0][0] == 7:
                     if connectionInstance.accepted is False:
                         self.fadeIndicator(self.queue[0][1], self.queue[0][2])
+
+                elif self.queue[0][0] == 8:
+                    if connectionInstance.accepted is False:
+                        self.animateAfterInputInSetup(self.queue[0][1])
+
+                elif self.queue[0][0] == 9:
+                    self.animateAfterInputInChat(self.queue[0][1])
+
+                elif self.queue[0][0] == 10:
+                    if connectionInstance.accepted is False:
+                        self.animateCurrenttext(self.queue[0][1])
 
                 self.queue.pop(0)
 
@@ -850,6 +1022,10 @@ class Communication:
                         connectionInstance.accepted = False
                         uiInstance.resetInputs()
 
+                    elif message[0:8] == "/timeout":
+                        animationInstance.queue.append([9, (255, 0, 0)])
+                        animationInstance.queue.append([1, message[9:]])
+
                     else:
                         self.addMessage(message)
 
@@ -927,7 +1103,6 @@ class UI:
         self.setupWindow = None
         self.inputTextBox = None
         self.status = None
-        self.connectText = None
         self.usernameIndicator = None
         self.colorIndicator = None
         self.hostIndicator = None
@@ -935,6 +1110,7 @@ class UI:
         self.publicKeyIndicator = None
         self.privateKeyIndicator = None
         self.cipherKeyIndicator = None
+        self.currentText = None
 
         # UI elements (chatWindow)
         self.chatWindow = None
@@ -968,14 +1144,14 @@ class UI:
         self.waitTime = 1
         self.page = 0
         self.linesSent = 0
-        self.linesLimit = 19
         self.darkMode = True
         self.hasRequestedInput = False
 
         # Font sizes list for different OS's
-        self.fontSizes = [[22, 17], [36, 26], [24, 19], [32, 28], [32, 23], [22, 19], [24, 17]]
+        self.fontSizes = [[22, 17], [36, 26], [24, 19], [32, 28], [32, 23], [22, 19], [24, 17], [22, 19]]
 
         # Messages List
+        # Where [1][] is the default request message, and [][1] is the failing message
         self.getInputsMessages = [["Choose a username", "Try a different username"],
                                   ["Choose a color", "Try a different color"],
                                   ["Enter the host IP", "Try a different IP"],
@@ -993,12 +1169,14 @@ class UI:
         if system() == "Darwin":
             # For macOS
             self.fontIndex = 0
+            self.linesLimit = 19
             self.rate = 0.00035
             self.LDM = False
 
         else:
             # For other platforms
             self.fontIndex = 1
+            self.linesLimit = 18
             self.rate = None
             self.LDM = True
 
@@ -1047,8 +1225,19 @@ class UI:
         else:
             animationInstance.queue.append([1, "Animations are disabled on your OS."])
 
-    # Resets the 7 inputs
+    def receivedInvalidInput(self, check):
+        # Create an animation to indicate an unsucessful input
+        # Create red flash in textbox
+        # Display an error message
+        # Update completed inputs counter
+
+        animationInstance.queue.append([8, (255, 0, 0)])
+        animationInstance.queue.append([5, self.getInputsMessages[check][1]])
+        animationInstance.queue.append(
+            [10, f"{(7 - connectionInstance.inputs.count(None))} of 7 inputs completed"])
+
     def resetInputs(self):
+        # Resets the 7 inputs
         # Resets every indiactor to be invisible
         for indicator in range(7):
             animationInstance.queue.append([7, indicator, self.bg])
@@ -1065,19 +1254,23 @@ class UI:
         # Reset inputs
         connectionInstance.inputs = [None for i in range(7)]
 
-        # Create warning
-        self.setupWindow.error("Error", "The server has rejected your username. All inputs have been reset.")
+        # Reset currentText and create warning
+        animationInstance.queue.append([10, "Inputs reset due to an invalid username"])
 
     # Gets the 7 inputs
     def getInputs(self, check, key, value):
         if self.hasRequestedInput is False or key is False:
+            # Create an animation to indicate an input request
+            # Display an input request
+            # Update completed inputs counter
             animationInstance.queue.append([5, self.getInputsMessages[check][0]])
+            animationInstance.queue.append([10, f"{(7 - connectionInstance.inputs.count(None))} of 7 inputs completed"])
 
             self.hasRequestedInput = True
 
         else:
             if not value:
-                animationInstance.queue.append([5, self.getInputsMessages[check][1]])
+                self.receivedInvalidInput(check)
 
             else:
                 # If the requested input is color
@@ -1086,8 +1279,8 @@ class UI:
                         color = web_to_rgb(value)
 
                         # Prevent matching background and text colors
-                        if color == self.lightbg:
-                            animationInstance.queue.append([5, self.getInputsMessages[check][1]])
+                        if color == self.lightbg or color == (255, 0, 0):
+                            self.receivedInvalidInput(check)
 
                         else:
                             # The inputted color is accepted, and the UI elements will fade to this new color
@@ -1096,7 +1289,7 @@ class UI:
                             return color
 
                     except ValueError:
-                        animationInstance.queue.append([5, self.getInputsMessages[check][1]])
+                        self.receivedInvalidInput(check)
 
                 else:
                     return value
@@ -1114,6 +1307,14 @@ class UI:
                     if val is not None:
                         connectionInstance.inputs[check] = val
                         connectionInstance.inputRequest += 1
+
+                        # Create an animation to indicate a successful input
+                        if connectionInstance.inputs[1] is not None:
+                            # Use the inputted color if given, otherwise use the default lightblue
+                            animationInstance.queue.append([8, connectionInstance.inputs[1]])
+
+                        else:
+                            animationInstance.queue.append([8, self.animationColor])
 
                         self.hasRequestedInput = False
 
@@ -1283,19 +1484,17 @@ class UI:
         rightPadding = Box(contents, width=20, height="fill", align="right")
         leftPadding = Box(contents, width=10, height="fill", align="left")
 
-        self.status = Text(header, text="Welcome", width="fill", height=40)
+        self.status = Text(header, text="Press Enter to begin", width="fill", height=40)
         self.status.text_color = self.lightbg
         self.status.text_size = self.fontSizes[4][self.fontIndex]
         self.status.bg = self.animationColor
 
-        self.inputTextBox = TextBox(contents, width=30, align="left")
+        statusPadding = Box(contents, width="fill", height=30, align="top")
+
+        self.inputTextBox = TextBox(contents, width=30)
         self.inputTextBox.text_color = self.color
         self.inputTextBox.text_size = self.fontSizes[5][self.fontIndex]
         self.inputTextBox.bg = self.darkbg
-
-        self.connectText = Text(contents, text="Press Enter to continue", align="right")
-        self.connectText.text_color = self.animationColor
-        self.connectText.text_size = self.fontSizes[6][self.fontIndex]
 
         self.usernameIndicator = Box(indicator, width=114, height="fill", align="left")
         self.colorIndicator = Box(indicator, width=114, height="fill", align="left")
@@ -1304,6 +1503,10 @@ class UI:
         self.publicKeyIndicator = Box(indicator, width=114, height="fill", align="left")
         self.privateKeyIndicator = Box(indicator, width=114, height="fill", align="left")
         self.cipherKeyIndicator = Box(indicator, width=114, height="fill", align="left")
+
+        self.currentText = Text(bottomPadding, text="", width="fill", height=20)
+        self.currentText.text_color = self.color
+        self.currentText.text_size = self.fontSizes[7][self.fontIndex]
 
         # Threads here will start when the code starts
         Thread(target=animationInstance.animationThread).start()
