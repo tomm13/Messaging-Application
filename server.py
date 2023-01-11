@@ -1,4 +1,4 @@
-# 7/1/2023
+# 11/1/2023
 # V13.3
 
 import math
@@ -433,8 +433,10 @@ class Connection:
                             self.removeUser(None, clientSocket)
 
                         if self.validateUsername(signal) is True:
+                            # Allow the client to receive and accept messages
                             self.addUser(signal)
 
+                            username = signal
                             hasValidUsername = True
 
                         else:
@@ -444,58 +446,57 @@ class Connection:
                     print(f"[Thread] An error occured in {username}'s update thread before validtion completed. {e}")
                     self.removeUser(None, clientSocket)
 
-        if clientSocket in self.clients:
-            messagesSentRecently = 0
-            lastMessageSentTime = 0
-            warnUser = False
-            detectSpam = True
+        messagesSentRecently = 0
+        lastMessageSentTime = 0
+        warnUser = False
+        detectSpam = True
 
-            while username in self.users and clientSocket in self.clients:
-                try:
-                    signal = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode())
-                    unifiedmessage = f"{username}: {signal}"
+        while hasValidUsername is True and clientSocket in self.clients:
+            try:
+                signal = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode())
+                unifiedmessage = f"{username}: {signal}"
 
-                    if signal:
-                        if signal[0] == "/":
-                            sendInstance.command(signal, username, clientSocket)
+                if signal:
+                    if signal[0] == "/":
+                        sendInstance.command(signal, username, clientSocket)
 
-                        else:
-                            if detectSpam is True:
-                                if messagesSentRecently >= 3:
-                                    if warnUser is False:
-                                        sendInstance.privateBroadcastDisplay("You are sending messages too quickly",
-                                                                             clientSocket)
-                                        warnUser = True
+                    else:
+                        if detectSpam is True:
+                            if messagesSentRecently >= 3:
+                                if warnUser is False:
+                                    sendInstance.privateBroadcast("/timeout You are sending messages too quickly",
+                                                                  clientSocket)
+                                    warnUser = True
 
-                                    if time.time() > lastMessageSentTime + 5:
-                                        messagesSentRecently = 0
-                                        warnUser = False
-
-                                else:
-                                    if self.validateMessageLength(unifiedmessage) is False:
-                                        sendInstance.privateBroadcastDisplay("Your message is too long", clientSocket)
-
-                                    else:
-                                        sendInstance.broadcast(unifiedmessage)
-
-                                    if lastMessageSentTime + 1 > time.time():
-                                        messagesSentRecently += 1
-
-                                    elif messagesSentRecently > 0:
-                                        messagesSentRecently -= 1
-
-                                    lastMessageSentTime = time.time()
+                                if time.time() > lastMessageSentTime + 5:
+                                    messagesSentRecently = 0
+                                    warnUser = False
 
                             else:
                                 if self.validateMessageLength(unifiedmessage) is False:
-                                    sendInstance.privateBroadcastDisplay("Your message is too long", clientSocket)
+                                    sendInstance.privateBroadcast("/timeout Your message is too long", clientSocket)
 
                                 else:
                                     sendInstance.broadcast(unifiedmessage)
 
-                except (ConnectionResetError, OSError) as e:
-                    print(f"[Thread] An error occured in {username}'s update thread after validation completed. {e}")
-                    self.removeUser(username, clientSocket)
+                                if lastMessageSentTime + 1 > time.time():
+                                    messagesSentRecently += 1
+
+                                elif messagesSentRecently > 0:
+                                    messagesSentRecently -= 1
+
+                                lastMessageSentTime = time.time()
+
+                        else:
+                            if self.validateMessageLength(unifiedmessage) is False:
+                                sendInstance.privateBroadcast("/timeout Your meessage is too long", clientSocket)
+
+                            else:
+                                sendInstance.broadcast(unifiedmessage)
+
+            except (ConnectionResetError, OSError) as e:
+                print(f"[Thread] An error occured in {username}'s update thread after validation completed. {e}")
+                self.removeUser(username, clientSocket)
 
         print(f"[Thread] Closed {username}'s update thread")
 
@@ -515,11 +516,11 @@ class Connection:
         # Called when a user has a duplicate username or leaves
         clientSocket.close()
 
-        if clientSocket in connectionInstance.clients:
-            connectionInstance.clients.remove(clientSocket)
+        if clientSocket in self.clients:
+            self.clients.remove(clientSocket)
 
-        if username in connectionInstance.users:
-            connectionInstance.users.remove(username)
+        if username in self.users:
+            self.users.remove(username)
             self.userOnline -= 1
 
         if clientSocket in actionsInstance.mods:
