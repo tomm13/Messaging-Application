@@ -1,4 +1,4 @@
-# 4/1/2023
+# 11/1/2023
 # V13.3
 
 import client
@@ -24,6 +24,7 @@ def test_getting_username():
 
 
 def test_getting_color():
+    # Invalid strings, white and red are all rejected
     client.uiInstance.requestInput(True, "invalidcolor")
 
     assert client.connectionInstance.inputs[1] is None
@@ -36,7 +37,12 @@ def test_getting_color():
 
     client.uiInstance.requestInput(True, "red")
 
-    assert client.connectionInstance.inputs[1] == (255, 0, 0)
+    assert client.connectionInstance.inputs[1] is None
+    assert client.connectionInstance.inputRequest == 1
+
+    client.uiInstance.requestInput(True, "blue")
+
+    assert client.connectionInstance.inputs[1] == (0, 0, 255)
     assert client.connectionInstance.inputRequest == 2
     assert all(item is None for item in client.connectionInstance.inputs[2:6]) is True
 
@@ -114,3 +120,4 @@ def test_key_retrieval():
 def test_string_retrieval():
     message = "my name is tomm 12345"
     assert message == client.communicationInstance.caesarDecrypt(client.communicationInstance.caesarEncrypt(message))
+
