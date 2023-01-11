@@ -1,4 +1,4 @@
-# 8/1/2023
+# 11/1/2023
 # V13.3
 
 
@@ -16,8 +16,6 @@ class Animation:
         self.queue = []
         self.readRate = 1
         self.waitMultiplier = 1
-
-    # Creates animations used in chat
 
     def animateHeaderInChat(self, message):
         # Code 1
@@ -343,8 +341,6 @@ class Animation:
 
         uiInstance.animationColor = newColor
 
-    # Creates animations used in setup
-
     @staticmethod
     def animateHeaderInSetup(message):
         # Code 5
@@ -520,7 +516,7 @@ class Animation:
                 uiInstance.cipherKeyIndicator.bg = (R, G, B)
 
     @staticmethod
-    def animateAfterInput(newColor):
+    def animateAfterInputInSetup(newColor):
         # Code 8
 
         if uiInstance.LDM is False:
@@ -563,8 +559,91 @@ class Animation:
                 sleep(uiInstance.rate)
 
     @staticmethod
-    def animateCurrentText(message):
+    def animateAfterInputInChat(newColor):
         # Code 9
+
+        if uiInstance.LDM is False:
+            if uiInstance.darkMode is True:
+                (R, G, B) = uiInstance.darkbg
+
+                while (R, G, B) != newColor:
+                    if R > newColor[0]:
+                        R -= 1
+                    if G > newColor[1]:
+                        G -= 1
+                    if B > newColor[2]:
+                        B -= 1
+                    if R < newColor[0]:
+                        R += 1
+                    if G < newColor[1]:
+                        G += 1
+                    if B < newColor[2]:
+                        B += 1
+
+                    uiInstance.messageInput.bg = (R, G, B)
+
+                    sleep(uiInstance.rate)
+
+                while (R, G, B) != uiInstance.darkbg:
+                    if R > uiInstance.darkbg[0]:
+                        R -= 1
+                    if G > uiInstance.darkbg[1]:
+                        G -= 1
+                    if B > uiInstance.darkbg[2]:
+                        B -= 1
+                    if R < uiInstance.darkbg[0]:
+                        R += 1
+                    if G < uiInstance.darkbg[1]:
+                        G += 1
+                    if B < uiInstance.darkbg[2]:
+                        B += 1
+
+                    uiInstance.messageInput.bg = (R, G, B)
+
+                    sleep(uiInstance.rate)
+
+            else:
+                (R, G, B) = uiInstance.lightbg
+
+                while (R, G, B) != newColor:
+                    if R > newColor[0]:
+                        R -= 1
+                    if G > newColor[1]:
+                        G -= 1
+                    if B > newColor[2]:
+                        B -= 1
+                    if R < newColor[0]:
+                        R += 1
+                    if G < newColor[1]:
+                        G += 1
+                    if B < newColor[2]:
+                        B += 1
+
+                    uiInstance.messageInput.bg = (R, G, B)
+
+                    sleep(uiInstance.rate)
+
+                while (R, G, B) != uiInstance.lightbg:
+                    if R > uiInstance.bg[0]:
+                        R -= 1
+                    if G > uiInstance.bg[1]:
+                        G -= 1
+                    if B > uiInstance.bg[2]:
+                        B -= 1
+                    if R < uiInstance.bg[0]:
+                        R += 1
+                    if G < uiInstance.bg[1]:
+                        G += 1
+                    if B < uiInstance.bg[2]:
+                        B += 1
+
+                    uiInstance.messageInput.bg = (R, G, B)
+
+                    sleep(uiInstance.rate)
+
+    @staticmethod
+    def animateCurrenttext(message):
+        # Code 10
 
         if uiInstance.LDM is False:
             (R, G, B) = uiInstance.animationColor
@@ -609,7 +688,6 @@ class Animation:
 
         else:
             uiInstance.currentText.value = message
-
 
     def animationThread(self):
         # This is the new thread in place of the hundreds of unterminated threads called before
@@ -661,11 +739,14 @@ class Animation:
 
                 elif self.queue[0][0] == 8:
                     if connectionInstance.accepted is False:
-                        self.animateAfterInput(self.queue[0][1])
+                        self.animateAfterInputInSetup(self.queue[0][1])
 
                 elif self.queue[0][0] == 9:
+                    self.animateAfterInputInChat(self.queue[0][1])
+
+                elif self.queue[0][0] == 10:
                     if connectionInstance.accepted is False:
-                        self.animateCurrentText(self.queue[0][1])
+                        self.animateCurrenttext(self.queue[0][1])
 
                 self.queue.pop(0)
 
@@ -779,8 +860,7 @@ class Communication:
             # If user is the client itself
             if connectionInstance.accepted is None:
                 # If the user is being accepted for the first time (as they were pending approval)
-                uiInstance.setupWindow.hide()
-                uiInstance.chatWindow.show()
+                uiInstance.openChat()
 
                 connectionInstance.accepted = True
 
@@ -939,11 +1019,12 @@ class Communication:
                         self.removeUser(message[8:])
 
                     elif message == "/reject":
-                        # Create a red warning
-                        animationInstance.queue.append([8, (255, 0, 0)])
-
                         connectionInstance.accepted = False
                         uiInstance.resetInputs()
+
+                    elif message[0:8] == "/timeout":
+                        animationInstance.queue.append([9, (255, 0, 0)])
+                        animationInstance.queue.append([1, message[9:]])
 
                     else:
                         self.addMessage(message)
@@ -1144,8 +1225,19 @@ class UI:
         else:
             animationInstance.queue.append([1, "Animations are disabled on your OS."])
 
-    # Resets the 7 inputs
+    def receivedInvalidInput(self, check):
+        # Create an animation to indicate an unsucessful input
+        # Create red flash in textbox
+        # Display an error message
+        # Update completed inputs counter
+
+        animationInstance.queue.append([8, (255, 0, 0)])
+        animationInstance.queue.append([5, self.getInputsMessages[check][1]])
+        animationInstance.queue.append(
+            [10, f"{(7 - connectionInstance.inputs.count(None))} of 7 inputs completed"])
+
     def resetInputs(self):
+        # Resets the 7 inputs
         # Resets every indiactor to be invisible
         for indicator in range(7):
             animationInstance.queue.append([7, indicator, self.bg])
@@ -1159,24 +1251,26 @@ class UI:
         # The animation resets color and animationcolor after running the animation
         animationInstance.queue.append([6, (173, 216, 230)])
 
-        # Create warning message
-        animationInstance.queue.append([5, f"{connectionInstance.inputs[0]} is not a valid username. "
-                                           f"All inputs will be reset."])
         # Reset inputs
         connectionInstance.inputs = [None for i in range(7)]
+
+        # Reset currentText and create warning
+        animationInstance.queue.append([10, "Inputs reset due to an invalid username"])
 
     # Gets the 7 inputs
     def getInputs(self, check, key, value):
         if self.hasRequestedInput is False or key is False:
+            # Create an animation to indicate an input request
+            # Display an input request
+            # Update completed inputs counter
             animationInstance.queue.append([5, self.getInputsMessages[check][0]])
-            animationInstance.queue.append([9, f"{(7 - connectionInstance.inputs.count(None))} of 7 inputs completed"])
+            animationInstance.queue.append([10, f"{(7 - connectionInstance.inputs.count(None))} of 7 inputs completed"])
 
             self.hasRequestedInput = True
 
         else:
             if not value:
-                animationInstance.queue.append([8, (255, 0, 0)])
-                animationInstance.queue.append([5, self.getInputsMessages[check][1]])
+                self.receivedInvalidInput(check)
 
             else:
                 # If the requested input is color
@@ -1186,9 +1280,7 @@ class UI:
 
                         # Prevent matching background and text colors
                         if color == self.lightbg or color == (255, 0, 0):
-                            # Create an animation to indicate a unsuccessful input
-                            animationInstance.queue.append([8, (255, 0, 0)])
-                            animationInstance.queue.append([5, self.getInputsMessages[check][1]])
+                            self.receivedInvalidInput(check)
 
                         else:
                             # The inputted color is accepted, and the UI elements will fade to this new color
@@ -1197,8 +1289,7 @@ class UI:
                             return color
 
                     except ValueError:
-                        animationInstance.queue.append([8, (255, 0, 0)])
-                        animationInstance.queue.append([5, self.getInputsMessages[check][1]])
+                        self.receivedInvalidInput(check)
 
                 else:
                     return value
@@ -1257,8 +1348,6 @@ class UI:
             if all(check is not None for check in connectionInstance.inputs) and key:
                 connectionInstance.connect()
 
-            print(connectionInstance.inputs)
-
     def keyPressed(self, event):
         # Detects key presses with emphasis on enter, escape, left and right
         if event:
@@ -1299,72 +1388,27 @@ class UI:
                 else:
                     self.inputTextBox.focus()
 
-    # Create the UI, then display the separate parts when needed
+    # Methods below create the UI
 
-    def createUI(self):
-        # Creates setup window
-        self.setupWindow = App(title="Setup", width=800, height=275)
-        self.setupWindow.bg = self.bg
-        self.setupWindow.font = self.font
-        self.setupWindow.when_closed = connectionInstance.leave
-        self.setupWindow.when_key_pressed = self.keyPressed
-        self.setupWindow.visible = True
-
-        topSetupWindowPadding = Box(self.setupWindow, width="fill", height=50, align="top")
-        bottomSetUpWindowPadding = Box(self.setupWindow, width="fill", height=50, align="bottom")
-
-        contents = Box(self.setupWindow, width="fill", height="fill", align="top")
-        header = Box(contents, width="fill", height=40, align="top")
-        indicator = Box(contents, width="fill", height=40, align="bottom")
-
-        rightSetupWindowPadding = Box(contents, width=20, height="fill", align="right")
-        leftSetupWindowPadding = Box(contents, width=10, height="fill", align="left")
-
-        self.status = Text(header, text="Press Enter to begin", width="fill", height=40, align="top")
-        self.status.text_color = self.lightbg
-        self.status.text_size = self.fontSizes[4][self.fontIndex]
-        self.status.bg = self.animationColor
-
-        statusPadding = Box(contents, width="fill", height=30)
-
-        self.inputTextBox = TextBox(contents, width="fill")
-        self.inputTextBox.text_color = self.color
-        self.inputTextBox.text_size = self.fontSizes[5][self.fontIndex]
-        self.inputTextBox.bg = self.darkbg
-
-        self.usernameIndicator = Box(indicator, width=114, height="fill", align="left")
-        self.colorIndicator = Box(indicator, width=114, height="fill", align="left")
-        self.hostIndicator = Box(indicator, width=114, height="fill", align="left")
-        self.portIndicator = Box(indicator, width=114, height="fill", align="left")
-        self.publicKeyIndicator = Box(indicator, width=114, height="fill", align="left")
-        self.privateKeyIndicator = Box(indicator, width=114, height="fill", align="left")
-        self.cipherKeyIndicator = Box(indicator, width=114, height="fill", align="left")
-
-        self.currentText = Text(bottomSetUpWindowPadding, text="", width="fill", height=20)
-        self.currentText.text_color = self.color
-        self.currentText.text_size = self.fontSizes[7][self.fontIndex]
-
+    def openChat(self):
         # Creates chat window
         self.chatWindow = Window(self.setupWindow, width=1280, height=720, title="Chatroom", bg=self.bg)
         self.chatWindow.when_closed = connectionInstance.leave
         self.chatWindow.when_key_pressed = self.keyPressed
-        self.chatWindow.visible = False
         self.chatWindow.set_full_screen()
 
-        topChatWindowPadding = Box(self.chatWindow, width="fill", height=50, align="top")
-        leftChatWindowPadding = Box(self.chatWindow, width=50, height="fill", align="left")
-        rightChatWindowPadding = Box(self.chatWindow, width=50, height="fill", align="right")
-        bottomChatWindowPadding = Box(self.chatWindow, width="fill", height=50, align="bottom")
+        topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
+        leftPadding = Box(self.chatWindow, width=50, height="fill", align="left")
+        rightPadding = Box(self.chatWindow, width=50, height="fill", align="right")
+        bottomPadding = Box(self.chatWindow, width="fill", height=50, align="bottom")
 
         self.border = Box(self.chatWindow, width="fill", height="fill")
 
         header = Box(self.border, width="fill", height=50, align="top")
-
-        headerPadding = Box(self.border, width="fill", height=50, align="top")
+        headerBlocker = Box(self.border, width="fill", height=50, align="top")
 
         userListBox = Box(self.border, width=170, height="fill", align="left")
-
-        userListPadding = Box(self.border, width=50, height="fill", align="left")
+        userListBlocker = Box(self.border, width=50, height="fill", align="left")
 
         userBox = Box(self.border, width="fill", height="fill", align="right")
         inputBox = Box(userBox, width="fill", height=120, align="bottom")
@@ -1383,7 +1427,7 @@ class UI:
         self.userList.text_size = self.fontSizes[0][self.fontIndex]
         self.userList.bg = self.themeDependentBg
 
-        self.header = Text(header, text="Loading...", width="fill", height=50)
+        self.header = Text(header, text=f"Welcome {connectionInstance.inputs[0]}", width="fill", height=50)
         self.header.text_color = self.themeDependentBg
         self.header.text_size = self.fontSizes[1][self.fontIndex]
         self.header.bg = self.color
@@ -1403,8 +1447,7 @@ class UI:
         self.chatHistory.bg = self.themeDependentBg
         self.chatHistory.disable()
 
-        messageInputPadding = Box(inputBox, width="fill", height=50, align="top")
-
+        messageInputBorder = Box(inputBox, width="fill", height=50, align="top")
         self.messageInputTopBorder = Box(inputBox, width="fill", height=10, align="top")
         self.messageInputTopBorder.bg = self.color
         self.messageInputRightBorder = Box(inputBox, width=10, height="fill", align="right")
@@ -1420,7 +1463,52 @@ class UI:
         self.messageInput.bg = self.themeDependentBg
         self.messageInput.when_key_pressed = self.keyPressed
 
-        # Begin the animation thread
+        self.setupWindow.hide()
+        self.chatWindow.show()
+
+    def openSetup(self):
+        # Creates setup window
+        self.setupWindow = App(title="Setup", width=800, height=275)
+        self.setupWindow.bg = self.bg
+        self.setupWindow.font = self.font
+        self.setupWindow.when_closed = connectionInstance.leave
+        self.setupWindow.when_key_pressed = self.keyPressed
+
+        topPadding = Box(self.setupWindow, width="fill", height=50, align="top")
+        bottomPadding = Box(self.setupWindow, width="fill", height=50, align="bottom")
+        contents = Box(self.setupWindow, width="fill", height="fill", align="top")
+
+        header = Box(contents, width="fill", height=40, align="top")
+        indicator = Box(contents, width="fill", height=40, align="bottom")
+
+        rightPadding = Box(contents, width=20, height="fill", align="right")
+        leftPadding = Box(contents, width=10, height="fill", align="left")
+
+        self.status = Text(header, text="Press Enter to begin", width="fill", height=40)
+        self.status.text_color = self.lightbg
+        self.status.text_size = self.fontSizes[4][self.fontIndex]
+        self.status.bg = self.animationColor
+
+        statusPadding = Box(contents, width="fill", height=30, align="top")
+
+        self.inputTextBox = TextBox(contents, width=30)
+        self.inputTextBox.text_color = self.color
+        self.inputTextBox.text_size = self.fontSizes[5][self.fontIndex]
+        self.inputTextBox.bg = self.darkbg
+
+        self.usernameIndicator = Box(indicator, width=114, height="fill", align="left")
+        self.colorIndicator = Box(indicator, width=114, height="fill", align="left")
+        self.hostIndicator = Box(indicator, width=114, height="fill", align="left")
+        self.portIndicator = Box(indicator, width=114, height="fill", align="left")
+        self.publicKeyIndicator = Box(indicator, width=114, height="fill", align="left")
+        self.privateKeyIndicator = Box(indicator, width=114, height="fill", align="left")
+        self.cipherKeyIndicator = Box(indicator, width=114, height="fill", align="left")
+
+        self.currentText = Text(bottomPadding, text="", width="fill", height=20)
+        self.currentText.text_color = self.color
+        self.currentText.text_size = self.fontSizes[7][self.fontIndex]
+
+        # Threads here will start when the code starts
         Thread(target=animationInstance.animationThread).start()
 
         self.setupWindow.display()
@@ -1432,4 +1520,4 @@ connectionInstance = Connection()
 uiInstance = UI()
 
 if __name__ == '__main__':
-    uiInstance.createUI()
+    uiInstance.openSetup()
