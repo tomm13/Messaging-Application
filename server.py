@@ -91,20 +91,22 @@ class Security:
         self.N = N
 
         self.cipherKey = random.randint(1, 26)
-        self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey)
+        self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey, self.e, self.N)
 
         print(f"[Server] Server hosted on {str(connectionInstance.host)} on port {str(connectionInstance.port)}")
         print(f"[Server] Public key = {e}{N}")
         print(f"[Server] Private key = {d}{N}")
         print(f"[Server] Cipher key = {self.encryptedCipherKey}")
 
-    def rsaEncrypt(self, key):
-        newKey = pow(key, self.e, self.N)
+    @staticmethod
+    def rsaEncrypt(key, e, N):
+        rsaKey = pow(key, e, N)
 
-        return newKey
+        return rsaKey
 
-    def rsaDecrypt(self, key):
-        newKey = pow(key, self.d, self.N)
+    @staticmethod
+    def rsaDecrypt(key, d, N):
+        newKey = pow(key, d, N)
 
         return newKey
 
