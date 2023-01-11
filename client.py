@@ -761,14 +761,14 @@ class Communication:
         self.page = 0
 
     @staticmethod
-    def rsaEncrypt(key):
-        rsaKey = pow(key, connectionInstance.e, connectionInstance.N)
+    def rsaEncrypt(key, e, N):
+        rsaKey = pow(key, e, N)
 
         return rsaKey
 
     @staticmethod
-    def rsaDecrypt(key):
-        newKey = pow(key, connectionInstance.d, connectionInstance.N)
+    def rsaDecrypt(key, d, N):
+        newKey = pow(key, d, N)
 
         return newKey
 
@@ -1061,7 +1061,7 @@ class Connection:
         self.e = int(str(self.inputs[4][0:6]), base=10)
         self.d = int(str(self.inputs[5][0:6]), base=10)
         self.N = int(str(self.inputs[5][6:12]), base=10)
-        self.cipherKey = communicationInstance.rsaDecrypt(int(self.inputs[6], base=10))
+        self.cipherKey = communicationInstance.rsaDecrypt(int(self.inputs[6], base=10), self.d, self.N)
 
         # Inherit the inputted colors to the UI
         uiInstance.color = self.inputs[1]
