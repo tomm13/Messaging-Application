@@ -25,20 +25,11 @@ def test_getting_username():
 
 def test_getting_color():
     # Invalid strings, white and red are all rejected
-    client.uiInstance.requestInput(True, "invalidcolor")
+    for color in ["invalidcolor", "white", "red"]:
+        client.uiInstance.requestInput(True, color)
 
-    assert client.connectionInstance.inputs[1] is None
-    assert client.connectionInstance.inputRequest == 1
-
-    client.uiInstance.requestInput(True, "white")
-
-    assert client.connectionInstance.inputs[1] is None
-    assert client.connectionInstance.inputRequest == 1
-
-    client.uiInstance.requestInput(True, "red")
-
-    assert client.connectionInstance.inputs[1] is None
-    assert client.connectionInstance.inputRequest == 1
+        assert client.connectionInstance.inputs[1] is None
+        assert client.connectionInstance.inputRequest == 1
 
     client.uiInstance.requestInput(True, "blue")
 
@@ -90,15 +81,11 @@ def test_getting_cipherKey():
 
 def test_arrow_keys_in_input():
     # Simulate an arrow key being pressed
-    client.uiInstance.requestInput(False, None)
+    for value in [None, "random string"]:
+        client.uiInstance.requestInput(False, value)
 
-    assert client.connectionInstance.inputRequest == 0
-    assert all(item is not None for item in client.connectionInstance.inputs) is True
-
-    client.uiInstance.requestInput(False, "random string")
-
-    assert client.connectionInstance.inputRequest == 0
-    assert all(item is not None for item in client.connectionInstance.inputs) is True
+        assert client.connectionInstance.inputRequest == 0
+        assert all(item is not None for item in client.connectionInstance.inputs) is True
 
 # Test proper indexing and separation of keys
 
