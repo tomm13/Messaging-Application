@@ -17,27 +17,7 @@ class Security:
         self.cipherKey = None
         self.encryptedCipherKey = None
 
-    @staticmethod
-    def getPort():
-        return input("[Server] Failed to bind - Enter an IP to host "
-                     "the server on\n")
-
-    def generatePort(self):
-        # Binds to an open port within the range 49125-65536
-        while True:
-            try:
-                while connectionInstance.host == '127.0.0.1':
-                    connectionInstance.host = self.getPort()
-                connectionInstance.socket.bind((connectionInstance.host, connectionInstance.port))
-                break
-
-            except ConnectionError:
-                connectionInstance.port = random.randint(49125, 65536)
-
-            except OSError:
-                connectionInstance.host = self.getPort()
-
-    def generateKey(self):
+    def getKeys(self):
         # Uses algorithms in modular exponentiation to generate the RSA private, public
         # And cipher key
         e = 0
@@ -93,7 +73,6 @@ class Security:
         self.cipherKey = random.randint(1, 26)
         self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey, self.e, self.N)
 
-        print(f"[Server] Server hosted on {str(connectionInstance.host)} on port {str(connectionInstance.port)}")
         print(f"[Server] Public key = {e}{N}")
         print(f"[Server] Private key = {d}{N}")
         print(f"[Server] Cipher key = {self.encryptedCipherKey}")
@@ -392,11 +371,30 @@ class Connection:
         self.users = []
         self.clients = []
 
-    def connect(self):
-        securityInstance.generatePort()
-        securityInstance.generateKey()
+    def bindToSocket(self):
+        # Binds to an open port within the range 49125-65536
+        while True:
+            try:
+                if self.host == '127.0.0.1' and __name__ == '__main__':
+                    self.host = input("[Server] Failed to bind - Enter an IP to host the server on\n")
 
+                self.socket.bind((socket.gethostbyname(socket.gethostname()), random.randint(49125, 65535)))
+
+            except ConnectionError:
+                self.port = random.randint(49125, 65536)
+
+            except OSError:
+                self.host = input("[Server] Failed to bind - Enter an IP to host the server on\n")
+
+            else:
+                print(f"[Server] Server hosted on {str(self.host)} on port {str(self.port)}")
+                break
+
+    def connect(self):
+        self.bindToSocket()
         self.socket.listen()
+
+        securityInstance.getKeys()
 
         while True:
             # The main thread listens for incoming connections and accepts it
