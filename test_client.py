@@ -3,11 +3,9 @@
 
 import client
 
-# Test inputs getter
-# Simulate nothing showing up until the first enter key is presssed
-
 
 def test_initialise_inputs():
+    # Simulate nothing showing up until the first enter key is presssed
     client.uiInstance.requestInput(True, None)
 
     assert all(item is None for item in client.connectionInstance.inputs) is True
@@ -15,6 +13,13 @@ def test_initialise_inputs():
 
 
 def test_getting_username():
+    # "Choose a username" is displayed, and an invalid username is inputted
+    client.uiInstance.requestInput(True, "")
+
+    assert client.connectionInstance.inputs[0] is None
+    assert client.connectionInstance.inputRequest == 0
+    assert all(item is None for item in client.connectionInstance.inputs) is True
+
     # "Choose a username" is displayed, and "Username" is inputted
     client.uiInstance.requestInput(True, "Username")
 
@@ -25,20 +30,13 @@ def test_getting_username():
 
 def test_getting_color():
     # Invalid strings, white and red are all rejected
-    client.uiInstance.requestInput(True, "invalidcolor")
+    for color in ["invalidcolor", "white", "red"]:
+        client.uiInstance.requestInput(True, color)
 
-    assert client.connectionInstance.inputs[1] is None
-    assert client.connectionInstance.inputRequest == 1
+        assert client.connectionInstance.inputs[1] is None
+        assert client.connectionInstance.inputRequest == 1
 
-    client.uiInstance.requestInput(True, "white")
-
-    assert client.connectionInstance.inputs[1] is None
-    assert client.connectionInstance.inputRequest == 1
-
-    client.uiInstance.requestInput(True, "red")
-
-    assert client.connectionInstance.inputs[1] is None
-    assert client.connectionInstance.inputRequest == 1
+    # Valid color test
 
     client.uiInstance.requestInput(True, "blue")
 
@@ -48,6 +46,14 @@ def test_getting_color():
 
 
 def test_getting_host():
+    # Invalid host test
+    client.uiInstance.requestInput(True, "")
+
+    assert client.connectionInstance.inputs[2] is None
+    assert client.connectionInstance.inputRequest == 2
+    assert all(item is None for item in client.connectionInstance.inputs[2:6]) is True
+
+    # Valid host test
     client.uiInstance.requestInput(True, "127.0.0.1")
 
     assert client.connectionInstance.inputs[2] == "127.0.0.1"
@@ -56,6 +62,14 @@ def test_getting_host():
 
 
 def test_getting_port():
+    # Invalid port test
+    client.uiInstance.requestInput(True, "")
+
+    assert client.connectionInstance.inputs[3] is None
+    assert client.connectionInstance.inputRequest == 3
+    assert all(item is None for item in client.connectionInstance.inputs[3:6]) is True
+
+    # Valid port test
     client.uiInstance.requestInput(True, "12345")
 
     assert client.connectionInstance.inputs[3] == "12345"
@@ -64,6 +78,14 @@ def test_getting_port():
 
 
 def test_getting_publicKey():
+    # Invalid publicKey test
+    client.uiInstance.requestInput(True, "")
+
+    assert client.connectionInstance.inputs[4] is None
+    assert client.connectionInstance.inputRequest == 4
+    assert all(item is None for item in client.connectionInstance.inputs[4:6]) is True
+
+    # Valid publicKey test
     client.uiInstance.requestInput(True, "244177280043")
 
     assert client.connectionInstance.inputs[4] == "244177280043"
@@ -72,6 +94,14 @@ def test_getting_publicKey():
 
 
 def test_getting_privateKey():
+    # Invalid privateKey test
+    client.uiInstance.requestInput(True, "")
+
+    assert client.connectionInstance.inputs[5] is None
+    assert client.connectionInstance.inputRequest == 5
+    assert all(item is None for item in client.connectionInstance.inputs[5:6]) is True
+
+    # Valid privateKey test
     client.uiInstance.requestInput(True, "257713280043")
 
     assert client.connectionInstance.inputs[5] == "257713280043"
@@ -81,6 +111,14 @@ def test_getting_privateKey():
 
 
 def test_getting_cipherKey():
+    # Invalid cipherKey test
+    client.uiInstance.requestInput(True, "")
+
+    assert client.connectionInstance.inputs[6] is None
+    assert client.connectionInstance.inputRequest == 6
+    assert all(item is None for item in client.connectionInstance.inputs[6:6]) is True
+
+    # Valid cipherKey test
     client.uiInstance.requestInput(True, "1144")
 
     assert client.connectionInstance.inputs[6] == "1144"
@@ -90,34 +128,28 @@ def test_getting_cipherKey():
 
 def test_arrow_keys_in_input():
     # Simulate an arrow key being pressed
-    client.uiInstance.requestInput(False, None)
+    for value in [None, "random string"]:
+        client.uiInstance.requestInput(False, value)
 
-    assert client.connectionInstance.inputRequest == 0
-    assert all(item is not None for item in client.connectionInstance.inputs) is True
-
-    client.uiInstance.requestInput(False, "random string")
-
-    assert client.connectionInstance.inputRequest == 0
-    assert all(item is not None for item in client.connectionInstance.inputs) is True
-
-# Test proper indexing and separation of keys
+        assert client.connectionInstance.inputRequest == 0
+        assert all(item is not None for item in client.connectionInstance.inputs) is True
 
 
 def test_key_separation():
+    # Test proper indexing and separation of keys
     assert client.connectionInstance.e == 244177
     assert client.connectionInstance.d == 257713
     assert client.connectionInstance.N == 280043
     assert client.connectionInstance.cipherKey == 14
 
-# Test algorithmic accuracy
-
 
 def test_key_retrieval():
-    key = 9
-    assert key == client.communicationInstance.rsaDecrypt(client.communicationInstance.rsaEncrypt(key))
+    for key in range(1, 26):
+        assert key == client.communicationInstance.rsaDecrypt(client.communicationInstance.rsaEncrypt(key, 244177, 280043), 257713, 280043)
 
 
 def test_string_retrieval():
     message = "my name is tomm 12345"
-    assert message == client.communicationInstance.caesarDecrypt(client.communicationInstance.caesarEncrypt(message))
+    for key in range(1, 26):
+        assert message == client.communicationInstance.caesarDecrypt(client.communicationInstance.caesarEncrypt(message, key), key)
 

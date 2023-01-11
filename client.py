@@ -761,19 +761,19 @@ class Communication:
         self.page = 0
 
     @staticmethod
-    def rsaEncrypt(key):
-        rsaKey = pow(key, connectionInstance.e, connectionInstance.N)
+    def rsaEncrypt(key, e, N):
+        rsaKey = pow(key, e, N)
 
         return rsaKey
 
     @staticmethod
-    def rsaDecrypt(key):
-        newKey = pow(key, connectionInstance.d, connectionInstance.N)
+    def rsaDecrypt(key, d, N):
+        newKey = pow(key, d, N)
 
         return newKey
 
     @staticmethod
-    def caesarEncrypt(message):
+    def caesarEncrypt(message, cipherKey):
         newMessage = ""
         for letter in message:
 
@@ -788,7 +788,7 @@ class Communication:
                 else:
                     raise ValueError("Invalid character")
 
-                index = (ord(letter) + connectionInstance.cipherKey - step) % 26
+                index = (ord(letter) + cipherKey - step) % 26
 
                 newMessage += chr(index + step)
 
@@ -798,7 +798,7 @@ class Communication:
         return newMessage
 
     @staticmethod
-    def caesarDecrypt(message):
+    def caesarDecrypt(message, cipherKey):
         newMessage = ""
         for letter in message:
 
@@ -813,7 +813,7 @@ class Communication:
                 else:
                     raise ValueError("Invalid character")
 
-                index = (ord(letter) - connectionInstance.cipherKey - step) % 26
+                index = (ord(letter) - cipherKey - step) % 26
 
                 newMessage += chr(index + step)
 
@@ -844,7 +844,7 @@ class Communication:
                     connectionInstance.leave()
 
                 else:
-                    connectionInstance.socket.send(self.caesarEncrypt(message).encode())
+                    connectionInstance.socket.send(self.caesarEncrypt(message, connectionInstance.cipherKey).encode())
                     uiInstance.messageInput.clear()
 
         except BrokenPipeError as e:
@@ -980,7 +980,7 @@ class Communication:
         # Looks out for server broadcasts
         while True:
             try:
-                message = self.caesarDecrypt(connectionInstance.socket.recv(1024).decode())
+                message = self.caesarDecrypt(connectionInstance.socket.recv(1024).decode(), connectionInstance.cipherKey)
 
                 if message:
                     print(f"Received message: {message}")
@@ -1061,7 +1061,7 @@ class Connection:
         self.e = int(str(self.inputs[4][0:6]), base=10)
         self.d = int(str(self.inputs[5][0:6]), base=10)
         self.N = int(str(self.inputs[5][6:12]), base=10)
-        self.cipherKey = communicationInstance.rsaDecrypt(int(self.inputs[6], base=10))
+        self.cipherKey = communicationInstance.rsaDecrypt(int(self.inputs[6], base=10), self.d, self.N)
 
         # Inherit the inputted colors to the UI
         uiInstance.color = self.inputs[1]
@@ -1074,7 +1074,7 @@ class Connection:
 
             if self.accepted is False:
                 # Send username to determine if it's acceptable
-                self.socket.send(communicationInstance.caesarEncrypt(self.inputs[0]).encode())
+                self.socket.send(communicationInstance.caesarEncrypt(self.inputs[0], self.cipherKey).encode())
                 self.accepted = None
 
             if self.threadInitialized is False:
@@ -1086,7 +1086,7 @@ class Connection:
 
     def leave(self):
         if connectionInstance.connected is True:
-            self.socket.send(communicationInstance.caesarEncrypt("/leave").encode())
+            self.socket.send(communicationInstance.caesarEncrypt("/leave", self.cipherKey).encode())
             self.socket.close()
 
         if connectionInstance.accepted is True:

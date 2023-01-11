@@ -17,27 +17,7 @@ class Security:
         self.cipherKey = None
         self.encryptedCipherKey = None
 
-    @staticmethod
-    def getPort():
-        return input("[Server] Failed to bind - Enter an IP to host "
-                     "the server on\n")
-
-    def generatePort(self):
-        # Binds to an open port within the range 49125-65536
-        while True:
-            try:
-                while connectionInstance.host == '127.0.0.1':
-                    connectionInstance.host = self.getPort()
-                connectionInstance.socket.bind((connectionInstance.host, connectionInstance.port))
-                break
-
-            except ConnectionError:
-                connectionInstance.port = random.randint(49125, 65536)
-
-            except OSError:
-                connectionInstance.host = self.getPort()
-
-    def generateKey(self):
+    def getKeys(self):
         # Uses algorithms in modular exponentiation to generate the RSA private, public
         # And cipher key
         e = 0
@@ -91,24 +71,26 @@ class Security:
         self.N = N
 
         self.cipherKey = random.randint(1, 26)
-        self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey)
+        self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey, self.e, self.N)
 
-        print(f"[Server] Server hosted on {str(connectionInstance.host)} on port {str(connectionInstance.port)}")
         print(f"[Server] Public key = {e}{N}")
         print(f"[Server] Private key = {d}{N}")
         print(f"[Server] Cipher key = {self.encryptedCipherKey}")
 
-    def rsaEncrypt(self, key):
-        newKey = pow(key, self.e, self.N)
+    @staticmethod
+    def rsaEncrypt(key, e, N):
+        rsaKey = pow(key, e, N)
+
+        return rsaKey
+
+    @staticmethod
+    def rsaDecrypt(key, d, N):
+        newKey = pow(key, d, N)
 
         return newKey
 
-    def rsaDecrypt(self, key):
-        newKey = pow(key, self.d, self.N)
-
-        return newKey
-
-    def caesarEncrypt(self, message):
+    @staticmethod
+    def caesarEncrypt(message, cipherKey):
         newMessage = ""
         for letter in message:
 
@@ -123,7 +105,7 @@ class Security:
                 else:
                     raise ValueError("Invalid character")
 
-                index = (ord(letter) + self.cipherKey - step) % 26
+                index = (ord(letter) + cipherKey - step) % 26
 
                 newMessage += chr(index + step)
 
@@ -132,7 +114,8 @@ class Security:
 
         return newMessage
 
-    def caesarDecrypt(self, message):
+    @staticmethod
+    def caesarDecrypt(message, cipherKey):
         newMessage = ""
         for letter in message:
 
@@ -147,7 +130,7 @@ class Security:
                 else:
                     raise ValueError("Invalid character")
 
-                index = (ord(letter) - self.cipherKey - step) % 26
+                index = (ord(letter) - cipherKey - step) % 26
 
                 newMessage += chr(index + step)
 
@@ -336,7 +319,7 @@ class Send:
         print(f"[Public] {message}")
 
         for client in connectionInstance.clients:
-            client.send(securityInstance.caesarEncrypt(message).encode())
+            client.send(securityInstance.caesarEncrypt(message, securityInstance.cipherKey).encode())
 
     @staticmethod
     def broadcastDisplay(message):
@@ -344,7 +327,7 @@ class Send:
         print(f"[PublicDisplay] {message}")
 
         for client in connectionInstance.clients:
-            client.send(securityInstance.caesarEncrypt(f"/display {message}").encode())
+            client.send(securityInstance.caesarEncrypt(f"/display {message}", securityInstance.cipherKey).encode())
 
     @staticmethod
     def privateBroadcast(message, clientSocket):
@@ -352,7 +335,7 @@ class Send:
         if clientSocket in connectionInstance.clients:
             print(f"[Private] {message}")
 
-            clientSocket.send(securityInstance.caesarEncrypt(message).encode())
+            clientSocket.send(securityInstance.caesarEncrypt(message, securityInstance.cipherKey).encode())
 
     @staticmethod
     def privateBroadcastDisplay(message, clientSocket):
@@ -360,7 +343,7 @@ class Send:
         if clientSocket in connectionInstance.clients:
             print(f"[PrivateDisplay] {message}")
 
-            clientSocket.send(securityInstance.caesarEncrypt(f"/display {message}").encode())
+            clientSocket.send(securityInstance.caesarEncrypt(f"/display {message}", securityInstance.cipherKey).encode())
 
     @staticmethod
     def command(message, username, clientSocket):
@@ -388,11 +371,30 @@ class Connection:
         self.users = []
         self.clients = []
 
-    def connect(self):
-        securityInstance.generatePort()
-        securityInstance.generateKey()
+    def bindToSocket(self):
+        # Binds to an open port within the range 49125-65536
+        while True:
+            try:
+                if self.host == '127.0.0.1' and __name__ == '__main__':
+                    self.host = input("[Server] Failed to bind - Enter an IP to host the server on\n")
 
+                self.socket.bind((socket.gethostbyname(socket.gethostname()), random.randint(49125, 65535)))
+
+            except ConnectionError:
+                self.port = random.randint(49125, 65536)
+
+            except OSError:
+                self.host = input("[Server] Failed to bind - Enter an IP to host the server on\n")
+
+            else:
+                print(f"[Server] Server hosted on {str(self.host)} on port {str(self.port)}")
+                break
+
+    def connect(self):
+        self.bindToSocket()
         self.socket.listen()
+
+        securityInstance.getKeys()
 
         while True:
             # The main thread listens for incoming connections and accepts it
@@ -402,7 +404,7 @@ class Connection:
 
             self.clients.append(clientSocket)
 
-            username = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode())
+            username = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode(), securityInstance.cipherKey)
 
             # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
             if self.validateUsername(username) is True:
@@ -425,7 +427,7 @@ class Connection:
         if hasValidUsername is False:
             while hasValidUsername is False and clientSocket in self.clients:
                 try:
-                    signal = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode())
+                    signal = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode(), securityInstance.cipherKey)
 
                     if signal:
                         if signal == "/leave":
@@ -453,7 +455,7 @@ class Connection:
 
         while hasValidUsername is True and clientSocket in self.clients:
             try:
-                signal = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode())
+                signal = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode(), securityInstance.cipherKey)
                 unifiedmessage = f"{username}: {signal}"
 
                 if signal:
