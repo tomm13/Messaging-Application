@@ -1,4 +1,4 @@
-# 11/1/2023
+# 12/1/2023
 # V13.3
 
 import client
@@ -14,7 +14,7 @@ def test_initialise_inputs():
 
 def test_getting_username():
     # "Choose a username" is displayed, and an invalid username is inputted
-    client.uiInstance.requestInput(True, "")
+    client.uiInstance.requestInput(True, None)
 
     assert client.connectionInstance.inputs[0] is None
     assert client.connectionInstance.inputRequest == 0
@@ -47,7 +47,7 @@ def test_getting_color():
 
 def test_getting_host():
     # Invalid host test
-    client.uiInstance.requestInput(True, "")
+    client.uiInstance.requestInput(True, None)
 
     assert client.connectionInstance.inputs[2] is None
     assert client.connectionInstance.inputRequest == 2
@@ -63,7 +63,7 @@ def test_getting_host():
 
 def test_getting_port():
     # Invalid port test
-    client.uiInstance.requestInput(True, "")
+    client.uiInstance.requestInput(True, None)
 
     assert client.connectionInstance.inputs[3] is None
     assert client.connectionInstance.inputRequest == 3
@@ -79,7 +79,7 @@ def test_getting_port():
 
 def test_getting_publicKey():
     # Invalid publicKey test
-    client.uiInstance.requestInput(True, "")
+    client.uiInstance.requestInput(True, None)
 
     assert client.connectionInstance.inputs[4] is None
     assert client.connectionInstance.inputRequest == 4
@@ -95,7 +95,7 @@ def test_getting_publicKey():
 
 def test_getting_privateKey():
     # Invalid privateKey test
-    client.uiInstance.requestInput(True, "")
+    client.uiInstance.requestInput(True, None)
 
     assert client.connectionInstance.inputs[5] is None
     assert client.connectionInstance.inputRequest == 5
@@ -112,7 +112,7 @@ def test_getting_privateKey():
 
 def test_getting_cipherKey():
     # Invalid cipherKey test
-    client.uiInstance.requestInput(True, "")
+    client.uiInstance.requestInput(True, None)
 
     assert client.connectionInstance.inputs[6] is None
     assert client.connectionInstance.inputRequest == 6
@@ -141,6 +141,17 @@ def test_key_separation():
     assert client.connectionInstance.d == 257713
     assert client.connectionInstance.N == 280043
     assert client.connectionInstance.cipherKey == 14
+
+
+def test_reset_inputs():
+    # Test that when a user provides an invalid inputs, every input so far is reset
+    # First test that every item has value
+    assert all(item is not None for item in client.connectionInstance.inputs) is True
+
+    # Reset every value
+    client.connectionInstance.resetInputs(None)
+
+    assert all(item is None for item in client.connectionInstance.inputs) is True
 
 
 def test_key_retrieval():
