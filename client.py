@@ -1,4 +1,4 @@
-# 11/1/2023
+# 12/1/2023
 # V13.3
 
 
@@ -411,6 +411,7 @@ class Animation:
                     B += 1
 
                 uiInstance.inputTextBox.text_color = (R, G, B)
+                uiInstance.currentText.text_color = (R, G, B)
                 uiInstance.status.bg = (R, G, B)
 
                 sleep(uiInstance.rate)
@@ -419,6 +420,7 @@ class Animation:
             (R, G, B) = newColor
 
             uiInstance.inputTextBox.text_color = (R, G, B)
+            uiInstance.currentText.text_color = (R, G, B)
             uiInstance.status.bg = (R, G, B)
 
         uiInstance.color = newColor
@@ -822,12 +824,11 @@ class Communication:
 
         return newMessage
 
-    @staticmethod
-    def saveChatHistory(location):
+    def saveChatHistoryToFile(self, location):
         # Called by /savechat [Location]
         if location and " " not in location:
             with open(location, "w") as file:
-                for chatLine in communicationInstance.chatHistory:
+                for chatLine in self.chatHistory:
                     file.write(chatLine + "\n")
                 file.close()
 
@@ -881,7 +882,7 @@ class Communication:
         # Called by /remove [Users split by space]
         try:
             if user == connectionInstance.inputs[0]:
-                connectionInstance.leave()
+                uiInstance.closeUI()
 
             else:
                 uiInstance.userList.remove(user)
@@ -980,7 +981,8 @@ class Communication:
         # Looks out for server broadcasts
         while True:
             try:
-                message = self.caesarDecrypt(connectionInstance.socket.recv(1024).decode(), connectionInstance.cipherKey)
+                message = self.caesarDecrypt(connectionInstance.socket.recv(1024).decode(),
+                                             connectionInstance.cipherKey)
 
                 if message:
                     print(f"Received message: {message}")
@@ -992,7 +994,7 @@ class Communication:
                         animationInstance.queue.append([2])
 
                     elif message[0:9] == "/savechat":
-                        communicationInstance.saveChatHistory(message[10:])
+                        communicationInstance.saveChatHistoryToFile(message[10:])
 
                     elif message == "/ldm":
                         uiInstance.setLDM()
@@ -1020,7 +1022,7 @@ class Communication:
 
                     elif message == "/reject":
                         connectionInstance.accepted = False
-                        uiInstance.resetInputs()
+                        connectionInstance.resetInputs("an invalid username")
 
                     elif message[0:8] == "/timeout":
                         animationInstance.queue.append([9, (255, 0, 0)])
@@ -1058,43 +1060,60 @@ class Connection:
         # Called when the user has filled out all 7 inputs
         # Connects to the socket, calculates the RSA encryption key, decryption key, and
         # The cipher key.
-        self.e = int(str(self.inputs[4][0:6]), base=10)
-        self.d = int(str(self.inputs[5][0:6]), base=10)
-        self.N = int(str(self.inputs[5][6:12]), base=10)
-        self.cipherKey = communicationInstance.rsaDecrypt(int(self.inputs[6], base=10), self.d, self.N)
-
-        # Inherit the inputted colors to the UI
-        uiInstance.color = self.inputs[1]
-        uiInstance.animationColor = self.inputs[1]
 
         try:
-            if self.connected is False:
-                self.socket.connect((self.inputs[2], int(self.inputs[3], base=10)))
-                self.connected = True
+            # Inherit the inputted colors to the UI
+            uiInstance.color = self.inputs[1]
+            uiInstance.animationColor = self.inputs[1]
 
-            if self.accepted is False:
-                # Send username to determine if it's acceptable
-                self.socket.send(communicationInstance.caesarEncrypt(self.inputs[0], self.cipherKey).encode())
-                self.accepted = None
+            # Decouple the public and private keys
+            # Decrypt the cipher key
+            self.e = int(str(self.inputs[4][0:6]), base=10)
+            self.d = int(str(self.inputs[5][0:6]), base=10)
+            self.N = int(str(self.inputs[5][6:12]), base=10)
+            self.cipherKey = communicationInstance.rsaDecrypt(int(self.inputs[6], base=10), self.d, self.N)
 
-            if self.threadInitialized is False:
-                Thread(target=communicationInstance.updateThread).start()
-                self.threadInitialized = True
+        except ValueError:
+            if __name__ == "__main__":
+                self.resetInputs("invalid keys")
 
-        except (ConnectionRefusedError, OSError, TimeoutError) as e:
-            print(f"An error occured 2 : {e}")
+        else:
+            try:
+                if self.connected is False:
+                    # Connect to the server socket once (ever)
+                    self.socket.connect((self.inputs[2], int(self.inputs[3], base=10)))
+                    self.connected = True
+
+                if self.accepted is False:
+                    # Send username to determine if it's acceptable
+                    self.socket.send(communicationInstance.caesarEncrypt(self.inputs[0], self.cipherKey).encode())
+                    self.accepted = None
+
+                if self.threadInitialized is False:
+                    Thread(target=communicationInstance.updateThread).start()
+                    self.threadInitialized = True
+
+            except (ValueError, TypeError, OverflowError):
+                if __name__ == "__main__":
+                    self.resetInputs("an invalid host/ port")
+
+            except (ConnectionRefusedError, OSError, TimeoutError):
+                if __name__ == "__main__":
+                    self.resetInputs("a connection error")
+
+    def resetInputs(self, message):
+        # Reset inputs in terms of variables and data
+        self.inputs = [None for i in range(7)]
+
+        # Reset indicators and UI elements, indicating the error
+        uiInstance.resetInputs(message)
 
     def leave(self):
         if connectionInstance.connected is True:
             self.socket.send(communicationInstance.caesarEncrypt("/leave", self.cipherKey).encode())
             self.socket.close()
 
-        if connectionInstance.accepted is True:
-            uiInstance.chatWindow.exit_full_screen()
-            uiInstance.chatWindow.destroy()
-
-        else:
-            uiInstance.setupWindow.destroy()
+        uiInstance.closeUI()
 
 
 class UI:
@@ -1202,13 +1221,18 @@ class UI:
     def setMod(self, message):
         # Called by /mod [User]
         if message == connectionInstance.inputs[0] and connectionInstance.mod is False:
+            # Load the mod preset (dark bg, lightblue text color, white borders)
+            # Indicate to the user that they are a moderator
+
+            animationInstance.queue.append([1, "You are now a mod"])
+
             if self.darkMode is False:
                 animationInstance.queue.append([2, False])
 
             connectionInstance.mod = True
 
-            uiInstance.chooseColor(3, "khaki")
-            uiInstance.chooseColor(4, "khaki")
+            uiInstance.chooseColor(3, "lightblue")
+            uiInstance.chooseColor(4, "white")
 
     def setLDM(self):
         # Called by /ldm
@@ -1225,6 +1249,16 @@ class UI:
         else:
             animationInstance.queue.append([1, "Animations are disabled on your OS."])
 
+    def closeUI(self):
+        # Is almost always called from the connectioninstance leaving method, but could be called
+        # Directly when kicked to prevent a doubled "/remove" call
+        if connectionInstance.accepted is True:
+            self.chatWindow.exit_full_screen()
+            self.chatWindow.destroy()
+
+        else:
+            self.setupWindow.destroy()
+
     def receivedInvalidInput(self, check):
         # Create an animation to indicate an unsucessful input
         # Create red flash in textbox
@@ -1236,7 +1270,7 @@ class UI:
         animationInstance.queue.append(
             [10, f"{(7 - connectionInstance.inputs.count(None))} of 7 inputs completed"])
 
-    def resetInputs(self):
+    def resetInputs(self, message):
         # Resets the 7 inputs
         # Resets every indiactor to be invisible
         for indicator in range(7):
@@ -1251,11 +1285,8 @@ class UI:
         # The animation resets color and animationcolor after running the animation
         animationInstance.queue.append([6, (173, 216, 230)])
 
-        # Reset inputs
-        connectionInstance.inputs = [None for i in range(7)]
-
         # Reset currentText and create warning
-        animationInstance.queue.append([10, "Inputs reset due to an invalid username"])
+        animationInstance.queue.append([10, f"Inputs reset due to {message}"])
 
     # Gets the 7 inputs
     def getInputs(self, check, key, value):
@@ -1338,6 +1369,7 @@ class UI:
                         animationInstance.queue.append([7, check, self.animationColor])
 
             if connectionInstance.inputRequest < 0:
+                # To cycle back the cursor when it reaches below 0 or above 6
                 connectionInstance.inputRequest = 6
                 self.requestInput(key, value)
 
