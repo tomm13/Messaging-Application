@@ -1,4 +1,4 @@
-# 11/1/2023
+# 18/1/2023
 # V13.3
 
 import math
@@ -384,7 +384,8 @@ class Connection:
                 self.port = random.randint(49125, 65536)
 
             except OSError:
-                self.host = input("[Server] Failed to bind - Enter an IP to host the server on\n")
+                if __name__ == '__main__':
+                    self.host = input("[Server] Failed to bind - Enter an IP to host the server on\n")
 
             else:
                 print(f"[Server] Server hosted on {str(self.host)} on port {str(self.port)}")
@@ -401,7 +402,7 @@ class Connection:
             # The main thread listens for incoming connections and accepts it
             # This also broadcasts to other online users that a new user has connected.
 
-            clientSocket, Address = self.socket.accept()
+            clientSocket, address = self.socket.accept()
 
             self.clients.append(clientSocket)
 
