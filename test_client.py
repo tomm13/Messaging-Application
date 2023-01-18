@@ -1,4 +1,4 @@
-# 12/1/2023
+# 18/1/2023
 # V13.3
 
 import client
@@ -143,7 +143,39 @@ def test_key_separation():
     assert client.connectionInstance.cipherKey == 14
 
 
+def test_moderator_rejection():
+    # Set None as argument
+    client.connectionInstance.setMod(None)
+
+    assert client.connectionInstance.mod is False
+
+
+def test_moderator_acceptance():
+    # Set Username as arugument
+    client.connectionInstance.setMod("Username")
+
+    assert client.connectionInstance.mod is True
+
+
+def test_key_retrieval():
+    for key in range(1, 26):
+        assert key == client.communicationInstance.rsaDecrypt(client.communicationInstance.rsaEncrypt(key, 244177, 280043), 257713, 280043)
+
+
+def test_normal_string_retrieval():
+    message = "my name is tomm 12345"
+    for key in range(1, 26):
+        assert message == client.communicationInstance.caesarDecrypt(client.communicationInstance.caesarEncrypt(message, key), key)
+
+
+def test_emoji_string_retrieval():
+    message = "😁😛😋🤣"
+    for key in range(1, 26):
+        assert message == client.communicationInstance.caesarDecrypt(client.communicationInstance.caesarEncrypt(message, key), key)
+
+
 def test_reset_inputs():
+    # Should probably run last
     # Test that when a user provides an invalid inputs, every input so far is reset
     # First test that every item has value
     assert all(item is not None for item in client.connectionInstance.inputs) is True
@@ -152,15 +184,3 @@ def test_reset_inputs():
     client.connectionInstance.resetInputs(None)
 
     assert all(item is None for item in client.connectionInstance.inputs) is True
-
-
-def test_key_retrieval():
-    for key in range(1, 26):
-        assert key == client.communicationInstance.rsaDecrypt(client.communicationInstance.rsaEncrypt(key, 244177, 280043), 257713, 280043)
-
-
-def test_string_retrieval():
-    message = "my name is tomm 12345"
-    for key in range(1, 26):
-        assert message == client.communicationInstance.caesarDecrypt(client.communicationInstance.caesarEncrypt(message, key), key)
-
