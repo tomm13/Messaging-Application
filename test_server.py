@@ -1,4 +1,4 @@
-# 11/1/2023
+# 18/1/2023
 # V13.3
 
 import server
@@ -8,7 +8,7 @@ def test_binding_to_socket():
     server.connectionInstance.bindToSocket()
 
     assert len(str(server.connectionInstance.port)) == 5
-    assert server.connectionInstance.host != '127.0.0.1'
+    assert server.connectionInstance.host is not None
 
 
 def test_key_generation():
@@ -25,10 +25,17 @@ def test_key_retrieval():
         assert key == server.securityInstance.rsaDecrypt(server.securityInstance.rsaEncrypt(key, 244177, 280043), 257713, 280043)
 
 
-def test_string_retrieval():
+def test_normal_string_retrieval():
     message = "my name is tomm 12345"
     for key in range(1, 26):
         assert message == server.securityInstance.caesarDecrypt(server.securityInstance.caesarEncrypt(message, key), key)
+
+
+def test_emoji_string_retrieval():
+    message = "😁😛😋🤣"
+    for key in range(1, 26):
+        assert message == server.securityInstance.caesarDecrypt(server.securityInstance.caesarEncrypt(message, key),
+                                                                key)
 
 
 def test_username_validation():

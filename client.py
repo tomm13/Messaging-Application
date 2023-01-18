@@ -870,10 +870,9 @@ class Communication:
 
         for user in users:
             if user not in self.users:
-                uiInstance.userList.append(user)
                 self.users.append(user)
 
-                animationInstance.queue.append([1, f"{str(user)} has connected"])
+                uiInstance.addUser(user)
 
             else:
                 uiInstance.userList.append(user)
@@ -885,12 +884,12 @@ class Communication:
                 uiInstance.closeUI()
 
             else:
-                uiInstance.userList.remove(user)
                 self.users.remove(user)
-                animationInstance.queue.append([1, f"{user} has disconnected"])
+
+                uiInstance.removeUser(user)
 
         except ValueError as e:
-            print(f"An error occured: {e}")
+            print(f"An error occured in removeUser: {e}")
 
     def previousPage(self):
         # Called by /previous
@@ -993,20 +992,20 @@ class Communication:
                     elif message == "/theme":
                         animationInstance.queue.append([2])
 
-                    elif message[0:9] == "/savechat":
-                        communicationInstance.saveChatHistoryToFile(message[10:])
-
                     elif message == "/ldm":
                         uiInstance.setLDM()
 
-                    elif message[0:4] == "/mod":
-                        uiInstance.setMod(message[5:])
-
                     elif message[0:6] == "/color":
-                        uiInstance.chooseColor(3, message[7:])
+                        val = uiInstance.setColor(message[7:])
+
+                        if val is not None:
+                            animationInstance.queue.append([3, val])
 
                     elif message[0:7] == "/border":
-                        uiInstance.chooseColor(4, message[8:])
+                        val = uiInstance.setColor(message[7:])
+
+                        if val is not None:
+                            animationInstance.queue.append([4, val])
 
                     elif message == "/next":
                         self.nextPage()
@@ -1019,6 +1018,12 @@ class Communication:
 
                     elif message[0:7] == "/remove":
                         self.removeUser(message[8:])
+
+                    elif message[0:9] == "/savechat":
+                        self.saveChatHistoryToFile(message[10:])
+
+                    elif message[0:4] == "/mod":
+                        connectionInstance.setMod(message[5:])
 
                     elif message == "/reject":
                         connectionInstance.accepted = False
@@ -1107,6 +1112,14 @@ class Connection:
 
         # Reset indicators and UI elements, indicating the error
         uiInstance.resetInputs(message)
+
+    def setMod(self, username):
+        # Called when the server approves of converting a user into a moderator
+        if username == self.inputs[0] and username is not None and self.mod is False:
+            # Set current user as mod
+            self.mod = True
+
+            uiInstance.setMod()
 
     def leave(self):
         if connectionInstance.connected is True:
@@ -1203,7 +1216,7 @@ class UI:
 
     # Methods below alter UI attributes
 
-    def chooseColor(self, code, message):
+    def setColor(self, message):
         # Called by /color [Color]
         try:
             color = web_to_rgb(message)
@@ -1212,42 +1225,62 @@ class UI:
                     (self.darkMode is False and color == self.lightbg):
                 animationInstance.queue.append([1, "You cannot do this due to contrast"])
 
+                return None
+
             else:
-                animationInstance.queue.append([code, color])
+                return color
 
         except ValueError:
             animationInstance.queue.append([1, "You cannot use this color as it is undefined"])
 
-    def setMod(self, message):
-        # Called by /mod [User]
-        if message == connectionInstance.inputs[0] and connectionInstance.mod is False:
-            # Load the mod preset (dark bg, lightblue text color, white borders)
-            # Indicate to the user that they are a moderator
+            return None
 
-            animationInstance.queue.append([1, "You are now a mod"])
+    def setMod(self):
+        # Load the mod preset (dark bg, lightblue text color, white borders)
+        # Indicate to the user that they are a moderator
 
-            if self.darkMode is False:
-                animationInstance.queue.append([2, False])
+        animationInstance.queue.append([1, "You are now a mod"])
 
-            connectionInstance.mod = True
+        if self.darkMode is False:
+            animationInstance.queue.append([2, False])
 
-            uiInstance.chooseColor(3, "lightblue")
-            uiInstance.chooseColor(4, "white")
+        val = self.setColor("lightblue")
+
+        if val is not None:
+            # Set the text color as lightblue
+            animationInstance.queue.append([3, val])
+
+        val = self.setColor("white")
+        if val is not None:
+            # Set the borders as white
+            animationInstance.queue.append([4, val])
 
     def setLDM(self):
         # Called by /ldm
         if system() == "Darwin":
             # For macOS
             if self.LDM is True:
-                self.LDM = False
                 animationInstance.queue.append([1, "You turned LDM off"])
 
+                self.LDM = False
+
             else:
-                self.LDM = True
                 animationInstance.queue.append([1, "You turned LDM on"])
+
+                self.LDM = True
 
         else:
             animationInstance.queue.append([1, "Animations are disabled on your OS."])
+
+    def addUser(self, user):
+        # Called iteratively when a new user is connected, adds every user in the list to the UI
+        self.userList.append(user)
+        animationInstance.queue.append([1, f"{str(user)} has connected"])
+
+    def removeUser(self, user):
+        # Called when a user that's not the client running disconnects, and displays the changes to the UI
+        self.userList.remove(user)
+        animationInstance.queue.append([1, f"{user} has disconnected"])
 
     def closeUI(self):
         # Is almost always called from the connectioninstance leaving method, but could be called
