@@ -43,7 +43,9 @@ def test_username_validation():
     for username in ["p p", "", "12345678", "None"]:
         assert server.connectionInstance.validateUsername(username) is False
 
-    assert server.connectionInstance.validateUsername("random") is True
+    # Valid usernames
+    for username in ["name", "peppy", "random1"]:
+        assert server.connectionInstance.validateUsername(username) is True
 
 
 def test_message_length_validation():
@@ -51,3 +53,7 @@ def test_message_length_validation():
     assert server.connectionInstance.validateMessageLength("123456789012345678901234567890123456789012345678901") is False
     assert server.connectionInstance.validateMessageLength("12345678901234567890123456789012345678901234567890") is True
     assert server.connectionInstance.validateMessageLength("a") is True
+
+
+def test_connecting():
+    server.connectionInstance.connect()
