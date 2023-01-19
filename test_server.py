@@ -25,13 +25,11 @@ def test_key_retrieval():
         assert key == server.securityInstance.rsaDecrypt(server.securityInstance.rsaEncrypt(key, 244177, 280043), 257713, 280043)
 
 
-def test_normal_string_retrieval():
+def test_string_retrieval():
     message = "my name is tomm 12345"
     for key in range(1, 26):
         assert message == server.securityInstance.caesarDecrypt(server.securityInstance.caesarEncrypt(message, key), key)
 
-
-def test_emoji_string_retrieval():
     message = "😁😛😋🤣"
     for key in range(1, 26):
         assert message == server.securityInstance.caesarDecrypt(server.securityInstance.caesarEncrypt(message, key),
@@ -43,7 +41,9 @@ def test_username_validation():
     for username in ["p p", "", "12345678", "None"]:
         assert server.connectionInstance.validateUsername(username) is False
 
-    assert server.connectionInstance.validateUsername("random") is True
+    # Valid username tests
+    for username in ["random", "tommy", "ab123"]:
+        assert server.connectionInstance.validateUsername(username) is True
 
 
 def test_message_length_validation():

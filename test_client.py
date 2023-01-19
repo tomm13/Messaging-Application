@@ -1,4 +1,4 @@
-# 18/1/2023
+# 19/1/2023
 # V13.3
 
 import client
@@ -162,13 +162,11 @@ def test_key_retrieval():
         assert key == client.communicationInstance.rsaDecrypt(client.communicationInstance.rsaEncrypt(key, 244177, 280043), 257713, 280043)
 
 
-def test_normal_string_retrieval():
+def test_string_retrieval():
     message = "my name is tomm 12345"
     for key in range(1, 26):
         assert message == client.communicationInstance.caesarDecrypt(client.communicationInstance.caesarEncrypt(message, key), key)
 
-
-def test_emoji_string_retrieval():
     message = "😁😛😋🤣"
     for key in range(1, 26):
         assert message == client.communicationInstance.caesarDecrypt(client.communicationInstance.caesarEncrypt(message, key), key)
