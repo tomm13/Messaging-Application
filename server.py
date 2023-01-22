@@ -1,10 +1,10 @@
-# 11/1/2023
+# 22/1/2023
 # V13.3
 
-import math
-import socket
+from math import sqrt, gcd
+from socket import socket, gethostname, gethostbyname
 import time
-import random
+from random import randint
 from threading import Thread
 
 
@@ -35,7 +35,7 @@ class Security:
         for prime in range(lower, upper):
             isPrime = True
 
-            for factor in range(2, int(math.sqrt(prime) + 1)):
+            for factor in range(2, int(sqrt(prime) + 1)):
                 if prime % factor == 0:
                     isPrime = False
                     break
@@ -45,8 +45,8 @@ class Security:
 
         while len(str(N)) != 6:
             # Generate 2 primes P and Q where the product N is 6 digits
-            P = primes[random.randint(0, len(primes) - 1)]
-            Q = primes[random.randint(0, len(primes) - 1)]
+            P = primes[randint(0, len(primes) - 1)]
+            Q = primes[randint(0, len(primes) - 1)]
 
             # N is the 7-12th digits of either the public or private key
             N = P * Q
@@ -54,10 +54,10 @@ class Security:
 
         # Generate e such that e < phiN, 6 digits long, as well as coprime with phiN
         for coprime in range(100000, phiN):
-            if math.gcd(coprime, phiN) == 1:
+            if gcd(coprime, phiN) == 1:
                 coprimes.append(coprime)
 
-        e = coprimes[random.randint(0, len(coprimes))]
+        e = coprimes[randint(0, len(coprimes))]
 
         for k in range(1, upper ** 2):
             # Generate d such that d = e^-1 mod phiN and is 6 digits long
@@ -70,7 +70,7 @@ class Security:
         self.d = d
         self.N = N
 
-        self.cipherKey = random.randint(1, 26)
+        self.cipherKey = randint(1, 26)
         self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey, self.e, self.N)
 
         print(f"[Server] Public key = {e}{N}")
@@ -364,9 +364,9 @@ class Send:
 
 class Connection:
     def __init__(self):
-        self.socket = socket.socket()
-        self.host = socket.gethostbyname(socket.gethostname())
-        self.port = random.randint(49125, 65535)
+        self.socket = socket()
+        self.host = gethostbyname(gethostname())
+        self.port = randint(49125, 65535)
         self.userOnline = 0
         self.users = []
         self.clients = []
@@ -381,7 +381,7 @@ class Connection:
                 self.socket.bind((self.host, self.port))
 
             except ConnectionError:
-                self.port = random.randint(49125, 65536)
+                self.port = randint(49125, 65536)
 
             except OSError:
                 self.host = input("[Server] Failed to bind - Enter an IP to host the server on\n")
