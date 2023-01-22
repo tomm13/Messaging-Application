@@ -1,4 +1,4 @@
-# 12/1/2023
+# 18/1/2023
 # V13.3
 
 
@@ -1059,7 +1059,6 @@ class Connection:
         self.threadInitialized = False
         self.mod = False
         self.inputRequest = 0
-        self.timeoutduration = 5
 
     def connect(self):
         # Called when the user has filled out all 7 inputs
