@@ -923,10 +923,13 @@ class Communication:
 
     def createNewPage(self, message):
         # Sends the client to the new current page and shows input
+        if __name__ == "__main__":
+            uiInstance.chatHistory.clear()
+            uiInstance.chatHistory.value = message
+
         self.transcript.append([message])
         self.page = uiInstance.page + 1
-        uiInstance.chatHistory.clear()
-        uiInstance.chatHistory.value = message
+
         uiInstance.page += 1
         uiInstance.linesSent = 1
 
@@ -937,29 +940,40 @@ class Communication:
 
         else:
             # Received input
-            self.chatHistory.append(strftime("%H:%M:%S", localtime()) + f" {message}")
+            self.chatHistory.append(strftime("%H:%M:%S", localtime()) + " {message}")
             if uiInstance.linesSent == 0:
                 # Only true for the very first message
                 self.transcript[uiInstance.page].append(message)
-                uiInstance.chatHistory.value = message
+
+                if __name__ == "__main__":
+                    uiInstance.chatHistory.value = message
+
                 uiInstance.linesSent += 1
 
             else:
                 if self.page == uiInstance.page:
                     # If you are viewing the current page then
                     self.transcript[uiInstance.page].append(message)
-                    uiInstance.chatHistory.append(message)
+
+                    if __name__ == "__main__":
+                        uiInstance.chatHistory.append(message)
+
                     uiInstance.linesSent += 1
 
                 else:
                     # If you are viewing an older page then load current page then show input
                     self.page = uiInstance.page
-                    uiInstance.chatHistory.clear()
-                    uiInstance.chatHistory.value = self.transcript[self.page][0]
+
+                    if __name__ == "__main__":
+                        uiInstance.chatHistory.clear()
+                        uiInstance.chatHistory.value = self.transcript[self.page][0]
+
                     uiInstance.linesSent = 1
 
                     for line in self.transcript[self.page][1:]:
-                        uiInstance.chatHistory.append(line)
+                        if __name__ == "__main__":
+                            uiInstance.chatHistory.append(line)
+
                         uiInstance.linesSent += 1
 
                     if uiInstance.linesSent >= uiInstance.linesLimit:
@@ -968,7 +982,10 @@ class Communication:
 
                     else:
                         self.transcript[uiInstance.page].append(message)
-                        uiInstance.chatHistory.append(message)
+
+                        if __name__ == "__main__":
+                            uiInstance.chatHistory.append(message)
+
                         uiInstance.linesSent += 1
 
     def updateThread(self):
