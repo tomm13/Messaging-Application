@@ -182,16 +182,3 @@ def test_chat_history_retrieval():
             line = file.readline()
 
         assert line == strftime("%H:%M:%S", localtime()) + " {message}\n"
-
-
-def test_message_and_page_handling():
-    # Test that pages are styled properly
-    # First reset the chathistory
-
-    client.communicationInstance.chatHistory = []
-    client.uiInstance.linesSent = 0
-
-    pass
-
-    #client.communicationInstance.addMessage()
-
