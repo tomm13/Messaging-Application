@@ -168,3 +168,16 @@ def test_reset_inputs():
     client.connectionInstance.resetInputs(None)
 
     assert all(item is None for item in client.connectionInstance.inputs) is True
+
+
+def test_chat_history_retrieval():
+    # Create a list of messages and see if it matches
+
+    for message in ["my name is tomm 12345", "😁😛😋🤣"]:
+        client.communicationInstance.chatHistory = [message]
+        client.communicationInstance.saveChatHistoryToFile("test.txt")
+
+        with open("test.txt", "r") as file:
+            line = file.readline()
+
+        assert line == f"{message}\n"
