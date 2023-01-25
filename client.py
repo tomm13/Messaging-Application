@@ -824,7 +824,7 @@ class Communication:
 
         return newMessage
 
-    def saveChatHistoryToFile(self, location):
+    def setChatHistoryFile(self, location):
         # Called by /savechat [Location]
         if location and " " not in location:
             with open(location, "w") as file:
@@ -852,7 +852,7 @@ class Communication:
             print(f"An error occured: {e}")
             connectionInstance.leave()
 
-    def addUsers(self, users):
+    def setUsers(self, users):
         # Called by /add [Users spilt by space]
         users = users.split()
         users.sort()
@@ -994,13 +994,13 @@ class Communication:
                         self.getPreviousPage()
 
                     elif message[0:7] == "/accept":
-                        self.addUsers(message[8:])
+                        self.setUsers(message[8:])
 
                     elif message[0:7] == "/remove":
                         self.removeUser(message[8:])
 
                     elif message[0:9] == "/savechat":
-                        self.saveChatHistoryToFile(message[10:])
+                        self.setChatHistoryFile(message[10:])
 
                     elif message == "/reject":
                         connectionInstance.accepted = False
@@ -1180,9 +1180,12 @@ class UI:
             print("Unfortunately your system does not support animations, therefore they have been disabled.")
 
         if __name__ == "__main__":
+            # EnableUI displays UI elements and sets their attributes
             self.enableUI = True
 
         else:
+            # Disabling it is useful in testing, as UI elements cannot be seen anyways
+            # In addition, this prevents attribute errors with UI elements that don't exist
             self.enableUI = False
 
     # Methods below alter UI attributes
@@ -1226,12 +1229,13 @@ class UI:
     def getPreviousPage(self, transcript):
         # Called by /previous
         # Clear the page, then set the first message as "value"
-        self.chatHistory.clear()
-        self.chatHistory.value = transcript[0]
+        if self.enableUI is True:
+            self.chatHistory.clear()
+            self.chatHistory.value = transcript[0]
 
-        for line in transcript[1:]:
-            # For every subsequent message, append to the list
-            self.chatHistory.append(line)
+            for line in transcript[1:]:
+                # For every subsequent message, append to the list
+                self.chatHistory.append(line)
 
         if self.LDM is False:
             # Let the user know which page they're on
@@ -1240,41 +1244,50 @@ class UI:
     def getNextPage(self, transcript):
         # Called by /next
         # Clear the page, then set the first message as "value"
+        if self.enableUI is True:
+            self.chatHistory.clear()
+            self.chatHistory.value = transcript[self.page][0]
 
-        self.chatHistory.clear()
-        self.chatHistory.value = transcript[self.page][0]
-
-        for line in transcript[1:]:
-            self.chatHistory.append(line)
+            for line in transcript[1:]:
+                self.chatHistory.append(line)
 
         if self.LDM is False:
             animationInstance.queue.append([1, f"You are on page {str(self.page + 1)} of {str(uiInstance.page + 1)}"])
 
     def getNewPage(self, message):
         # Called when the messages on 1 page excees the lineslimit
-        self.chatHistory.clear()
-        self.chatHistory.value = message
+        if self.enableUI is True:
+            self.chatHistory.clear()
+            self.chatHistory.value = message
 
         self.page += 1
         self.linesSent = 1
 
     def setFirstMessage(self, message):
-        self.chatHistory.clear()
-        self.chatHistory.value = message
+        if self.enableUI is True:
+            self.chatHistory.clear()
+            self.chatHistory.value = message
+
         self.linesSent += 1
 
     def setSubsequentMessage(self, message):
-        self.chatHistory.append(message)
+        if self.enableUI is True:
+            self.chatHistory.append(message)
+
         self.linesSent += 1
 
     def addUser(self, user):
         # Called iteratively when a new user is connected, adds every user in the list to the UI
-        self.userList.append(user)
+        if self.enableUI is True:
+            self.userList.append(user)
+
         animationInstance.queue.append([1, f"{str(user)} has connected"])
 
     def removeUser(self, user):
         # Called when a user that's not the client running disconnects, and displays the changes to the UI
-        self.userList.remove(user)
+        if self.enableUI is True:
+            self.userList.remove(user)
+
         animationInstance.queue.append([1, f"{user} has disconnected"])
 
     def closeUI(self):
