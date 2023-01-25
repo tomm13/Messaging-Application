@@ -1,4 +1,4 @@
-# 19/1/2023
+# 25/1/2023
 # V13.3
 
 import client
@@ -141,20 +141,6 @@ def test_key_separation():
     assert client.connectionInstance.d == 257713
     assert client.connectionInstance.N == 280043
     assert client.connectionInstance.cipherKey == 14
-
-
-def test_moderator_rejection():
-    # Set None as argument
-    client.connectionInstance.setMod(None)
-
-    assert client.connectionInstance.mod is False
-
-
-def test_moderator_acceptance():
-    # Set Username as arugument
-    client.connectionInstance.setMod("Username")
-
-    assert client.connectionInstance.mod is True
 
 
 def test_key_retrieval():

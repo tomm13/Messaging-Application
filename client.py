@@ -1,4 +1,4 @@
-# 18/1/2023
+# 25/1/2023
 # V13.3
 
 
@@ -880,13 +880,9 @@ class Communication:
     def removeUser(self, user):
         # Called by /remove [Users split by space]
         try:
-            if user == connectionInstance.inputs[0]:
-                uiInstance.closeUI()
+            self.users.remove(user)
 
-            else:
-                self.users.remove(user)
-
-                uiInstance.removeUser(user)
+            uiInstance.removeUser(user)
 
         except ValueError as e:
             print(f"An error occured in removeUser: {e}")
@@ -1022,9 +1018,6 @@ class Communication:
                     elif message[0:9] == "/savechat":
                         self.saveChatHistoryToFile(message[10:])
 
-                    elif message[0:4] == "/mod":
-                        connectionInstance.setMod(message[5:])
-
                     elif message == "/reject":
                         connectionInstance.accepted = False
                         connectionInstance.resetInputs("an invalid username")
@@ -1111,14 +1104,6 @@ class Connection:
 
         # Reset indicators and UI elements, indicating the error
         uiInstance.resetInputs(message)
-
-    def setMod(self, username):
-        # Called when the server approves of converting a user into a moderator
-        if username == self.inputs[0] and username is not None and self.mod is False:
-            # Set current user as mod
-            self.mod = True
-
-            uiInstance.setMod()
 
     def leave(self):
         if connectionInstance.connected is True:
@@ -1233,26 +1218,6 @@ class UI:
             animationInstance.queue.append([1, "You cannot use this color as it is undefined"])
 
             return None
-
-    def setMod(self):
-        # Load the mod preset (dark bg, lightblue text color, white borders)
-        # Indicate to the user that they are a moderator
-
-        animationInstance.queue.append([1, "You are now a mod"])
-
-        if self.darkMode is False:
-            animationInstance.queue.append([2, False])
-
-        val = self.setColor("lightblue")
-
-        if val is not None:
-            # Set the text color as lightblue
-            animationInstance.queue.append([3, val])
-
-        val = self.setColor("white")
-        if val is not None:
-            # Set the borders as white
-            animationInstance.queue.append([4, val])
 
     def setLDM(self):
         # Called by /ldm
