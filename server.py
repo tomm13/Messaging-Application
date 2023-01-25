@@ -73,8 +73,8 @@ class Security:
         self.cipherKey = randint(1, 26)
         self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey, self.e, self.N)
 
-        print(f"[Server] Public key = {e}{N}")
-        print(f"[Server] Private key = {d}{N}")
+        print(f"[Server] Public key = {self.e}{self.N}")
+        print(f"[Server] Private key = {self.d}{self.N}")
         print(f"[Server] Cipher key = {self.encryptedCipherKey}")
 
     @staticmethod
