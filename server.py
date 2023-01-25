@@ -1,4 +1,4 @@
-# 22/1/2023
+# 25/1/2023
 # V13.3
 
 from math import sqrt, gcd
@@ -43,32 +43,32 @@ class Security:
             if isPrime is True:
                 primes.append(prime)
 
-        while len(str(N)) != 6:
+        while True:
             # Generate 2 primes P and Q where the product N is 6 digits
             P = primes[randint(0, len(primes) - 1)]
             Q = primes[randint(0, len(primes) - 1)]
 
             # N is the 7-12th digits of either the public or private key
-            N = P * Q
+            self.N = P * Q
+
             phiN = (P - 1) * (Q - 1)
+
+            if len(str(self.N)) == 6:
+                break
 
         # Generate e such that e < phiN, 6 digits long, as well as coprime with phiN
         for coprime in range(100000, phiN):
             if gcd(coprime, phiN) == 1:
                 coprimes.append(coprime)
 
-        e = coprimes[randint(0, len(coprimes))]
+        self.e = coprimes[randint(0, len(coprimes))]
 
         for k in range(1, upper ** 2):
             # Generate d such that d = e^-1 mod phiN and is 6 digits long
-            if (k * phiN + 1) % e == 0:
-                if (k * phiN + 1) // e != e and len(str((k * phiN + 1) // e)) == 6:
-                    d = (k * phiN + 1) // e
+            if (k * phiN + 1) % self.e == 0:
+                if (k * phiN + 1) // self.e != self.e and len(str((k * phiN + 1) // self.e)) == 6:
+                    self.d = (k * phiN + 1) // self.e
                     break
-
-        self.e = e
-        self.d = d
-        self.N = N
 
         self.cipherKey = randint(1, 26)
         self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey, self.e, self.N)
@@ -140,178 +140,6 @@ class Security:
         return newMessage
 
 
-class Actions:
-    def __init__(self):
-        self.voteTimeRemaining = 90
-        self.modOnline = 0
-        self.mods = []
-        self.modUsers = []
-        self.hasVoted = []
-        self.hasVotedUsers = []
-        self.voteTarget = 2
-        self.voteFor = 0
-        self.voteAgainst = 0
-        self.voteActive = False
-        self.userToKick = None
-        self.userToKickSocket = None
-
-    def resetVote(self):
-        self.voteTimeRemaining = 90
-        self.userToKick = None
-        self.userToKickSocket = None
-        self.hasVoted = []
-        self.hasVotedUsers = []
-        self.voteActive = False
-
-    def voteWaiter(self):
-        # Executed in a thread, waits for a timer to end
-
-        while self.voteTimeRemaining > 0:
-            self.voteTimeRemaining -= 1
-            time.sleep(1)
-
-        if self.voteFor > self.voteAgainst:
-            sendInstance.broadcastDisplay(f"{self.userToKick} will be kicked")
-            connectionInstance.removeUser(self.userToKick, self.userToKickSocket)
-
-        else:
-            sendInstance.broadcastDisplay(f"{self.userToKick} will not be kicked")
-
-        self.resetVote()
-
-    def vote(self, message, clientSocket):
-        # Called when a moderator is trying to kick a user, and depending on the number
-        # of moderators online, the user is either kicked or a vote starts. Use /kick
-        modSocket = clientSocket
-        index = connectionInstance.clients.index(modSocket)
-        modUsername = connectionInstance.users[index]
-
-        if message[0:5] == "/kick":
-            username = message[6:]
-
-            if username in connectionInstance.users:
-                index = connectionInstance.users.index(username)
-                clientSocket = connectionInstance.clients[index]
-
-                if modSocket in self.mods and modUsername in self.modUsers:
-                    if clientSocket not in self.mods and username not in self.modUsers:
-                        if self.voteActive is False:
-                            if self.modOnline == 1:
-                                sendInstance.broadcastDisplay(modUsername + " has kicked " + username)
-                                connectionInstance.removeUser(username, clientSocket)
-
-                            else:
-                                self.voteFor = 1
-                                self.voteAgainst = 0
-                                self.hasVoted.append(modSocket)
-                                self.hasVotedUsers.append(modUsername)
-                                self.userToKick = username
-                                self.userToKickSocket = clientSocket
-                                self.voteActive = True
-
-                                Thread(target=self.voteWaiter).start()
-
-                                sendInstance.broadcastDisplay(f"{modUsername} has started a vote to kick {username}")
-                        else:
-                            sendInstance.privateBroadcastDisplay("You cannot complete this action at this time",
-                                                                 modSocket)
-                    else:
-                        sendInstance.privateBroadcastDisplay("You cannot kick a mod", modSocket)
-                else:
-                    sendInstance.privateBroadcastDisplay(f"You need to be a mod to kick {username}", modSocket)
-            else:
-                sendInstance.privateBroadcastDisplay("You can't kick what doesn't exist", modSocket)
-
-        elif message[0:5] == "/vote":
-            if self.voteActive is True:
-                if message[6:] == "details":
-                    sendInstance.privateBroadcastDisplay("Being kicked: " + self.userToKick, modSocket)
-
-                    time.sleep(0.1)
-
-                    if self.voteTarget - (self.voteFor + self.voteAgainst) == 1:
-                        sendInstance.privateBroadcastDisplay(str(self.voteTarget - (self.voteFor + self.voteAgainst)) +
-                                                             " vote needed", modSocket)
-                    else:
-                        sendInstance.privateBroadcastDisplay(str(self.voteTarget - (self.voteFor + self.voteAgainst)) +
-                                                             " votes needed", modSocket)
-
-                elif modSocket in self.mods and modUsername in self.modUsers:
-                    if modSocket not in self.hasVoted and modUsername not in self.hasVotedUsers:
-                        if message[6:] == "for":
-                            self.hasVoted.append(modSocket)
-                            self.hasVotedUsers.append(modUsername)
-                            self.voteFor += 1
-
-                        elif message[6:] == "against":
-                            self.hasVoted.append(modSocket)
-                            self.hasVotedUsers.append(modUsername)
-                            self.voteAgainst += 1
-
-                        else:
-                            sendInstance.privateBroadcastDisplay("Your vote argument is unknown", modSocket)
-                    else:
-                        sendInstance.privateBroadcastDisplay("You have already cast your vote", modSocket)
-                else:
-                    sendInstance.privateBroadcastDisplay("You need to be a mod to vote", modSocket)
-            else:
-                sendInstance.privateBroadcastDisplay("You cannot do this as there is no ongoing vote", modSocket)
-
-        if self.voteActive is True:
-            if self.voteFor == self.voteTarget or self.voteAgainst == self.voteTarget or self.voteFor + \
-                    self.voteAgainst == self.voteTarget:
-
-                if self.voteFor == self.voteTarget:
-                    sendInstance.broadcastDisplay(f"{self.userToKick} will be kicked")
-                    connectionInstance.removeUser(self.userToKick, self.userToKickSocket)
-
-                elif self.voteAgainst == self.voteTarget or self.voteFor + self.voteAgainst == self.voteTarget:
-                    sendInstance.broadcastDisplay(f"{self.userToKick} will not be kicked")
-
-                self.resetVote()
-
-    def mod(self, message, clientSocket):
-        # Called when a moderator converts other users into another moderator
-        # Use /mod
-        modSocket = clientSocket
-        index = connectionInstance.clients.index(modSocket)
-        modUsername = connectionInstance.users[index]
-
-        username = message[5:]
-
-        if username in connectionInstance.users:
-            index = connectionInstance.users.index(username)
-            clientSocket = connectionInstance.clients[index]
-
-            if clientSocket not in self.mods and username not in self.modUsers:
-                if actionsInstance.userToKickSocket != clientSocket and actionsInstance.userToKick != username:
-                    if self.modOnline == 0:
-                        self.modUsers.append(username)
-                        self.mods.append(clientSocket)
-                        self.modOnline += 1
-
-                        sendInstance.privateBroadcast(f"/mod {username}", clientSocket)
-                        sendInstance.broadcastDisplay(f"{username} is now a mod")
-
-                    elif modSocket in self.mods and modUsername in self.modUsers:
-                        self.modUsers.append(username)
-                        self.mods.append(clientSocket)
-                        self.modOnline += 1
-
-                        sendInstance.privateBroadcast(f"/mod {username}", clientSocket)
-                        sendInstance.broadcastDisplay(f"{username} is now a mod")
-
-                    else:
-                        sendInstance.privateBroadcastDisplay("You need to be a mod to do this", modSocket)
-                else:
-                    sendInstance.privateBroadcastDisplay("You cannot mod this person as they are under review",
-                                                         modSocket)
-            else:
-                sendInstance.privateBroadcastDisplay("You are already a mod", modSocket)
-        else:
-            sendInstance.privateBroadcastDisplay("You cannot mod this person", modSocket)
-
-
 class Send:
     @staticmethod
     def broadcast(message):
@@ -343,17 +171,14 @@ class Send:
         if clientSocket in connectionInstance.clients:
             print(f"[PrivateDisplay] {message}")
 
-            clientSocket.send(securityInstance.caesarEncrypt(f"/display {message}", securityInstance.cipherKey).encode())
+            clientSocket.send(securityInstance.caesarEncrypt(f"/display {message}", securityInstance.cipherKey).
+                              encode())
 
     @staticmethod
     def command(message, username, clientSocket):
         # Use list to prevent doubled code
         if message == "/leave":
             connectionInstance.removeUser(username, clientSocket)
-        elif message[0:4] == "/mod":
-            actionsInstance.mod(message, clientSocket)
-        elif message[0:5] in ["/kick", "/vote"]:
-            actionsInstance.vote(message, clientSocket)
         elif message[0:6] == "/color" or message[0:7] == "/border" or message[0:9] == "/savechat":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message in ["/theme", "/ldm", "/previous", "/next"]:
@@ -428,7 +253,8 @@ class Connection:
         if hasValidUsername is False:
             while hasValidUsername is False and clientSocket in self.clients:
                 try:
-                    signal = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode(), securityInstance.cipherKey)
+                    signal = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode(),
+                                                            securityInstance.cipherKey)
 
                     if signal:
                         if signal == "/leave":
@@ -526,18 +352,6 @@ class Connection:
             self.users.remove(username)
             self.userOnline -= 1
 
-        if clientSocket in actionsInstance.mods:
-            actionsInstance.mods.remove(clientSocket)
-
-        if username in actionsInstance.modUsers:
-            actionsInstance.modUsers.remove(username)
-            actionsInstance.modOnline -= 1
-
-            if actionsInstance.voteActive is True:
-                actionsInstance.resetVote()
-
-                sendInstance.broadcastDisplay("The vote has been called off as a mod has left")
-
         sendInstance.broadcast(f"/remove {username}")
 
     def validateUsername(self, username):
@@ -557,7 +371,6 @@ class Connection:
             return True
 
 
-actionsInstance = Actions()
 connectionInstance = Connection()
 securityInstance = Security()
 sendInstance = Send()
