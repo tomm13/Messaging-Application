@@ -837,7 +837,7 @@ class Communication:
         else:
             animationInstance.queue.append([1, "You can't save to this location"])
 
-    def sendToServer(self, message):
+    def setMessageToSend(self, message):
         # Gets the value of the input, encrypts, then broadcasts
         try:
             if message:
@@ -846,7 +846,8 @@ class Communication:
 
                 else:
                     connectionInstance.socket.send(self.caesarEncrypt(message, connectionInstance.cipherKey).encode())
-                    uiInstance.messageInput.clear()
+
+                    uiInstance.setMessageInputAsEmpty()
 
         except BrokenPipeError as e:
             print(f"An error occured: {e}")
@@ -865,24 +866,23 @@ class Communication:
 
                 connectionInstance.accepted = True
 
-        uiInstance.userList.clear()
-        uiInstance.userList.append("Users online:")
+        uiInstance.setUserListAsEmpty()
 
         for user in users:
             if user not in self.users:
                 self.users.append(user)
 
-                uiInstance.addUser(user)
+                uiInstance.setUsers(user)
 
             else:
                 uiInstance.userList.append(user)
 
-    def removeUser(self, user):
+    def setRemovedUser(self, user):
         # Called by /remove [Users split by space]
         try:
             self.users.remove(user)
 
-            uiInstance.removeUser(user)
+            uiInstance.setRemovedUser(user)
 
         except ValueError as e:
             print(f"An error occured in removeUser: {e}")
@@ -987,6 +987,14 @@ class Communication:
                         if val is not None:
                             animationInstance.queue.append([4, val])
 
+                    elif message == "/reject":
+                        connectionInstance.accepted = False
+                        connectionInstance.setInputsAsNone("an invalid username")
+
+                    elif message[0:8] == "/timeout":
+                        animationInstance.queue.append([9, (255, 0, 0)])
+                        animationInstance.queue.append([1, message[9:]])
+
                     elif message == "/next":
                         self.getNextPage()
 
@@ -997,24 +1005,19 @@ class Communication:
                         self.setUsers(message[8:])
 
                     elif message[0:7] == "/remove":
-                        self.removeUser(message[8:])
+                        self.setRemovedUser(message[8:])
 
                     elif message[0:9] == "/savechat":
                         self.setChatHistoryFile(message[10:])
-
-                    elif message == "/reject":
-                        connectionInstance.accepted = False
-                        connectionInstance.resetInputs("an invalid username")
-
-                    elif message[0:8] == "/timeout":
-                        animationInstance.queue.append([9, (255, 0, 0)])
-                        animationInstance.queue.append([1, message[9:]])
 
                     else:
                         self.setMessage(message)
 
             except (ConnectionResetError, OSError):
                 print("Closed update thread")
+
+                connectionInstance.leave()
+
                 break
 
 
@@ -1037,7 +1040,7 @@ class Connection:
         self.mod = False
         self.inputRequest = 0
 
-    def connect(self):
+    def setConnection(self):
         # Called when the user has filled out all 7 inputs
         # Connects to the socket, calculates the RSA encryption key, decryption key, and
         # The cipher key.
@@ -1055,7 +1058,7 @@ class Connection:
             self.cipherKey = communicationInstance.rsaDecrypt(int(self.inputs[6], base=10), self.d, self.N)
 
         except ValueError:
-            self.resetInputs("invalid keys")
+            self.setInputsAsNone("invalid keys")
 
         else:
             try:
@@ -1074,24 +1077,24 @@ class Connection:
                     self.threadInitialized = True
 
             except (ValueError, TypeError, OverflowError):
-                self.resetInputs("an invalid host/ port")
+                self.setInputsAsNone("an invalid host/ port")
 
             except (ConnectionRefusedError, OSError, TimeoutError):
-                self.resetInputs("a connection error")
+                self.setInputsAsNone("a connection error")
 
-    def resetInputs(self, message):
+    def setInputsAsNone(self, message):
         # Reset inputs in terms of variables and data
         self.inputs = [None for i in range(7)]
 
         # Reset indicators and UI elements, indicating the error
-        uiInstance.resetInputs(message)
+        uiInstance.setInputsAsNone(message)
 
     def leave(self):
         if connectionInstance.connected is True:
             self.socket.send(communicationInstance.caesarEncrypt("/leave", self.cipherKey).encode())
             self.socket.close()
 
-        uiInstance.closeUI()
+        uiInstance.leave()
 
 
 class UI:
@@ -1184,7 +1187,7 @@ class UI:
             self.enableUI = True
 
         else:
-            # Disabling it is useful in testing, as UI elements cannot be seen anyways
+            # Disabling it is useful in testing, as UI elements cannot be seen anyway
             # In addition, this prevents attribute errors with UI elements that don't exist
             self.enableUI = False
 
@@ -1239,7 +1242,7 @@ class UI:
 
         if self.LDM is False:
             # Let the user know which page they're on
-            animationInstance.queue.append([1, f"You are on page {str(self.page + 1)} of {str(uiInstance.page + 1)}"])
+            animationInstance.queue.append([1, f"You are on page {str(communicationInstance.page + 1)} of {str(self.page + 1)}"])
 
     def getNextPage(self, transcript):
         # Called by /next
@@ -1252,7 +1255,7 @@ class UI:
                 self.chatHistory.append(line)
 
         if self.LDM is False:
-            animationInstance.queue.append([1, f"You are on page {str(self.page + 1)} of {str(uiInstance.page + 1)}"])
+            animationInstance.queue.append([1, f"You are on page {str(communicationInstance.page + 1)} of {str(self.page + 1)}"])
 
     def getNewPage(self, message):
         # Called when the messages on 1 page excees the lineslimit
@@ -1276,21 +1279,30 @@ class UI:
 
         self.linesSent += 1
 
-    def addUser(self, user):
+    def setUsers(self, user):
         # Called iteratively when a new user is connected, adds every user in the list to the UI
         if self.enableUI is True:
             self.userList.append(user)
 
         animationInstance.queue.append([1, f"{str(user)} has connected"])
 
-    def removeUser(self, user):
+    def setRemovedUser(self, user):
         # Called when a user that's not the client running disconnects, and displays the changes to the UI
         if self.enableUI is True:
             self.userList.remove(user)
 
         animationInstance.queue.append([1, f"{user} has disconnected"])
 
-    def closeUI(self):
+    def setUserListAsEmpty(self):
+        if self.enableUI is True:
+            self.userList.clear()
+            self.userList.append("Users online:")
+
+    def setMessageInputAsEmpty(self):
+        if self.enableUI is True:
+            self.messageInput.clear()
+
+    def leave(self):
         # Is almost always called from the connectioninstance leaving method, but could be called
         # Directly when kicked to prevent a doubled "/remove" call
         if connectionInstance.accepted is True:
@@ -1311,7 +1323,7 @@ class UI:
         animationInstance.queue.append(
             [10, f"{(7 - connectionInstance.inputs.count(None))} of 7 inputs completed"])
 
-    def resetInputs(self, message):
+    def setInputsAsNone(self, message):
         # Resets the 7 inputs
         # Resets every indiactor to be invisible
         for indicator in range(7):
@@ -1368,7 +1380,7 @@ class UI:
 
         return None
 
-    def requestInput(self, key, value):
+    def setInputGetter(self, key, value):
         if connectionInstance.accepted is False:
             # Creates a series of input requests
             for check in range(7):
@@ -1412,14 +1424,14 @@ class UI:
             if connectionInstance.inputRequest < 0:
                 # To cycle back the cursor when it reaches below 0 or above 6
                 connectionInstance.inputRequest = 6
-                self.requestInput(key, value)
+                self.setInputGetter(key, value)
 
             if connectionInstance.inputRequest > 6:
                 connectionInstance.inputRequest = 0
-                self.requestInput(key, value)
+                self.setInputGetter(key, value)
 
             if all(check is not None for check in connectionInstance.inputs) and key and __name__ == "__main__":
-                connectionInstance.connect()
+                connectionInstance.setConnection()
 
     def keyPressed(self, event):
         # Detects key presses with emphasis on enter, escape, left and right
@@ -1433,7 +1445,7 @@ class UI:
 
                     connectionInstance.inputRequest -= 1
 
-                    self.requestInput(False, self.inputTextBox.value)
+                    self.setInputGetter(False, self.inputTextBox.value)
 
             if event.tk_event.keysym == "Right":
                 if 7 > connectionInstance.inputRequest > -1:
@@ -1441,14 +1453,14 @@ class UI:
 
                     connectionInstance.inputRequest += 1
 
-                    self.requestInput(False, self.inputTextBox.value)
+                    self.setInputGetter(False, self.inputTextBox.value)
 
             if event.tk_event.keysym == "Return":
                 if connectionInstance.accepted:
-                    communicationInstance.sendToServer(self.messageInput.value)
+                    communicationInstance.setMessageToSend(self.messageInput.value)
 
                 else:
-                    self.requestInput(True, self.inputTextBox.value)
+                    self.setInputGetter(True, self.inputTextBox.value)
 
             if event.tk_event.keysym == "Escape":
                 if connectionInstance.accepted:
