@@ -184,7 +184,7 @@ class Animation:
                     sleep(uiInstance.rate)
 
         else:
-            communicationInstance.addMessage(message)
+            communicationInstance.setMessage(message)
 
     @staticmethod
     def switchTheme():
@@ -887,56 +887,39 @@ class Communication:
         except ValueError as e:
             print(f"An error occured in removeUser: {e}")
 
-    def previousPage(self):
+    def getPreviousPage(self):
         # Called by /previous
         if self.page > 0:
             self.page -= 1
 
-            uiInstance.chatHistory.clear()
-            uiInstance.chatHistory.value = self.transcript[self.page][0]
+            # Tell the UI to display the previous page
+            uiInstance.getPreviousPage(self.transcript[self.page])
 
-            for line in self.transcript[self.page][1:]:
-                uiInstance.chatHistory.append(line)
-
-            if uiInstance.LDM is False:
-                animationInstance.queue.append([1, f"You are on page {str(self.page + 1)} of {str(uiInstance.page + 1)}"
-                                                ])
         else:
             animationInstance.queue.append([1, "You cannot go below this page"])
 
-    def nextPage(self):
+    def getNextPage(self):
         # Called by /next
         if self.page < uiInstance.page:
             self.page += 1
 
-            uiInstance.chatHistory.clear()
-            uiInstance.chatHistory.value = self.transcript[self.page][0]
+            # Tell the UI to display the previous page
+            uiInstance.getPreviousPage(self.transcript[self.page])
 
-            for line in self.transcript[self.page][1:]:
-                uiInstance.chatHistory.append(line)
-
-            if uiInstance.LDM is False:
-                animationInstance.queue.append(
-                    [1, f"You are on page {str(self.page + 1)} of {str(uiInstance.page + 1)}"])
         else:
             animationInstance.queue.append([1, "You are at the highest page"])
 
-    def createNewPage(self, message):
+    def getNewPage(self, message):
         # Sends the client to the new current page and shows input
-        if __name__ == "__main__":
-            uiInstance.chatHistory.clear()
-            uiInstance.chatHistory.value = message
-
         self.transcript.append([message])
         self.page = uiInstance.page + 1
 
-        uiInstance.page += 1
-        uiInstance.linesSent = 1
+        uiInstance.getNewPage(message)
 
-    def addMessage(self, message):
+    def setMessage(self, message):
         # Called when the message is not a command
         if uiInstance.linesSent >= uiInstance.linesLimit:
-            self.createNewPage(message)
+            self.getNewPage(message)
 
         else:
             # Received input
@@ -945,48 +928,32 @@ class Communication:
                 # Only true for the very first message
                 self.transcript[uiInstance.page].append(message)
 
-                if __name__ == "__main__":
-                    uiInstance.chatHistory.value = message
-
-                uiInstance.linesSent += 1
+                uiInstance.setFirstMessage(message)
 
             else:
                 if self.page == uiInstance.page:
                     # If you are viewing the current page then
                     self.transcript[uiInstance.page].append(message)
 
-                    if __name__ == "__main__":
-                        uiInstance.chatHistory.append(message)
-
-                    uiInstance.linesSent += 1
+                    uiInstance.setSubsequentMessage(message)
 
                 else:
                     # If you are viewing an older page then load current page then show input
                     self.page = uiInstance.page
 
-                    if __name__ == "__main__":
-                        uiInstance.chatHistory.clear()
-                        uiInstance.chatHistory.value = self.transcript[self.page][0]
-
-                    uiInstance.linesSent = 1
+                    uiInstance.setFirstMessage(self.transcript[self.page][0])
 
                     for line in self.transcript[self.page][1:]:
-                        if __name__ == "__main__":
-                            uiInstance.chatHistory.append(line)
-
-                        uiInstance.linesSent += 1
+                        uiInstance.setSubsequentMessage(line)
 
                     if uiInstance.linesSent >= uiInstance.linesLimit:
                         # If the current page has no space left
-                        self.createNewPage(message)
+                        self.getNewPage(message)
 
                     else:
                         self.transcript[uiInstance.page].append(message)
 
-                        if __name__ == "__main__":
-                            uiInstance.chatHistory.append(message)
-
-                        uiInstance.linesSent += 1
+                        uiInstance.setSubsequentMessage(message)
 
     def updateThread(self):
         # Starts when the user is connected
@@ -1021,10 +988,10 @@ class Communication:
                             animationInstance.queue.append([4, val])
 
                     elif message == "/next":
-                        self.nextPage()
+                        self.getNextPage()
 
                     elif message == "/previous":
-                        self.previousPage()
+                        self.getPreviousPage()
 
                     elif message[0:7] == "/accept":
                         self.addUsers(message[8:])
@@ -1044,7 +1011,7 @@ class Communication:
                         animationInstance.queue.append([1, message[9:]])
 
                     else:
-                        self.addMessage(message)
+                        self.setMessage(message)
 
             except (ConnectionResetError, OSError):
                 print("Closed update thread")
@@ -1088,8 +1055,7 @@ class Connection:
             self.cipherKey = communicationInstance.rsaDecrypt(int(self.inputs[6], base=10), self.d, self.N)
 
         except ValueError:
-            if __name__ == "__main__":
-                self.resetInputs("invalid keys")
+            self.resetInputs("invalid keys")
 
         else:
             try:
@@ -1108,12 +1074,10 @@ class Connection:
                     self.threadInitialized = True
 
             except (ValueError, TypeError, OverflowError):
-                if __name__ == "__main__":
-                    self.resetInputs("an invalid host/ port")
+                self.resetInputs("an invalid host/ port")
 
             except (ConnectionRefusedError, OSError, TimeoutError):
-                if __name__ == "__main__":
-                    self.resetInputs("a connection error")
+                self.resetInputs("a connection error")
 
     def resetInputs(self, message):
         # Reset inputs in terms of variables and data
@@ -1215,6 +1179,12 @@ class UI:
 
             print("Unfortunately your system does not support animations, therefore they have been disabled.")
 
+        if __name__ == "__main__":
+            self.enableUI = True
+
+        else:
+            self.enableUI = False
+
     # Methods below alter UI attributes
 
     def setColor(self, message):
@@ -1252,6 +1222,50 @@ class UI:
 
         else:
             animationInstance.queue.append([1, "Animations are disabled on your OS."])
+
+    def getPreviousPage(self, transcript):
+        # Called by /previous
+        # Clear the page, then set the first message as "value"
+        self.chatHistory.clear()
+        self.chatHistory.value = transcript[0]
+
+        for line in transcript[1:]:
+            # For every subsequent message, append to the list
+            self.chatHistory.append(line)
+
+        if self.LDM is False:
+            # Let the user know which page they're on
+            animationInstance.queue.append([1, f"You are on page {str(self.page + 1)} of {str(uiInstance.page + 1)}"])
+
+    def getNextPage(self, transcript):
+        # Called by /next
+        # Clear the page, then set the first message as "value"
+
+        self.chatHistory.clear()
+        self.chatHistory.value = transcript[self.page][0]
+
+        for line in transcript[1:]:
+            self.chatHistory.append(line)
+
+        if self.LDM is False:
+            animationInstance.queue.append([1, f"You are on page {str(self.page + 1)} of {str(uiInstance.page + 1)}"])
+
+    def getNewPage(self, message):
+        # Called when the messages on 1 page excees the lineslimit
+        self.chatHistory.clear()
+        self.chatHistory.value = message
+
+        self.page += 1
+        self.linesSent = 1
+
+    def setFirstMessage(self, message):
+        self.chatHistory.clear()
+        self.chatHistory.value = message
+        self.linesSent += 1
+
+    def setSubsequentMessage(self, message):
+        self.chatHistory.append(message)
+        self.linesSent += 1
 
     def addUser(self, user):
         # Called iteratively when a new user is connected, adds every user in the list to the UI
@@ -1364,7 +1378,7 @@ class UI:
                         self.hasRequestedInput = False
 
                     # For testing, UI elements are inaccessible
-                    if __name__ == '__main__':
+                    if self.enableUI is True:
                         self.inputTextBox.clear()
 
                     # Creates white block cursor
@@ -1391,7 +1405,7 @@ class UI:
                 connectionInstance.inputRequest = 0
                 self.requestInput(key, value)
 
-            if all(check is not None for check in connectionInstance.inputs) and key:
+            if all(check is not None for check in connectionInstance.inputs) and key and __name__ == "__main__":
                 connectionInstance.connect()
 
     def keyPressed(self, event):
