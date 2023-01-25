@@ -3,7 +3,7 @@
 
 from math import sqrt, gcd
 from socket import socket, gethostname, gethostbyname
-import time
+from time import time
 from random import randint
 from threading import Thread
 
@@ -297,7 +297,7 @@ class Connection:
                                                                   clientSocket)
                                     warnUser = True
 
-                                if time.time() > lastMessageSentTime + 5:
+                                if time() > lastMessageSentTime + 5:
                                     messagesSentRecently = 0
                                     warnUser = False
 
@@ -308,13 +308,13 @@ class Connection:
                                 else:
                                     sendInstance.broadcast(unifiedmessage)
 
-                                if lastMessageSentTime + 1 > time.time():
+                                if lastMessageSentTime + 1 > time():
                                     messagesSentRecently += 1
 
                                 elif messagesSentRecently > 0:
                                     messagesSentRecently -= 1
 
-                                lastMessageSentTime = time.time()
+                                lastMessageSentTime = time()
 
                         else:
                             if self.validateMessageLength(unifiedmessage) is False:
