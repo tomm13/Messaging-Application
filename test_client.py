@@ -148,17 +148,20 @@ def test_key_separation():
 
 def test_key_retrieval():
     for key in range(1, 26):
-        assert key == client.communicationInstance.rsaDecrypt(client.communicationInstance.rsaEncrypt(key, 244177, 280043), 257713, 280043)
+        assert key == client.communicationInstance.getrsaDecryptedMessage(
+            client.communicationInstance.getrsaEncryptedMessage(key, 244177, 280043), 257713, 280043)
 
 
 def test_string_retrieval():
     message = "my name is tomm 12345"
     for key in range(1, 26):
-        assert message == client.communicationInstance.caesarDecrypt(client.communicationInstance.caesarEncrypt(message, key), key)
+        assert message == client.communicationInstance.getCaesarDecryptedMessage(
+            client.communicationInstance.getCaesarEncryptedMessage(message, key), key)
 
     message = "😁😛😋🤣"
     for key in range(1, 26):
-        assert message == client.communicationInstance.caesarDecrypt(client.communicationInstance.caesarEncrypt(message, key), key)
+        assert message == client.communicationInstance.getCaesarDecryptedMessage(
+            client.communicationInstance.getCaesarEncryptedMessage(message, key), key)
 
 
 def test_reset_inputs():
