@@ -2,6 +2,7 @@
 # V13.3
 
 import client
+from time import localtime, strftime
 
 
 def test_initialise_inputs():
@@ -174,10 +175,23 @@ def test_chat_history_retrieval():
     # Create a list of messages and see if it matches
 
     for message in ["my name is tomm 12345", "😁😛😋🤣"]:
-        client.communicationInstance.chatHistory = [message]
+        client.communicationInstance.addMessage(message)
         client.communicationInstance.saveChatHistoryToFile("test.txt")
 
         with open("test.txt", "r") as file:
             line = file.readline()
 
-        assert line == f"{message}\n"
+        assert line == strftime("%H:%M:%S", localtime()) + " {message}\n"
+
+
+def test_message_and_page_handling():
+    # Test that pages are styled properly
+    # First reset the chathistory
+
+    client.communicationInstance.chatHistory = []
+    client.uiInstance.linesSent = 0
+
+    pass
+
+    #client.communicationInstance.addMessage()
+
