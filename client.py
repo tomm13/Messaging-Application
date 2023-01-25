@@ -763,19 +763,19 @@ class Communication:
         self.page = 0
 
     @staticmethod
-    def rsaEncrypt(key, e, N):
+    def getrsaEncryptedMessage(key, e, N):
         rsaKey = pow(key, e, N)
 
         return rsaKey
 
     @staticmethod
-    def rsaDecrypt(key, d, N):
+    def getrsaDecryptedMessage(key, d, N):
         newKey = pow(key, d, N)
 
         return newKey
 
     @staticmethod
-    def caesarEncrypt(message, cipherKey):
+    def getCaesarEncryptedMessage(message, cipherKey):
         newMessage = ""
         for letter in message:
 
@@ -800,7 +800,7 @@ class Communication:
         return newMessage
 
     @staticmethod
-    def caesarDecrypt(message, cipherKey):
+    def getCaesarDecryptedMessage(message, cipherKey):
         newMessage = ""
         for letter in message:
 
@@ -845,7 +845,8 @@ class Communication:
                     connectionInstance.leave()
 
                 else:
-                    connectionInstance.socket.send(self.caesarEncrypt(message, connectionInstance.cipherKey).encode())
+                    connectionInstance.socket.send(self.getCaesarEncryptedMessage(message, connectionInstance.cipherKey)
+                                                   .encode())
 
                     uiInstance.setMessageInputAsEmpty()
 
@@ -960,8 +961,8 @@ class Communication:
         # Looks out for server broadcasts
         while True:
             try:
-                message = self.caesarDecrypt(connectionInstance.socket.recv(1024).decode(),
-                                             connectionInstance.cipherKey)
+                message = self.getCaesarDecryptedMessage(connectionInstance.socket.recv(1024).decode(),
+                                                         connectionInstance.cipherKey)
 
                 if message:
                     print(f"Received message: {message}")
@@ -1055,7 +1056,7 @@ class Connection:
             self.e = int(str(self.inputs[4][0:6]), base=10)
             self.d = int(str(self.inputs[5][0:6]), base=10)
             self.N = int(str(self.inputs[5][6:12]), base=10)
-            self.cipherKey = communicationInstance.rsaDecrypt(int(self.inputs[6], base=10), self.d, self.N)
+            self.cipherKey = communicationInstance.getrsaDecryptedMessage(int(self.inputs[6], base=10), self.d, self.N)
 
         except ValueError:
             self.setInputsAsNone("invalid keys")
@@ -1069,7 +1070,8 @@ class Connection:
 
                 if self.accepted is False:
                     # Send username to determine if it's acceptable
-                    self.socket.send(communicationInstance.caesarEncrypt(self.inputs[0], self.cipherKey).encode())
+                    self.socket.send(communicationInstance.getCaesarEncryptedMessage(self.inputs[0], self.cipherKey)
+                                     .encode())
                     self.accepted = None
 
                 if self.threadInitialized is False:
@@ -1091,7 +1093,7 @@ class Connection:
 
     def leave(self):
         if connectionInstance.connected is True:
-            self.socket.send(communicationInstance.caesarEncrypt("/leave", self.cipherKey).encode())
+            self.socket.send(communicationInstance.getrsaEncryptedMessage("/leave", self.cipherKey).encode())
             self.socket.close()
 
         uiInstance.leave()
@@ -1242,7 +1244,8 @@ class UI:
 
         if self.LDM is False:
             # Let the user know which page they're on
-            animationInstance.queue.append([1, f"You are on page {str(communicationInstance.page + 1)} of {str(self.page + 1)}"])
+            animationInstance.queue.append(
+                [1, f"You are on page {str(communicationInstance.page + 1)} of {str(self.page + 1)}"])
 
     def getNextPage(self, transcript):
         # Called by /next
@@ -1255,7 +1258,8 @@ class UI:
                 self.chatHistory.append(line)
 
         if self.LDM is False:
-            animationInstance.queue.append([1, f"You are on page {str(communicationInstance.page + 1)} of {str(self.page + 1)}"])
+            animationInstance.queue.append(
+                [1, f"You are on page {str(communicationInstance.page + 1)} of {str(self.page + 1)}"])
 
     def getNewPage(self, message):
         # Called when the messages on 1 page excees the lineslimit
@@ -1433,7 +1437,7 @@ class UI:
             if all(check is not None for check in connectionInstance.inputs) and key and __name__ == "__main__":
                 connectionInstance.setConnection()
 
-    def keyPressed(self, event):
+    def setKeyPressed(self, event):
         # Detects key presses with emphasis on enter, escape, left and right
         if event:
             # Left and right keys bypass all if statements in getInputs, therefore will request for inputs every time
@@ -1479,7 +1483,7 @@ class UI:
         # Creates chat window
         self.chatWindow = Window(self.setupWindow, width=1280, height=720, title="Chatroom", bg=self.bg)
         self.chatWindow.when_closed = connectionInstance.leave
-        self.chatWindow.when_key_pressed = self.keyPressed
+        self.chatWindow.when_key_pressed = self.setKeyPressed
         self.chatWindow.set_full_screen()
 
         topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
@@ -1546,7 +1550,7 @@ class UI:
         self.messageInput.text_color = self.color
         self.messageInput.text_size = self.fontSizes[3][self.fontIndex]
         self.messageInput.bg = self.themeDependentBg
-        self.messageInput.when_key_pressed = self.keyPressed
+        self.messageInput.when_key_pressed = self.setKeyPressed
 
         self.setupWindow.hide()
         self.chatWindow.show()
@@ -1557,7 +1561,7 @@ class UI:
         self.setupWindow.bg = self.bg
         self.setupWindow.font = self.font
         self.setupWindow.when_closed = connectionInstance.leave
-        self.setupWindow.when_key_pressed = self.keyPressed
+        self.setupWindow.when_key_pressed = self.setKeyPressed
 
         topPadding = Box(self.setupWindow, width="fill", height=50, align="top")
         bottomPadding = Box(self.setupWindow, width="fill", height=50, align="bottom")
