@@ -138,6 +138,8 @@ def test_arrow_keys_in_input():
 
 def test_key_separation():
     # Test proper indexing and separation of keys
+    client.connectionInstance.connect()
+
     assert client.connectionInstance.e == 244177
     assert client.connectionInstance.d == 257713
     assert client.connectionInstance.N == 280043
@@ -162,7 +164,9 @@ def test_string_retrieval():
 def test_reset_inputs():
     # Should probably run last
     # Test that when a user provides an invalid inputs, every input so far is reset
-    # First test that every item has value
+    # First generate 7 values and test they are not none
+    client.connectionInstance.inputs = [True for i in range(7)]
+
     assert all(item is not None for item in client.connectionInstance.inputs) is True
 
     # Reset every value
@@ -175,8 +179,8 @@ def test_chat_history_retrieval():
     # Create a list of messages and see if it matches
 
     for message in ["my name is tomm 12345", "😁😛😋🤣"]:
-        client.communicationInstance.addMessage(message)
-        client.communicationInstance.saveChatHistoryToFile("test.txt")
+        client.communicationInstance.setMessage(message)
+        client.communicationInstance.setChatHistoryFile("test.txt")
 
         with open("test.txt", "r") as file:
             line = file.readline()
