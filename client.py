@@ -1434,7 +1434,7 @@ class UI:
                 connectionInstance.inputRequest = 0
                 self.setInputGetter(key, value)
 
-            if all(check is not None for check in connectionInstance.inputs) and key and __name__ == "__main__":
+            if all(check is not None for check in connectionInstance.inputs) and key and self.enableUI is True:
                 connectionInstance.setConnection()
 
     def setKeyPressed(self, event):
