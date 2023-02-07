@@ -772,18 +772,21 @@ class Communication:
 
     @staticmethod
     def getrsaEncryptedMessage(key, e, N):
+        # Used to encrypt the keys
         rsaKey = pow(key, e, N)
 
         return rsaKey
 
     @staticmethod
     def getrsaDecryptedMessage(key, d, N):
+        # Used to decrypt the keys
         newKey = pow(key, d, N)
 
         return newKey
 
     @staticmethod
     def getCaesarEncryptedMessage(message, cipherKey):
+        # Used to decrypt message
         newMessage = ""
         for letter in message:
 
@@ -809,6 +812,7 @@ class Communication:
 
     @staticmethod
     def getCaesarDecryptedMessage(message, cipherKey):
+        # Used to encrypt messages 
         newMessage = ""
         for letter in message:
 
@@ -863,7 +867,7 @@ class Communication:
             connectionInstance.leave()
 
     def setUsers(self, users):
-        # Called by /add [Users spilt by space]
+        # Called by /add [Users spilt by space], adds every user that are currently online
         users = users.split()
         users.sort()
 
@@ -887,7 +891,7 @@ class Communication:
                 uiInstance.userList.append(user)
 
     def setRemovedUser(self, user):
-        # Called by /remove [Users split by space]
+        # Called by /remove [Users split by space], removes user from the list of users online (locally)
         try:
             self.users.remove(user)
 
@@ -897,7 +901,7 @@ class Communication:
             print(f"An error occured in removeUser: {e}")
 
     def getPreviousPage(self):
-        # Called by /previous
+        # Called by /previous, loads the previous page if its not page 0
         if self.page > 0:
             self.page -= 1
 
@@ -908,7 +912,7 @@ class Communication:
             animationInstance.queue.append([1, "You cannot go below this page"])
 
     def getNextPage(self):
-        # Called by /next
+        # Called by /next, loads the next page if its been generated
         if self.page < uiInstance.page:
             self.page += 1
 
@@ -965,7 +969,7 @@ class Communication:
                         uiInstance.setSubsequentMessage(message)
 
     def updateThread(self):
-        # Starts when the user is connected
+        # Starts when the user is connected and runs indefinitely
         # Looks out for server broadcasts
         while True:
             try:
