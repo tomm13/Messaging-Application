@@ -694,7 +694,7 @@ class Animation:
             uiInstance.currentText.value = message
 
     def animationThread(self):
-        # This is the new thread in place of the hundreds of unterminated threads called before
+        # This thread runs indefinitely and checks the queue for list items, calling
         # The format for this thread is [[Class animation method code, *args]]
         while True:
             if self.queue:
@@ -703,6 +703,7 @@ class Animation:
                     self.queue.pop(1)
 
                 if self.queue[0][0] == 1:
+                    # Dynamically adjust the animation duration based on length of the message
                     if len(str(self.queue[0][0])) < 10:
                         self.waitMultiplier = 2.0
                     elif len(str(self.queue[0][0])) < 15:
