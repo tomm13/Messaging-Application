@@ -17,7 +17,6 @@ class Animation:
     
     def __init__(self):
         self.queue = []
-        self.readRate = 1
         self.waitMultiplier = 1
 
     def animateHeaderInChat(self, message):
@@ -65,7 +64,7 @@ class Animation:
                     uiInstance.header.bg = (R, G, B)
                     sleep(uiInstance.rate)
 
-                sleep(self.readRate * self.waitMultiplier)
+                sleep(self.waitMultiplier)
 
                 while (R, G, B) != uiInstance.animationColor:
                     # Fades background from white to color
@@ -146,7 +145,7 @@ class Animation:
                     uiInstance.header.bg = (R, G, B)
                     sleep(uiInstance.rate)
 
-                sleep(self.readRate * self.waitMultiplier)
+                sleep(self.waitMultiplier)
 
                 while (R, G, B) != uiInstance.animationColor:
                     # Fades background from black to color
