@@ -184,7 +184,7 @@ class Animation:
                     sleep(uiInstance.rate)
 
         else:
-            communicationInstance.addMessage(message)
+            communicationInstance.setMessage(message)
 
     @staticmethod
     def switchTheme():
@@ -763,19 +763,19 @@ class Communication:
         self.page = 0
 
     @staticmethod
-    def rsaEncrypt(key, e, N):
+    def getrsaEncryptedMessage(key, e, N):
         rsaKey = pow(key, e, N)
 
         return rsaKey
 
     @staticmethod
-    def rsaDecrypt(key, d, N):
+    def getrsaDecryptedMessage(key, d, N):
         newKey = pow(key, d, N)
 
         return newKey
 
     @staticmethod
-    def caesarEncrypt(message, cipherKey):
+    def getCaesarEncryptedMessage(message, cipherKey):
         newMessage = ""
         for letter in message:
 
@@ -800,7 +800,7 @@ class Communication:
         return newMessage
 
     @staticmethod
-    def caesarDecrypt(message, cipherKey):
+    def getCaesarDecryptedMessage(message, cipherKey):
         newMessage = ""
         for letter in message:
 
@@ -824,7 +824,7 @@ class Communication:
 
         return newMessage
 
-    def saveChatHistoryToFile(self, location):
+    def setChatHistoryFile(self, location):
         # Called by /savechat [Location]
         if location and " " not in location:
             with open(location, "w") as file:
@@ -837,7 +837,7 @@ class Communication:
         else:
             animationInstance.queue.append([1, "You can't save to this location"])
 
-    def sendToServer(self, message):
+    def setMessageToSend(self, message):
         # Gets the value of the input, encrypts, then broadcasts
         try:
             if message:
@@ -845,14 +845,16 @@ class Communication:
                     connectionInstance.leave()
 
                 else:
-                    connectionInstance.socket.send(self.caesarEncrypt(message, connectionInstance.cipherKey).encode())
-                    uiInstance.messageInput.clear()
+                    connectionInstance.socket.send(self.getCaesarEncryptedMessage(message, connectionInstance.cipherKey)
+                                                   .encode())
+
+                    uiInstance.setMessageInputAsEmpty()
 
         except BrokenPipeError as e:
             print(f"An error occured: {e}")
             connectionInstance.leave()
 
-    def addUsers(self, users):
+    def setUsers(self, users):
         # Called by /add [Users spilt by space]
         users = users.split()
         users.sort()
@@ -865,78 +867,60 @@ class Communication:
 
                 connectionInstance.accepted = True
 
-        uiInstance.userList.clear()
-        uiInstance.userList.append("Users online:")
+        uiInstance.setUserListAsEmpty()
 
         for user in users:
             if user not in self.users:
                 self.users.append(user)
 
-                uiInstance.addUser(user)
+                uiInstance.setUsers(user)
 
             else:
                 uiInstance.userList.append(user)
 
-    def removeUser(self, user):
+    def setRemovedUser(self, user):
         # Called by /remove [Users split by space]
         try:
             self.users.remove(user)
 
-            uiInstance.removeUser(user)
+            uiInstance.setRemovedUser(user)
 
         except ValueError as e:
             print(f"An error occured in removeUser: {e}")
 
-    def previousPage(self):
+    def getPreviousPage(self):
         # Called by /previous
         if self.page > 0:
             self.page -= 1
 
-            uiInstance.chatHistory.clear()
-            uiInstance.chatHistory.value = self.transcript[self.page][0]
+            # Tell the UI to display the previous page
+            uiInstance.getPreviousPage(self.transcript[self.page])
 
-            for line in self.transcript[self.page][1:]:
-                uiInstance.chatHistory.append(line)
-
-            if uiInstance.LDM is False:
-                animationInstance.queue.append([1, f"You are on page {str(self.page + 1)} of {str(uiInstance.page + 1)}"
-                                                ])
         else:
             animationInstance.queue.append([1, "You cannot go below this page"])
 
-    def nextPage(self):
+    def getNextPage(self):
         # Called by /next
         if self.page < uiInstance.page:
             self.page += 1
 
-            uiInstance.chatHistory.clear()
-            uiInstance.chatHistory.value = self.transcript[self.page][0]
+            # Tell the UI to display the previous page
+            uiInstance.getPreviousPage(self.transcript[self.page])
 
-            for line in self.transcript[self.page][1:]:
-                uiInstance.chatHistory.append(line)
-
-            if uiInstance.LDM is False:
-                animationInstance.queue.append(
-                    [1, f"You are on page {str(self.page + 1)} of {str(uiInstance.page + 1)}"])
         else:
             animationInstance.queue.append([1, "You are at the highest page"])
 
-    def createNewPage(self, message):
+    def getNewPage(self, message):
         # Sends the client to the new current page and shows input
-        if __name__ == "__main__":
-            uiInstance.chatHistory.clear()
-            uiInstance.chatHistory.value = message
-
         self.transcript.append([message])
         self.page = uiInstance.page + 1
 
-        uiInstance.page += 1
-        uiInstance.linesSent = 1
+        uiInstance.getNewPage(message)
 
-    def addMessage(self, message):
+    def setMessage(self, message):
         # Called when the message is not a command
         if uiInstance.linesSent >= uiInstance.linesLimit:
-            self.createNewPage(message)
+            self.getNewPage(message)
 
         else:
             # Received input
@@ -945,56 +929,40 @@ class Communication:
                 # Only true for the very first message
                 self.transcript[uiInstance.page].append(message)
 
-                if __name__ == "__main__":
-                    uiInstance.chatHistory.value = message
-
-                uiInstance.linesSent += 1
+                uiInstance.setFirstMessage(message)
 
             else:
                 if self.page == uiInstance.page:
                     # If you are viewing the current page then
                     self.transcript[uiInstance.page].append(message)
 
-                    if __name__ == "__main__":
-                        uiInstance.chatHistory.append(message)
-
-                    uiInstance.linesSent += 1
+                    uiInstance.setSubsequentMessage(message)
 
                 else:
                     # If you are viewing an older page then load current page then show input
                     self.page = uiInstance.page
 
-                    if __name__ == "__main__":
-                        uiInstance.chatHistory.clear()
-                        uiInstance.chatHistory.value = self.transcript[self.page][0]
-
-                    uiInstance.linesSent = 1
+                    uiInstance.setFirstMessage(self.transcript[self.page][0])
 
                     for line in self.transcript[self.page][1:]:
-                        if __name__ == "__main__":
-                            uiInstance.chatHistory.append(line)
-
-                        uiInstance.linesSent += 1
+                        uiInstance.setSubsequentMessage(line)
 
                     if uiInstance.linesSent >= uiInstance.linesLimit:
                         # If the current page has no space left
-                        self.createNewPage(message)
+                        self.getNewPage(message)
 
                     else:
                         self.transcript[uiInstance.page].append(message)
 
-                        if __name__ == "__main__":
-                            uiInstance.chatHistory.append(message)
-
-                        uiInstance.linesSent += 1
+                        uiInstance.setSubsequentMessage(message)
 
     def updateThread(self):
         # Starts when the user is connected
         # Looks out for server broadcasts
         while True:
             try:
-                message = self.caesarDecrypt(connectionInstance.socket.recv(1024).decode(),
-                                             connectionInstance.cipherKey)
+                message = self.getCaesarDecryptedMessage(connectionInstance.socket.recv(1024).decode(),
+                                                         connectionInstance.cipherKey)
 
                 if message:
                     print(f"Received message: {message}")
@@ -1020,34 +988,37 @@ class Communication:
                         if val is not None:
                             animationInstance.queue.append([4, val])
 
-                    elif message == "/next":
-                        self.nextPage()
-
-                    elif message == "/previous":
-                        self.previousPage()
-
-                    elif message[0:7] == "/accept":
-                        self.addUsers(message[8:])
-
-                    elif message[0:7] == "/remove":
-                        self.removeUser(message[8:])
-
-                    elif message[0:9] == "/savechat":
-                        self.saveChatHistoryToFile(message[10:])
-
                     elif message == "/reject":
                         connectionInstance.accepted = False
-                        connectionInstance.resetInputs("an invalid username")
+                        connectionInstance.setInputsAsNone("an invalid username")
 
                     elif message[0:8] == "/timeout":
                         animationInstance.queue.append([9, (255, 0, 0)])
                         animationInstance.queue.append([1, message[9:]])
 
+                    elif message == "/next":
+                        self.getNextPage()
+
+                    elif message == "/previous":
+                        self.getPreviousPage()
+
+                    elif message[0:7] == "/accept":
+                        self.setUsers(message[8:])
+
+                    elif message[0:7] == "/remove":
+                        self.setRemovedUser(message[8:])
+
+                    elif message[0:9] == "/savechat":
+                        self.setChatHistoryFile(message[10:])
+
                     else:
-                        self.addMessage(message)
+                        self.setMessage(message)
 
             except (ConnectionResetError, OSError):
                 print("Closed update thread")
+
+                connectionInstance.leave()
+
                 break
 
 
@@ -1070,7 +1041,7 @@ class Connection:
         self.mod = False
         self.inputRequest = 0
 
-    def connect(self):
+    def setConnection(self):
         # Called when the user has filled out all 7 inputs
         # Connects to the socket, calculates the RSA encryption key, decryption key, and
         # The cipher key.
@@ -1085,11 +1056,10 @@ class Connection:
             self.e = int(str(self.inputs[4][0:6]), base=10)
             self.d = int(str(self.inputs[5][0:6]), base=10)
             self.N = int(str(self.inputs[5][6:12]), base=10)
-            self.cipherKey = communicationInstance.rsaDecrypt(int(self.inputs[6], base=10), self.d, self.N)
+            self.cipherKey = communicationInstance.getrsaDecryptedMessage(int(self.inputs[6], base=10), self.d, self.N)
 
         except ValueError:
-            if __name__ == "__main__":
-                self.resetInputs("invalid keys")
+            self.setInputsAsNone("invalid keys")
 
         else:
             try:
@@ -1100,7 +1070,8 @@ class Connection:
 
                 if self.accepted is False:
                     # Send username to determine if it's acceptable
-                    self.socket.send(communicationInstance.caesarEncrypt(self.inputs[0], self.cipherKey).encode())
+                    self.socket.send(communicationInstance.getCaesarEncryptedMessage(self.inputs[0], self.cipherKey)
+                                     .encode())
                     self.accepted = None
 
                 if self.threadInitialized is False:
@@ -1108,26 +1079,24 @@ class Connection:
                     self.threadInitialized = True
 
             except (ValueError, TypeError, OverflowError):
-                if __name__ == "__main__":
-                    self.resetInputs("an invalid host/ port")
+                self.setInputsAsNone("an invalid host/ port")
 
             except (ConnectionRefusedError, OSError, TimeoutError):
-                if __name__ == "__main__":
-                    self.resetInputs("a connection error")
+                self.setInputsAsNone("a connection error")
 
-    def resetInputs(self, message):
+    def setInputsAsNone(self, message):
         # Reset inputs in terms of variables and data
         self.inputs = [None for i in range(7)]
 
         # Reset indicators and UI elements, indicating the error
-        uiInstance.resetInputs(message)
+        uiInstance.setInputsAsNone(message)
 
     def leave(self):
         if connectionInstance.connected is True:
-            self.socket.send(communicationInstance.caesarEncrypt("/leave", self.cipherKey).encode())
+            self.socket.send(communicationInstance.getrsaEncryptedMessage("/leave", self.cipherKey).encode())
             self.socket.close()
 
-        uiInstance.closeUI()
+        uiInstance.leave()
 
 
 class UI:
@@ -1215,6 +1184,15 @@ class UI:
 
             print("Unfortunately your system does not support animations, therefore they have been disabled.")
 
+        if __name__ == "__main__":
+            # EnableUI displays UI elements and sets their attributes
+            self.enableUI = True
+
+        else:
+            # Disabling it is useful in testing, as UI elements cannot be seen anyway
+            # In addition, this prevents attribute errors with UI elements that don't exist
+            self.enableUI = False
+
     # Methods below alter UI attributes
 
     def setColor(self, message):
@@ -1253,17 +1231,82 @@ class UI:
         else:
             animationInstance.queue.append([1, "Animations are disabled on your OS."])
 
-    def addUser(self, user):
+    def getPreviousPage(self, transcript):
+        # Called by /previous
+        # Clear the page, then set the first message as "value"
+        if self.enableUI is True:
+            self.chatHistory.clear()
+            self.chatHistory.value = transcript[0]
+
+            for line in transcript[1:]:
+                # For every subsequent message, append to the list
+                self.chatHistory.append(line)
+
+        if self.LDM is False:
+            # Let the user know which page they're on
+            animationInstance.queue.append(
+                [1, f"You are on page {str(communicationInstance.page + 1)} of {str(self.page + 1)}"])
+
+    def getNextPage(self, transcript):
+        # Called by /next
+        # Clear the page, then set the first message as "value"
+        if self.enableUI is True:
+            self.chatHistory.clear()
+            self.chatHistory.value = transcript[self.page][0]
+
+            for line in transcript[1:]:
+                self.chatHistory.append(line)
+
+        if self.LDM is False:
+            animationInstance.queue.append(
+                [1, f"You are on page {str(communicationInstance.page + 1)} of {str(self.page + 1)}"])
+
+    def getNewPage(self, message):
+        # Called when the messages on 1 page excees the lineslimit
+        if self.enableUI is True:
+            self.chatHistory.clear()
+            self.chatHistory.value = message
+
+        self.page += 1
+        self.linesSent = 1
+
+    def setFirstMessage(self, message):
+        if self.enableUI is True:
+            self.chatHistory.clear()
+            self.chatHistory.value = message
+
+        self.linesSent += 1
+
+    def setSubsequentMessage(self, message):
+        if self.enableUI is True:
+            self.chatHistory.append(message)
+
+        self.linesSent += 1
+
+    def setUsers(self, user):
         # Called iteratively when a new user is connected, adds every user in the list to the UI
-        self.userList.append(user)
+        if self.enableUI is True:
+            self.userList.append(user)
+
         animationInstance.queue.append([1, f"{str(user)} has connected"])
 
-    def removeUser(self, user):
+    def setRemovedUser(self, user):
         # Called when a user that's not the client running disconnects, and displays the changes to the UI
-        self.userList.remove(user)
+        if self.enableUI is True:
+            self.userList.remove(user)
+
         animationInstance.queue.append([1, f"{user} has disconnected"])
 
-    def closeUI(self):
+    def setUserListAsEmpty(self):
+        if self.enableUI is True:
+            self.userList.clear()
+            self.userList.append("Users online:")
+
+    def setMessageInputAsEmpty(self):
+        if self.enableUI is True:
+            self.messageInput.clear()
+
+    def leave(self):
         # Is almost always called from the connectioninstance leaving method, but could be called
         # Directly when kicked to prevent a doubled "/remove" call
         if connectionInstance.accepted is True:
@@ -1284,7 +1327,7 @@ class UI:
         animationInstance.queue.append(
             [10, f"{(7 - connectionInstance.inputs.count(None))} of 7 inputs completed"])
 
-    def resetInputs(self, message):
+    def setInputsAsNone(self, message):
         # Resets the 7 inputs
         # Resets every indiactor to be invisible
         for indicator in range(7):
@@ -1341,7 +1384,7 @@ class UI:
 
         return None
 
-    def requestInput(self, key, value):
+    def setInputGetter(self, key, value):
         if connectionInstance.accepted is False:
             # Creates a series of input requests
             for check in range(7):
@@ -1364,7 +1407,7 @@ class UI:
                         self.hasRequestedInput = False
 
                     # For testing, UI elements are inaccessible
-                    if __name__ == '__main__':
+                    if self.enableUI is True:
                         self.inputTextBox.clear()
 
                     # Creates white block cursor
@@ -1385,16 +1428,16 @@ class UI:
             if connectionInstance.inputRequest < 0:
                 # To cycle back the cursor when it reaches below 0 or above 6
                 connectionInstance.inputRequest = 6
-                self.requestInput(key, value)
+                self.setInputGetter(key, value)
 
             if connectionInstance.inputRequest > 6:
                 connectionInstance.inputRequest = 0
-                self.requestInput(key, value)
+                self.setInputGetter(key, value)
 
-            if all(check is not None for check in connectionInstance.inputs) and key:
-                connectionInstance.connect()
+            if all(check is not None for check in connectionInstance.inputs) and key and self.enableUI is True:
+                connectionInstance.setConnection()
 
-    def keyPressed(self, event):
+    def setKeyPressed(self, event):
         # Detects key presses with emphasis on enter, escape, left and right
         if event:
             # Left and right keys bypass all if statements in getInputs, therefore will request for inputs every time
@@ -1406,7 +1449,7 @@ class UI:
 
                     connectionInstance.inputRequest -= 1
 
-                    self.requestInput(False, self.inputTextBox.value)
+                    self.setInputGetter(False, self.inputTextBox.value)
 
             if event.tk_event.keysym == "Right":
                 if 7 > connectionInstance.inputRequest > -1:
@@ -1414,14 +1457,14 @@ class UI:
 
                     connectionInstance.inputRequest += 1
 
-                    self.requestInput(False, self.inputTextBox.value)
+                    self.setInputGetter(False, self.inputTextBox.value)
 
             if event.tk_event.keysym == "Return":
                 if connectionInstance.accepted:
-                    communicationInstance.sendToServer(self.messageInput.value)
+                    communicationInstance.setMessageToSend(self.messageInput.value)
 
                 else:
-                    self.requestInput(True, self.inputTextBox.value)
+                    self.setInputGetter(True, self.inputTextBox.value)
 
             if event.tk_event.keysym == "Escape":
                 if connectionInstance.accepted:
@@ -1440,7 +1483,7 @@ class UI:
         # Creates chat window
         self.chatWindow = Window(self.setupWindow, width=1280, height=720, title="Chatroom", bg=self.bg)
         self.chatWindow.when_closed = connectionInstance.leave
-        self.chatWindow.when_key_pressed = self.keyPressed
+        self.chatWindow.when_key_pressed = self.setKeyPressed
         self.chatWindow.set_full_screen()
 
         topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
@@ -1507,7 +1550,7 @@ class UI:
         self.messageInput.text_color = self.color
         self.messageInput.text_size = self.fontSizes[3][self.fontIndex]
         self.messageInput.bg = self.themeDependentBg
-        self.messageInput.when_key_pressed = self.keyPressed
+        self.messageInput.when_key_pressed = self.setKeyPressed
 
         self.setupWindow.hide()
         self.chatWindow.show()
@@ -1518,7 +1561,7 @@ class UI:
         self.setupWindow.bg = self.bg
         self.setupWindow.font = self.font
         self.setupWindow.when_closed = connectionInstance.leave
-        self.setupWindow.when_key_pressed = self.keyPressed
+        self.setupWindow.when_key_pressed = self.setKeyPressed
 
         topPadding = Box(self.setupWindow, width="fill", height=50, align="top")
         bottomPadding = Box(self.setupWindow, width="fill", height=50, align="bottom")
