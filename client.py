@@ -754,8 +754,6 @@ class Animation:
 
 class Communication:
     def __init__(self):
-        self.warningTimer = None
-        self.messageTooLongWarning = False
         self.users = []
         self.chatHistory = []
         self.transcript = [[]]
