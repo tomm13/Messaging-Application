@@ -765,8 +765,6 @@ class Communication:
     # chatHistory stores every message and transcript is a 2D list of messages indexed by page
     
     def __init__(self):
-        self.warningTimer = None
-        self.messageTooLongWarning = False
         self.users = []
         self.chatHistory = []
         self.transcript = [[]]
