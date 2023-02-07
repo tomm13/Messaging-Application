@@ -11,7 +11,10 @@ from guizero import *
 
 
 class Animation:
-    # Creates a class with animation methods and a thread method
+    # An indefinite thread (animation thread) runs off a list and checks for items in the list.
+    # When there is an item in the list, appended by the rest of the code, the thread indexes the animation
+    # "code" and runs the corresponding animation method, passing in any relevant arguments such as message
+    
     def __init__(self):
         self.queue = []
         self.readRate = 1
