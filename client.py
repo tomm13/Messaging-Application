@@ -757,6 +757,13 @@ class Animation:
 
 
 class Communication:
+    # This handles all the communication from and to the server using the socket class
+    # The indefinte thread (update thread) receives all the communication whilst the main thread
+    # sends to the server. This class also handles the encyrption and decryption of the messages
+    # being sent and received, and processes them as messages or commands accordingly
+    # This class also appends all messages received into chatHistory and transcript, where
+    # chatHistory stores every message and transcript is a 2D list of messages indexed by page
+    
     def __init__(self):
         self.warningTimer = None
         self.messageTooLongWarning = False
