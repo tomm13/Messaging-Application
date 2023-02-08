@@ -874,7 +874,7 @@ class Communication:
         if connectionInstance.inputs[0] in users:
             # If user is the client itself
             if connectionInstance.accepted is None:
-                # If the user is being accepted for the first time (as they were pending approval)
+                # If the user is being accepted for the first time (as the username has been accepted)
                 uiInstance.openChat()
 
                 connectionInstance.accepted = True
@@ -1035,8 +1035,10 @@ class Communication:
 
 
 class Connection:
+    # Handles the socket connection with the server, decryption and formatting of the keys
+    # And starting the update thread in the communication class once 
     def __init__(self):
-        # Inputs list
+        # Inputs list such that its formatted as [username, color, host, port, public key, private key, encrypted cipher key]
         self.inputs = [None for i in range(7)]
 
         # Attributes
@@ -1084,9 +1086,10 @@ class Connection:
                     # Send username to determine if it's acceptable
                     self.socket.send(communicationInstance.getCaesarEncryptedMessage(self.inputs[0], self.cipherKey)
                                      .encode())
-                    self.accepted = None
+                    self.accepted = None 
 
                 if self.threadInitialized is False:
+                    # If the thread has not started, start it once
                     Thread(target=communicationInstance.updateThread).start()
                     self.threadInitialized = True
 
@@ -1104,6 +1107,7 @@ class Connection:
         uiInstance.setInputsAsNone(message)
 
     def leave(self):
+        # Alert the server that the client is disconnecting, then close the socket
         if connectionInstance.connected is True:
             self.socket.send(communicationInstance.getrsaEncryptedMessage("/leave", self.cipherKey).encode())
             self.socket.close()
