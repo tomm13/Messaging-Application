@@ -1116,6 +1116,9 @@ class Connection:
 
 
 class UI:
+    # Handles all interaction with the UI elements, as well as create them 
+    # The setup window will require input handling to establish a connection (username, host ip etc)
+    # Whereas the chatroom window will require input handling to send messages/ commands
     def __init__(self):
         # UI elements (setup)
         self.setupWindow = None
@@ -1166,10 +1169,12 @@ class UI:
         self.hasRequestedInput = False
 
         # Font sizes list for different OS's
+        # [n][0] (so index 0 of every list item) is the appropriate list of font sizes for macOS
+        # [n][1] is the appropriate list of font sizes on every other OS
         self.fontSizes = [[22, 17], [36, 26], [24, 19], [32, 28], [32, 23], [22, 19], [24, 17], [22, 19]]
 
         # Messages List
-        # Where [1][] is the default request message, and [][1] is the failing message
+        # Where [1][n] is the default request message, and [n][1] is the failing message
         self.getInputsMessages = [["Choose a username", "Try a different username"],
                                   ["Choose a color", "Try a different color"],
                                   ["Enter the host IP", "Try a different IP"],
@@ -1198,21 +1203,20 @@ class UI:
             self.rate = None
             self.LDM = True
 
-            print("Unfortunately your system does not support animations, therefore they have been disabled.")
+            print("Unfortunately your system does not support animations, and they have been disabled.")
 
         if __name__ == "__main__":
             # EnableUI displays UI elements and sets their attributes
             self.enableUI = True
 
         else:
-            # Disabling it is useful in testing, as UI elements cannot be seen anyway
-            # In addition, this prevents attribute errors with UI elements that don't exist
+            # Disabling this prevents attribute errors with UI elements that don't exist, and is only used in testing
             self.enableUI = False
 
     # Methods below alter UI attributes
 
     def setColor(self, message):
-        # Called by /color [Color]
+        # Called by /color [Color], and returns a color 
         try:
             color = web_to_rgb(message)
 
@@ -1442,15 +1446,17 @@ class UI:
                         animationInstance.queue.append([7, check, self.animationColor])
 
             if connectionInstance.inputRequest < 0:
-                # To cycle back the cursor when it reaches below 0 or above 6
+                # To cycle back the cursor when the index reaches below 0
                 connectionInstance.inputRequest = 6
                 self.setInputGetter(key, value)
 
             if connectionInstance.inputRequest > 6:
+                # To cycle back the cursor when the index reaches above 6
                 connectionInstance.inputRequest = 0
                 self.setInputGetter(key, value)
 
-            if all(check is not None for check in connectionInstance.inputs) and key and self.enableUI is True:
+            if all(check is not None for check in connectionInstance.inputs) and key is True and self.enableUI is True:
+                # Connect to the server given every input is valid
                 connectionInstance.setConnection()
 
     def setKeyPressed(self, event):
@@ -1501,17 +1507,21 @@ class UI:
         self.chatWindow.when_closed = connectionInstance.leave
         self.chatWindow.when_key_pressed = self.setKeyPressed
         self.chatWindow.set_full_screen()
-
+        
+        # Creates 4 gray borders on the edges of the screen
         topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
         leftPadding = Box(self.chatWindow, width=50, height="fill", align="left")
         rightPadding = Box(self.chatWindow, width=50, height="fill", align="right")
         bottomPadding = Box(self.chatWindow, width="fill", height=50, align="bottom")
-
+        
+        # Creates a box from the remaining space left
         self.border = Box(self.chatWindow, width="fill", height="fill")
-
+        
+        # Creates a header that displays notifications
         header = Box(self.border, width="fill", height=50, align="top")
         headerBlocker = Box(self.border, width="fill", height=50, align="top")
-
+        
+        # Creates a listbox that displays a list of connected users
         userListBox = Box(self.border, width=170, height="fill", align="left")
         userListBlocker = Box(self.border, width=50, height="fill", align="left")
 
@@ -1551,8 +1561,10 @@ class UI:
         self.chatHistory.text_size = self.fontSizes[2][self.fontIndex]
         self.chatHistory.bg = self.themeDependentBg
         self.chatHistory.disable()
-
+        
+        # Creates a textbox to type in
         messageInputBorder = Box(inputBox, width="fill", height=50, align="top")
+        
         self.messageInputTopBorder = Box(inputBox, width="fill", height=10, align="top")
         self.messageInputTopBorder.bg = self.color
         self.messageInputRightBorder = Box(inputBox, width=10, height="fill", align="right")
@@ -1578,12 +1590,16 @@ class UI:
         self.setupWindow.font = self.font
         self.setupWindow.when_closed = connectionInstance.leave
         self.setupWindow.when_key_pressed = self.setKeyPressed
-
+        
+        # Creates 2 gray borders on the top and bottom edges
         topPadding = Box(self.setupWindow, width="fill", height=50, align="top")
         bottomPadding = Box(self.setupWindow, width="fill", height=50, align="bottom")
         contents = Box(self.setupWindow, width="fill", height="fill", align="top")
-
+        
+        # Creates a header that displays messages
         header = Box(contents, width="fill", height=40, align="top")
+        
+        # Creates a row of space that contains indicators, used to display completed and in progress inputs
         indicator = Box(contents, width="fill", height=40, align="bottom")
 
         rightPadding = Box(contents, width=20, height="fill", align="right")
@@ -1613,7 +1629,7 @@ class UI:
         self.currentText.text_color = self.color
         self.currentText.text_size = self.fontSizes[7][self.fontIndex]
 
-        # Threads here will start when the code starts
+        # Initialize the animation thread upon starting the code
         Thread(target=animationInstance.animationThread).start()
 
         self.setupWindow.display()
