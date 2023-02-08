@@ -1235,7 +1235,7 @@ class UI:
             return None
 
     def setLDM(self):
-        # Called by /ldm
+        # Called by /ldm and changes light mode to dark mode and vice versa
         if system() == "Darwin":
             # For macOS
             if self.LDM is True:
@@ -1252,8 +1252,7 @@ class UI:
             animationInstance.queue.append([1, "Animations are disabled on your OS."])
 
     def getPreviousPage(self, transcript):
-        # Called by /previous
-        # Clear the page, then set the first message as "value"
+        # Called by /previous. Clears the page, then set the first message as "value"
         if self.enableUI is True:
             self.chatHistory.clear()
             self.chatHistory.value = transcript[0]
@@ -1268,8 +1267,7 @@ class UI:
                 [1, f"You are on page {str(communicationInstance.page + 1)} of {str(self.page + 1)}"])
 
     def getNextPage(self, transcript):
-        # Called by /next
-        # Clear the page, then set the first message as "value"
+        # Called by /next. Clears the page, then set the first message as "value"
         if self.enableUI is True:
             self.chatHistory.clear()
             self.chatHistory.value = transcript[self.page][0]
@@ -1291,6 +1289,7 @@ class UI:
         self.linesSent = 1
 
     def setFirstMessage(self, message):
+        # When displaying the first message, the value attribute is changed
         if self.enableUI is True:
             self.chatHistory.clear()
             self.chatHistory.value = message
@@ -1298,6 +1297,7 @@ class UI:
         self.linesSent += 1
 
     def setSubsequentMessage(self, message):
+        # When displaying subsequent messages, the append method is used instead 
         if self.enableUI is True:
             self.chatHistory.append(message)
 
@@ -1524,8 +1524,10 @@ class UI:
         # Creates a listbox that displays a list of connected users
         userListBox = Box(self.border, width=170, height="fill", align="left")
         userListBlocker = Box(self.border, width=50, height="fill", align="left")
-
+        
+        # Creates a listbox that displays the messages up to around 18 at any time
         userBox = Box(self.border, width="fill", height="fill", align="right")
+        
         inputBox = Box(userBox, width="fill", height=120, align="bottom")
 
         self.userListTopBorder = Box(userListBox, width="fill", height=10, align="top")
@@ -1611,7 +1613,8 @@ class UI:
         self.status.bg = self.animationColor
 
         statusPadding = Box(contents, width="fill", height=30, align="top")
-
+        
+        # Creates a textbox to type into
         self.inputTextBox = TextBox(contents, width=30)
         self.inputTextBox.text_color = self.color
         self.inputTextBox.text_size = self.fontSizes[5][self.fontIndex]
