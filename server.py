@@ -9,7 +9,8 @@ from threading import Thread
 
 
 class Security:
-    # Generates key and port, as well as encrypting and decrypting messages/ keys
+    # Handles all the algorithms around ecnrypting, decrypting, and the generation 
+    # of keys
     def __init__(self):
         self.d = None
         self.e = None
@@ -69,7 +70,8 @@ class Security:
                 if (k * phiN + 1) // self.e != self.e and len(str((k * phiN + 1) // self.e)) == 6:
                     self.d = (k * phiN + 1) // self.e
                     break
-
+        
+        # Generates a cipher key between 1-26, then encrypt it
         self.cipherKey = randint(1, 26)
         self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey, self.e, self.N)
 
@@ -141,6 +143,9 @@ class Security:
 
 
 class Send:
+    # Handles all the different ways a message can be send, such as if the message is sent 
+    # publicly, privately, and if the message should be displayed as an animated banner
+    # Also handles commands sent by the user, using the prefix /
     @staticmethod
     def broadcast(message):
         # Send a public message to every client
@@ -176,7 +181,7 @@ class Send:
 
     @staticmethod
     def command(message, username, clientSocket):
-        # Use list to prevent doubled code
+        # Commands called by the prefix /
         if message == "/leave":
             connectionInstance.removeUser(username, clientSocket)
         elif message[0:6] == "/color" or message[0:7] == "/border" or message[0:9] == "/savechat":
@@ -188,6 +193,13 @@ class Send:
 
 
 class Connection:
+    # Handles all the connection requests by users, and runs a thread for each user
+    # The main connect() method also runs indefiitely and accepts any requests to connect
+    # The connect accepts the socket connection, and a username is sent by the client.
+    # A listening thread is then started for this user until they disconnect.
+    # If the username sent by the client is approved (no spaces, correct length etc) then the
+    # client is allowed to receive and send messages, otherwise they can only do so after
+    # Inputting a valid username. If a user leaves then the server also notifies all connected users.
     def __init__(self):
         self.socket = socket()
         self.host = gethostbyname(gethostname())

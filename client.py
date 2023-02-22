@@ -11,7 +11,10 @@ from guizero import *
 
 
 class Animation:
-    # Creates a class with animation methods and a thread method
+    # An indefinite thread (animation thread) runs off a list and checks for items in the list.
+    # When there is an item in the list, appended by the rest of the code, the thread indexes the animation
+    # "code" and runs the corresponding animation method, passing in any relevant arguments such as message
+    
     def __init__(self):
         self.queue = []
         self.waitMultiplier = 1
@@ -691,7 +694,7 @@ class Animation:
             uiInstance.currentText.value = message
 
     def animationThread(self):
-        # This is the new thread in place of the hundreds of unterminated threads called before
+        # This thread runs indefinitely and checks the queue for list items, calling
         # The format for this thread is [[Class animation method code, *args]]
         while True:
             if self.queue:
@@ -700,6 +703,7 @@ class Animation:
                     self.queue.pop(1)
 
                 if self.queue[0][0] == 1:
+                    # Dynamically adjust the animation duration based on length of the message
                     if len(str(self.queue[0][0])) < 10:
                         self.waitMultiplier = 2.0
                     elif len(str(self.queue[0][0])) < 15:
@@ -753,6 +757,13 @@ class Animation:
 
 
 class Communication:
+    # This handles all the communication from and to the server using the socket class
+    # The indefinte thread (update thread) receives all the communication whilst the main thread
+    # sends to the server. This class also handles the encyrption and decryption of the messages
+    # being sent and received, and processes them as messages or commands accordingly
+    # This class also appends all messages received into chatHistory and transcript, where
+    # chatHistory stores every message and transcript is a 2D list of messages indexed by page
+    
     def __init__(self):
         self.users = []
         self.chatHistory = []
@@ -761,18 +772,21 @@ class Communication:
 
     @staticmethod
     def getrsaEncryptedMessage(key, e, N):
+        # Used to encrypt the keys
         rsaKey = pow(key, e, N)
 
         return rsaKey
 
     @staticmethod
     def getrsaDecryptedMessage(key, d, N):
+        # Used to decrypt the keys
         newKey = pow(key, d, N)
 
         return newKey
 
     @staticmethod
     def getCaesarEncryptedMessage(message, cipherKey):
+        # Used to decrypt message
         newMessage = ""
         for letter in message:
 
@@ -798,6 +812,7 @@ class Communication:
 
     @staticmethod
     def getCaesarDecryptedMessage(message, cipherKey):
+        # Used to encrypt messages 
         newMessage = ""
         for letter in message:
 
@@ -852,14 +867,14 @@ class Communication:
             connectionInstance.leave()
 
     def setUsers(self, users):
-        # Called by /add [Users spilt by space]
+        # Called by /add [Users spilt by space], adds every user that are currently online
         users = users.split()
         users.sort()
 
         if connectionInstance.inputs[0] in users:
             # If user is the client itself
             if connectionInstance.accepted is None:
-                # If the user is being accepted for the first time (as they were pending approval)
+                # If the user is being accepted for the first time (as the username has been accepted)
                 uiInstance.openChat()
 
                 connectionInstance.accepted = True
@@ -876,7 +891,7 @@ class Communication:
                 uiInstance.userList.append(user)
 
     def setRemovedUser(self, user):
-        # Called by /remove [Users split by space]
+        # Called by /remove [Users split by space], removes user from the list of users online (locally)
         try:
             self.users.remove(user)
 
@@ -886,7 +901,7 @@ class Communication:
             print(f"An error occured in removeUser: {e}")
 
     def getPreviousPage(self):
-        # Called by /previous
+        # Called by /previous, loads the previous page if its not page 0
         if self.page > 0:
             self.page -= 1
 
@@ -897,7 +912,7 @@ class Communication:
             animationInstance.queue.append([1, "You cannot go below this page"])
 
     def getNextPage(self):
-        # Called by /next
+        # Called by /next, loads the next page if its been generated
         if self.page < uiInstance.page:
             self.page += 1
 
@@ -954,7 +969,7 @@ class Communication:
                         uiInstance.setSubsequentMessage(message)
 
     def updateThread(self):
-        # Starts when the user is connected
+        # Starts when the user is connected and runs indefinitely
         # Looks out for server broadcasts
         while True:
             try:
@@ -1020,8 +1035,10 @@ class Communication:
 
 
 class Connection:
+    # Handles the socket connection with the server, decryption and formatting of the keys
+    # And starting the update thread in the communication class once 
     def __init__(self):
-        # Inputs list
+        # Inputs list such that its formatted as [username, color, host, port, public key, private key, encrypted cipher key]
         self.inputs = [None for i in range(7)]
 
         # Attributes
@@ -1069,9 +1086,10 @@ class Connection:
                     # Send username to determine if it's acceptable
                     self.socket.send(communicationInstance.getCaesarEncryptedMessage(self.inputs[0], self.cipherKey)
                                      .encode())
-                    self.accepted = None
+                    self.accepted = None 
 
                 if self.threadInitialized is False:
+                    # If the thread has not started, start it once
                     Thread(target=communicationInstance.updateThread).start()
                     self.threadInitialized = True
 
@@ -1089,6 +1107,7 @@ class Connection:
         uiInstance.setInputsAsNone(message)
 
     def leave(self):
+        # Alert the server that the client is disconnecting, then close the socket
         if connectionInstance.connected is True:
             self.socket.send(communicationInstance.getrsaEncryptedMessage("/leave", self.cipherKey).encode())
             self.socket.close()
@@ -1097,6 +1116,9 @@ class Connection:
 
 
 class UI:
+    # Handles all interaction with the UI elements, as well as create them 
+    # The setup window will require input handling to establish a connection (username, host ip etc)
+    # Whereas the chatroom window will require input handling to send messages/ commands
     def __init__(self):
         # UI elements (setup)
         self.setupWindow = None
@@ -1147,10 +1169,12 @@ class UI:
         self.hasRequestedInput = False
 
         # Font sizes list for different OS's
+        # [n][0] (so index 0 of every list item) is the appropriate list of font sizes for macOS
+        # [n][1] is the appropriate list of font sizes on every other OS
         self.fontSizes = [[22, 17], [36, 26], [24, 19], [32, 28], [32, 23], [22, 19], [24, 17], [22, 19]]
 
         # Messages List
-        # Where [1][] is the default request message, and [][1] is the failing message
+        # Where [1][n] is the default request message, and [n][1] is the failing message
         self.getInputsMessages = [["Choose a username", "Try a different username"],
                                   ["Choose a color", "Try a different color"],
                                   ["Enter the host IP", "Try a different IP"],
@@ -1179,21 +1203,20 @@ class UI:
             self.rate = None
             self.LDM = True
 
-            print("Unfortunately your system does not support animations, therefore they have been disabled.")
+            print("Unfortunately your system does not support animations, and they have been disabled.")
 
         if __name__ == "__main__":
             # EnableUI displays UI elements and sets their attributes
             self.enableUI = True
 
         else:
-            # Disabling it is useful in testing, as UI elements cannot be seen anyway
-            # In addition, this prevents attribute errors with UI elements that don't exist
+            # Disabling this prevents attribute errors with UI elements that don't exist, and is only used in testing
             self.enableUI = False
 
     # Methods below alter UI attributes
 
     def setColor(self, message):
-        # Called by /color [Color]
+        # Called by /color [Color], and returns a color 
         try:
             color = web_to_rgb(message)
 
@@ -1212,7 +1235,7 @@ class UI:
             return None
 
     def setLDM(self):
-        # Called by /ldm
+        # Called by /ldm and changes light mode to dark mode and vice versa
         if system() == "Darwin":
             # For macOS
             if self.LDM is True:
@@ -1229,8 +1252,7 @@ class UI:
             animationInstance.queue.append([1, "Animations are disabled on your OS."])
 
     def getPreviousPage(self, transcript):
-        # Called by /previous
-        # Clear the page, then set the first message as "value"
+        # Called by /previous. Clears the page, then set the first message as "value"
         if self.enableUI is True:
             self.chatHistory.clear()
             self.chatHistory.value = transcript[0]
@@ -1245,8 +1267,7 @@ class UI:
                 [1, f"You are on page {str(communicationInstance.page + 1)} of {str(self.page + 1)}"])
 
     def getNextPage(self, transcript):
-        # Called by /next
-        # Clear the page, then set the first message as "value"
+        # Called by /next. Clears the page, then set the first message as "value"
         if self.enableUI is True:
             self.chatHistory.clear()
             self.chatHistory.value = transcript[self.page][0]
@@ -1268,6 +1289,7 @@ class UI:
         self.linesSent = 1
 
     def setFirstMessage(self, message):
+        # When displaying the first message, the value attribute is changed
         if self.enableUI is True:
             self.chatHistory.clear()
             self.chatHistory.value = message
@@ -1275,6 +1297,7 @@ class UI:
         self.linesSent += 1
 
     def setSubsequentMessage(self, message):
+        # When displaying subsequent messages, the append method is used instead 
         if self.enableUI is True:
             self.chatHistory.append(message)
 
@@ -1423,15 +1446,17 @@ class UI:
                         animationInstance.queue.append([7, check, self.animationColor])
 
             if connectionInstance.inputRequest < 0:
-                # To cycle back the cursor when it reaches below 0 or above 6
+                # To cycle back the cursor when the index reaches below 0
                 connectionInstance.inputRequest = 6
                 self.setInputGetter(key, value)
 
             if connectionInstance.inputRequest > 6:
+                # To cycle back the cursor when the index reaches above 6
                 connectionInstance.inputRequest = 0
                 self.setInputGetter(key, value)
 
-            if all(check is not None for check in connectionInstance.inputs) and key and self.enableUI is True:
+            if all(check is not None for check in connectionInstance.inputs) and key is True and self.enableUI is True:
+                # Connect to the server given every input is valid
                 connectionInstance.setConnection()
 
     def setKeyPressed(self, event):
@@ -1482,21 +1507,27 @@ class UI:
         self.chatWindow.when_closed = connectionInstance.leave
         self.chatWindow.when_key_pressed = self.setKeyPressed
         self.chatWindow.set_full_screen()
-
+        
+        # Creates 4 gray borders on the edges of the screen
         topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
         leftPadding = Box(self.chatWindow, width=50, height="fill", align="left")
         rightPadding = Box(self.chatWindow, width=50, height="fill", align="right")
         bottomPadding = Box(self.chatWindow, width="fill", height=50, align="bottom")
-
+        
+        # Creates a box from the remaining space left
         self.border = Box(self.chatWindow, width="fill", height="fill")
-
+        
+        # Creates a header that displays notifications
         header = Box(self.border, width="fill", height=50, align="top")
         headerBlocker = Box(self.border, width="fill", height=50, align="top")
-
+        
+        # Creates a listbox that displays a list of connected users
         userListBox = Box(self.border, width=170, height="fill", align="left")
         userListBlocker = Box(self.border, width=50, height="fill", align="left")
-
+        
+        # Creates a listbox that displays the messages up to around 18 at any time
         userBox = Box(self.border, width="fill", height="fill", align="right")
+        
         inputBox = Box(userBox, width="fill", height=120, align="bottom")
 
         self.userListTopBorder = Box(userListBox, width="fill", height=10, align="top")
@@ -1532,8 +1563,10 @@ class UI:
         self.chatHistory.text_size = self.fontSizes[2][self.fontIndex]
         self.chatHistory.bg = self.themeDependentBg
         self.chatHistory.disable()
-
+        
+        # Creates a textbox to type in
         messageInputBorder = Box(inputBox, width="fill", height=50, align="top")
+        
         self.messageInputTopBorder = Box(inputBox, width="fill", height=10, align="top")
         self.messageInputTopBorder.bg = self.color
         self.messageInputRightBorder = Box(inputBox, width=10, height="fill", align="right")
@@ -1559,12 +1592,16 @@ class UI:
         self.setupWindow.font = self.font
         self.setupWindow.when_closed = connectionInstance.leave
         self.setupWindow.when_key_pressed = self.setKeyPressed
-
+        
+        # Creates 2 gray borders on the top and bottom edges
         topPadding = Box(self.setupWindow, width="fill", height=50, align="top")
         bottomPadding = Box(self.setupWindow, width="fill", height=50, align="bottom")
         contents = Box(self.setupWindow, width="fill", height="fill", align="top")
-
+        
+        # Creates a header that displays messages
         header = Box(contents, width="fill", height=40, align="top")
+        
+        # Creates a row of space that contains indicators, used to display completed and in progress inputs
         indicator = Box(contents, width="fill", height=40, align="bottom")
 
         rightPadding = Box(contents, width=20, height="fill", align="right")
@@ -1576,7 +1613,8 @@ class UI:
         self.status.bg = self.animationColor
 
         statusPadding = Box(contents, width="fill", height=30, align="top")
-
+        
+        # Creates a textbox to type into
         self.inputTextBox = TextBox(contents, width=30)
         self.inputTextBox.text_color = self.color
         self.inputTextBox.text_size = self.fontSizes[5][self.fontIndex]
@@ -1594,7 +1632,7 @@ class UI:
         self.currentText.text_color = self.color
         self.currentText.text_size = self.fontSizes[7][self.fontIndex]
 
-        # Threads here will start when the code starts
+        # Initialize the animation thread upon starting the code
         Thread(target=animationInstance.animationThread).start()
 
         self.setupWindow.display()
