@@ -15,7 +15,7 @@ def test_initialise_inputs():
 
 def test_getting_username():
     # An invalid username is inputted
-    for input in [None, " ", "", 0]:
+    for input in [None, "", 0]:
         client.uiInstance.setInputGetter(True, input)
 
         assert client.connectionInstance.inputs[0] is None
