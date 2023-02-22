@@ -14,14 +14,15 @@ def test_initialise_inputs():
 
 
 def test_getting_username():
-    # "Choose a username" is displayed, and an invalid username is inputted
-    client.uiInstance.setInputGetter(True, None)
+    # Invalid username test
+    for input in [None, "", 0]:
+        client.uiInstance.setInputGetter(True, input)
 
-    assert client.connectionInstance.inputs[0] is None
-    assert client.connectionInstance.inputRequest == 0
-    assert all(item is None for item in client.connectionInstance.inputs) is True
+        assert client.connectionInstance.inputs[0] is None
+        assert client.connectionInstance.inputRequest == 0
+        assert all(item is None for item in client.connectionInstance.inputs) is True
 
-    # "Choose a username" is displayed, and "Username" is inputted
+    # Valid username test
     client.uiInstance.setInputGetter(True, "Username")
 
     assert client.connectionInstance.inputs[0] == "Username"
@@ -48,11 +49,12 @@ def test_getting_color():
 
 def test_getting_host():
     # Invalid host test
-    client.uiInstance.setInputGetter(True, None)
+    for input in [None, "", 0]:
+        client.uiInstance.setInputGetter(True, input)
 
-    assert client.connectionInstance.inputs[2] is None
-    assert client.connectionInstance.inputRequest == 2
-    assert all(item is None for item in client.connectionInstance.inputs[2:6]) is True
+        assert client.connectionInstance.inputs[2] is None
+        assert client.connectionInstance.inputRequest == 2
+        assert all(item is None for item in client.connectionInstance.inputs[2:6]) is True
 
     # Valid host test
     client.uiInstance.setInputGetter(True, "127.0.0.1")
@@ -64,11 +66,12 @@ def test_getting_host():
 
 def test_getting_port():
     # Invalid port test
-    client.uiInstance.setInputGetter(True, None)
+    for input in [None, "", 0]:
+        client.uiInstance.setInputGetter(True, input)
 
-    assert client.connectionInstance.inputs[3] is None
-    assert client.connectionInstance.inputRequest == 3
-    assert all(item is None for item in client.connectionInstance.inputs[3:6]) is True
+        assert client.connectionInstance.inputs[3] is None
+        assert client.connectionInstance.inputRequest == 3
+        assert all(item is None for item in client.connectionInstance.inputs[3:6]) is True
 
     # Valid port test
     client.uiInstance.setInputGetter(True, "12345")
@@ -80,11 +83,12 @@ def test_getting_port():
 
 def test_getting_publicKey():
     # Invalid publicKey test
-    client.uiInstance.setInputGetter(True, None)
+    for input in [None, "", 0]:
+        client.uiInstance.setInputGetter(True, input)
 
-    assert client.connectionInstance.inputs[4] is None
-    assert client.connectionInstance.inputRequest == 4
-    assert all(item is None for item in client.connectionInstance.inputs[4:6]) is True
+        assert client.connectionInstance.inputs[4] is None
+        assert client.connectionInstance.inputRequest == 4
+        assert all(item is None for item in client.connectionInstance.inputs[4:6]) is True
 
     # Valid publicKey test
     client.uiInstance.setInputGetter(True, "244177280043")
@@ -96,11 +100,12 @@ def test_getting_publicKey():
 
 def test_getting_privateKey():
     # Invalid privateKey test
-    client.uiInstance.setInputGetter(True, None)
+    for input in [None, "", 0]:
+        client.uiInstance.setInputGetter(True, input)
 
-    assert client.connectionInstance.inputs[5] is None
-    assert client.connectionInstance.inputRequest == 5
-    assert all(item is None for item in client.connectionInstance.inputs[5:6]) is True
+        assert client.connectionInstance.inputs[5] is None
+        assert client.connectionInstance.inputRequest == 5
+        assert all(item is None for item in client.connectionInstance.inputs[5:6]) is True
 
     # Valid privateKey test
     client.uiInstance.setInputGetter(True, "257713280043")
@@ -113,11 +118,12 @@ def test_getting_privateKey():
 
 def test_getting_cipherKey():
     # Invalid cipherKey test
-    client.uiInstance.setInputGetter(True, None)
+    for input in [None, "", 0]:
+        client.uiInstance.setInputGetter(True, input)
 
-    assert client.connectionInstance.inputs[6] is None
-    assert client.connectionInstance.inputRequest == 6
-    assert all(item is None for item in client.connectionInstance.inputs[6:6]) is True
+        assert client.connectionInstance.inputs[6] is None
+        assert client.connectionInstance.inputRequest == 6
+        assert all(item is None for item in client.connectionInstance.inputs[6:6]) is True
 
     # Valid cipherKey test
     client.uiInstance.setInputGetter(True, "1144")
