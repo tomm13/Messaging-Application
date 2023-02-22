@@ -14,14 +14,15 @@ def test_initialise_inputs():
 
 
 def test_getting_username():
-    # "Choose a username" is displayed, and an invalid username is inputted
-    client.uiInstance.setInputGetter(True, None)
+    # An invalid username is inputted
+    for input in [None, " ", "", 0]:
+        client.uiInstance.setInputGetter(True, input)
 
-    assert client.connectionInstance.inputs[0] is None
-    assert client.connectionInstance.inputRequest == 0
-    assert all(item is None for item in client.connectionInstance.inputs) is True
+        assert client.connectionInstance.inputs[0] is None
+        assert client.connectionInstance.inputRequest == 0
+        assert all(item is None for item in client.connectionInstance.inputs) is True
 
-    # "Choose a username" is displayed, and "Username" is inputted
+    # A valid username is inputted
     client.uiInstance.setInputGetter(True, "Username")
 
     assert client.connectionInstance.inputs[0] == "Username"
