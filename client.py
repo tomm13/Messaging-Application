@@ -1354,7 +1354,7 @@ class UI:
             self.hasRequestedInput = True
 
         else:
-            if not value:
+            if value is None:
                 self.receivedInvalidInput(check)
 
             else:
