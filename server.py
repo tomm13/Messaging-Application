@@ -263,6 +263,7 @@ class Connection:
     def listen(self, username, clientSocket, hasValidUsername):
         # A listening thread linked to every unique client, and detects input from them
         if hasValidUsername is False:
+            # If the username is not valid, wait in this thread until it is
             while hasValidUsername is False and clientSocket in self.clients:
                 try:
                     signal = securityInstance.getcaesarDecryptedMessage(clientSocket.recv(1024).decode(),
@@ -293,6 +294,7 @@ class Connection:
         detectSpam = True
 
         while hasValidUsername is True and clientSocket in self.clients:
+            # After having a valid username, the client can now receive and send messages
             try:
                 signal = securityInstance.getcaesarDecryptedMessage(clientSocket.recv(1024).decode(), securityInstance.cipherKey)
                 unifiedmessage = f"{username}: {signal}"
@@ -376,6 +378,7 @@ class Connection:
 
     @staticmethod
     def validateMessageLength(message):
+        # Prevent messages of length 50 or greater being sent
         if len(message) > 50:
             return False
 
