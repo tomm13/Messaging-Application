@@ -73,26 +73,26 @@ class Security:
         
         # Generates a cipher key between 1-26, then encrypt it
         self.cipherKey = randint(1, 26)
-        self.encryptedCipherKey = self.rsaEncrypt(self.cipherKey, self.e, self.N)
+        self.encryptedCipherKey = self.getrsaEncryptedMessage(self.cipherKey, self.e, self.N)
 
         print(f"[Server] Public key = {self.e}{self.N}")
         print(f"[Server] Private key = {self.d}{self.N}")
         print(f"[Server] Cipher key = {self.encryptedCipherKey}")
 
     @staticmethod
-    def rsaEncrypt(key, e, N):
+    def getrsaEncryptedMessage(key, e, N):
         rsaKey = pow(key, e, N)
 
         return rsaKey
 
     @staticmethod
-    def rsaDecrypt(key, d, N):
+    def getrsaDecryptedMessage(key, d, N):
         newKey = pow(key, d, N)
 
         return newKey
 
     @staticmethod
-    def caesarEncrypt(message, cipherKey):
+    def getcaesarEncryptedMessage(message, cipherKey):
         newMessage = ""
         for letter in message:
 
@@ -117,7 +117,7 @@ class Security:
         return newMessage
 
     @staticmethod
-    def caesarDecrypt(message, cipherKey):
+    def getcaesarDecryptedMessage(message, cipherKey):
         newMessage = ""
         for letter in message:
 
@@ -152,7 +152,7 @@ class Send:
         print(f"[Public] {message}")
 
         for client in connectionInstance.clients:
-            client.send(securityInstance.caesarEncrypt(message, securityInstance.cipherKey).encode())
+            client.send(securityInstance.getcaesarEncryptedMessage(message, securityInstance.cipherKey).encode())
 
     @staticmethod
     def broadcastDisplay(message):
@@ -160,7 +160,7 @@ class Send:
         print(f"[PublicDisplay] {message}")
 
         for client in connectionInstance.clients:
-            client.send(securityInstance.caesarEncrypt(f"/display {message}", securityInstance.cipherKey).encode())
+            client.send(securityInstance.getcaesarEncryptedMessage(f"/display {message}", securityInstance.cipherKey).encode())
 
     @staticmethod
     def privateBroadcast(message, clientSocket):
@@ -168,7 +168,7 @@ class Send:
         if clientSocket in connectionInstance.clients:
             print(f"[Private] {message}")
 
-            clientSocket.send(securityInstance.caesarEncrypt(message, securityInstance.cipherKey).encode())
+            clientSocket.send(securityInstance.getcaesarEncryptedMessage(message, securityInstance.cipherKey).encode())
 
     @staticmethod
     def privateBroadcastDisplay(message, clientSocket):
@@ -176,7 +176,7 @@ class Send:
         if clientSocket in connectionInstance.clients:
             print(f"[PrivateDisplay] {message}")
 
-            clientSocket.send(securityInstance.caesarEncrypt(f"/display {message}", securityInstance.cipherKey).
+            clientSocket.send(securityInstance.getcaesarEncryptedMessage(f"/display {message}", securityInstance.cipherKey).
                               encode())
 
     @staticmethod
@@ -242,7 +242,7 @@ class Connection:
 
             self.clients.append(clientSocket)
 
-            username = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode(), securityInstance.cipherKey)
+            username = securityInstance.getcaesarDecryptedMessage(clientSocket.recv(1024).decode(), securityInstance.cipherKey)
 
             # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
             if self.validateUsername(username) is True:
@@ -265,7 +265,7 @@ class Connection:
         if hasValidUsername is False:
             while hasValidUsername is False and clientSocket in self.clients:
                 try:
-                    signal = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode(),
+                    signal = securityInstance.getcaesarDecryptedMessage(clientSocket.recv(1024).decode(),
                                                             securityInstance.cipherKey)
 
                     if signal:
@@ -294,7 +294,7 @@ class Connection:
 
         while hasValidUsername is True and clientSocket in self.clients:
             try:
-                signal = securityInstance.caesarDecrypt(clientSocket.recv(1024).decode(), securityInstance.cipherKey)
+                signal = securityInstance.getcaesarDecryptedMessage(clientSocket.recv(1024).decode(), securityInstance.cipherKey)
                 unifiedmessage = f"{username}: {signal}"
 
                 if signal:

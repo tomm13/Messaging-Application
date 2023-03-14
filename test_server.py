@@ -25,19 +25,21 @@ def test_key_generation():
 def test_key_retrieval():
     # Test that the keys are the same after encrypting and decrypting
     for key in range(1, 26):
-        assert key == server.securityInstance.rsaDecrypt(server.securityInstance.rsaEncrypt(key, 244177, 280043), 257713, 280043)
+        assert key == server.securityInstance.getrsaDecryptedMessage(
+            server.securityInstance.getrsaEncryptedMessage(key, 244177, 280043), 257713, 280043)
 
 
 def test_string_retrieval():
     # Test that the messages are the same after encrypting and decrypting
     message = "my name is tomm 12345"
     for key in range(1, 26):
-        assert message == server.securityInstance.caesarDecrypt(server.securityInstance.caesarEncrypt(message, key), key)
+        assert message == server.securityInstance.getcaesarDecryptedMessage(
+            server.securityInstance.getcaesarEncryptedMessage(message, key), key)
 
     message = "😁😛😋🤣"
     for key in range(1, 26):
-        assert message == server.securityInstance.caesarDecrypt(server.securityInstance.caesarEncrypt(message, key),
-                                                                key)
+        assert message == server.securityInstance.getcaesarDecryptedMessage(
+            server.securityInstance.getcaesarEncryptedMessage(message, key), key)
 
 
 def test_username_validation():
