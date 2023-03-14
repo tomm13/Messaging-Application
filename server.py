@@ -86,7 +86,7 @@ class Security:
         return rsaKey
 
     @staticmethod
-    def getrsaDecryptMessage(key, d, N):
+    def getrsaDecryptedMessage(key, d, N):
         newKey = pow(key, d, N)
 
         return newKey
