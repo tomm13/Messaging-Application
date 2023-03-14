@@ -1,4 +1,4 @@
-# 25/1/2023
+# 14/3/2023
 # V13.3
 
 import client
@@ -153,12 +153,14 @@ def test_key_separation():
 
 
 def test_key_retrieval():
+    # Test that the keys are the same after encrypting and decrypting
     for key in range(1, 26):
         assert key == client.communicationInstance.getrsaDecryptedMessage(
             client.communicationInstance.getrsaEncryptedMessage(key, 244177, 280043), 257713, 280043)
 
 
 def test_string_retrieval():
+    # Test that the messages are the same after encrypting and decrypting
     message = "my name is tomm 12345"
     for key in range(1, 26):
         assert message == client.communicationInstance.getCaesarDecryptedMessage(
@@ -185,7 +187,7 @@ def test_reset_inputs():
 
 
 def test_chat_history_retrieval():
-    # Create a list of messages and see if it matches
+    # Create a list of messages, save it into a file and test if it matches
 
     for message in ["my name is tomm 12345", "😁😛😋🤣"]:
         client.communicationInstance.setMessage(message)
