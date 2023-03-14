@@ -1,10 +1,11 @@
-# 18/1/2023
+# 14/3/2023
 # V13.3
 
 import server
 
 
 def test_binding_to_socket():
+    # Test that the server binds with a valid host and port
     server.connectionInstance.bindToSocket()
 
     assert len(str(server.connectionInstance.port)) == 5
@@ -12,6 +13,7 @@ def test_binding_to_socket():
 
 
 def test_key_generation():
+    # Test that the key generation is valid (keys are 6 digit, cipherkey is between 1 and 26)
     server.securityInstance.getKeys()
 
     for key in [server.securityInstance.e, server.securityInstance.d, server.securityInstance.N]:
@@ -21,11 +23,13 @@ def test_key_generation():
 
 
 def test_key_retrieval():
+    # Test that the keys are the same after encrypting and decrypting
     for key in range(1, 26):
         assert key == server.securityInstance.rsaDecrypt(server.securityInstance.rsaEncrypt(key, 244177, 280043), 257713, 280043)
 
 
 def test_string_retrieval():
+    # Test that the messages are the same after encrypting and decrypting
     message = "my name is tomm 12345"
     for key in range(1, 26):
         assert message == server.securityInstance.caesarDecrypt(server.securityInstance.caesarEncrypt(message, key), key)
