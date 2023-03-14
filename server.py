@@ -80,19 +80,19 @@ class Security:
         print(f"[Server] Cipher key = {self.encryptedCipherKey}")
 
     @staticmethod
-    def rsaEncrypt(key, e, N):
+    def getrsaEncryptedMessage(key, e, N):
         rsaKey = pow(key, e, N)
 
         return rsaKey
 
     @staticmethod
-    def rsaDecrypt(key, d, N):
+    def getrsaDecryptMessage(key, d, N):
         newKey = pow(key, d, N)
 
         return newKey
 
     @staticmethod
-    def caesarEncrypt(message, cipherKey):
+    def getcaesarEncryptedMessage(message, cipherKey):
         newMessage = ""
         for letter in message:
 
@@ -117,7 +117,7 @@ class Security:
         return newMessage
 
     @staticmethod
-    def caesarDecrypt(message, cipherKey):
+    def getcaesarDecryptedMessage(message, cipherKey):
         newMessage = ""
         for letter in message:
 
