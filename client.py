@@ -1638,10 +1638,10 @@ class UI:
         self.setupWindow.display()
 
 
-animationInstance = Animation()
-communicationInstance = Communication()
-connectionInstance = Connection()
-uiInstance = UI()
-
 if __name__ == '__main__':
+    animationInstance = Animation()
+    communicationInstance = Communication()
+    connectionInstance = Connection()
+    uiInstance = UI()
+
     uiInstance.openSetup()
