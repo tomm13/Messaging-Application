@@ -1,7 +1,14 @@
-# 14/3/2023
+# 16/3/2023
 # V13.3
 
 import server
+
+
+def test_instantiaion():
+    # Instantiate objects from server
+    server.connectionInstance = server.Connection()
+    server.securityInstance = server.Security()
+    server.sendInstance = server.Send()
 
 
 def test_binding_to_socket():
