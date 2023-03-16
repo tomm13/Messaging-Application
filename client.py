@@ -1,4 +1,4 @@
-# 9/3/2023
+# 16/3/2023
 # V13.3
 
 
@@ -14,7 +14,7 @@ class Animation:
     # An indefinite thread (animation thread) runs off a list and checks for items in the list.
     # When there is an item in the list, appended by the rest of the code, the thread indexes the animation
     # "code" and runs the corresponding animation method, passing in any relevant arguments such as message
-    
+
     def __init__(self):
         self.queue = []
         self.waitMultiplier = 1
@@ -763,7 +763,7 @@ class Communication:
     # being sent and received, and processes them as messages or commands accordingly
     # This class also appends all messages received into chatHistory and transcript, where
     # chatHistory stores every message and transcript is a 2D list of messages indexed by page
-    
+
     def __init__(self):
         self.users = []
         self.chatHistory = []
@@ -812,7 +812,7 @@ class Communication:
 
     @staticmethod
     def getCaesarDecryptedMessage(message, cipherKey):
-        # Used to encrypt messages 
+        # Used to encrypt messages
         newMessage = ""
         for letter in message:
 
@@ -995,7 +995,7 @@ class Communication:
                             animationInstance.queue.append([3, val])
 
                     elif message[0:7] == "/border":
-                        val = uiInstance.setColor(message[7:])
+                        val = uiInstance.setColor(message[8:])
 
                         if val is not None:
                             animationInstance.queue.append([4, val])
@@ -1036,7 +1036,7 @@ class Communication:
 
 class Connection:
     # Handles the socket connection with the server, decryption and formatting of the keys
-    # And starting the update thread in the communication class once 
+    # And starting the update thread in the communication class once
     def __init__(self):
         # Inputs list such that its formatted as [username, color, host, port, public key, private key, encrypted cipher key]
         self.inputs = [None for i in range(7)]
@@ -1086,7 +1086,7 @@ class Connection:
                     # Send username to determine if it's acceptable
                     self.socket.send(communicationInstance.getCaesarEncryptedMessage(self.inputs[0], self.cipherKey)
                                      .encode())
-                    self.accepted = None 
+                    self.accepted = None
 
                 if self.threadInitialized is False:
                     # If the thread has not started, start it once
@@ -1109,14 +1109,14 @@ class Connection:
     def leave(self):
         # Alert the server that the client is disconnecting, then close the socket
         if connectionInstance.connected is True:
-            self.socket.send(communicationInstance.getrsaEncryptedMessage("/leave", self.cipherKey).encode())
+            self.socket.send(communicationInstance.getCaesarDecryptedMessage("/leave", self.cipherKey).encode())
             self.socket.close()
 
         uiInstance.leave()
 
 
 class UI:
-    # Handles all interaction with the UI elements, as well as create them 
+    # Handles all interaction with the UI elements, as well as create them
     # The setup window will require input handling to establish a connection (username, host ip etc)
     # Whereas the chatroom window will require input handling to send messages/ commands
     def __init__(self):
@@ -1216,7 +1216,7 @@ class UI:
     # Methods below alter UI attributes
 
     def setColor(self, message):
-        # Called by /color [Color], and returns a color 
+        # Called by /color [Color], and returns a color
         try:
             color = web_to_rgb(message)
 
@@ -1297,7 +1297,7 @@ class UI:
         self.linesSent += 1
 
     def setSubsequentMessage(self, message):
-        # When displaying subsequent messages, the append method is used instead 
+        # When displaying subsequent messages, the append method is used instead
         if self.enableUI is True:
             self.chatHistory.append(message)
 
@@ -1507,27 +1507,27 @@ class UI:
         self.chatWindow.when_closed = connectionInstance.leave
         self.chatWindow.when_key_pressed = self.setKeyPressed
         self.chatWindow.set_full_screen()
-        
+
         # Creates 4 gray borders on the edges of the screen
         topPadding = Box(self.chatWindow, width="fill", height=50, align="top")
         leftPadding = Box(self.chatWindow, width=50, height="fill", align="left")
         rightPadding = Box(self.chatWindow, width=50, height="fill", align="right")
         bottomPadding = Box(self.chatWindow, width="fill", height=50, align="bottom")
-        
+
         # Creates a box from the remaining space left
         self.border = Box(self.chatWindow, width="fill", height="fill")
-        
+
         # Creates a header that displays notifications
         header = Box(self.border, width="fill", height=50, align="top")
         headerBlocker = Box(self.border, width="fill", height=50, align="top")
-        
+
         # Creates a listbox that displays a list of connected users
         userListBox = Box(self.border, width=170, height="fill", align="left")
         userListBlocker = Box(self.border, width=50, height="fill", align="left")
-        
+
         # Creates a listbox that displays the messages up to around 18 at any time
         userBox = Box(self.border, width="fill", height="fill", align="right")
-        
+
         inputBox = Box(userBox, width="fill", height=120, align="bottom")
 
         self.userListTopBorder = Box(userListBox, width="fill", height=10, align="top")
@@ -1563,10 +1563,10 @@ class UI:
         self.chatHistory.text_size = self.fontSizes[2][self.fontIndex]
         self.chatHistory.bg = self.themeDependentBg
         self.chatHistory.disable()
-        
+
         # Creates a textbox to type in
         messageInputBorder = Box(inputBox, width="fill", height=50, align="top")
-        
+
         self.messageInputTopBorder = Box(inputBox, width="fill", height=10, align="top")
         self.messageInputTopBorder.bg = self.color
         self.messageInputRightBorder = Box(inputBox, width=10, height="fill", align="right")
@@ -1592,15 +1592,15 @@ class UI:
         self.setupWindow.font = self.font
         self.setupWindow.when_closed = connectionInstance.leave
         self.setupWindow.when_key_pressed = self.setKeyPressed
-        
+
         # Creates 2 gray borders on the top and bottom edges
         topPadding = Box(self.setupWindow, width="fill", height=50, align="top")
         bottomPadding = Box(self.setupWindow, width="fill", height=50, align="bottom")
         contents = Box(self.setupWindow, width="fill", height="fill", align="top")
-        
+
         # Creates a header that displays messages
         header = Box(contents, width="fill", height=40, align="top")
-        
+
         # Creates a row of space that contains indicators, used to display completed and in progress inputs
         indicator = Box(contents, width="fill", height=40, align="bottom")
 
@@ -1613,7 +1613,7 @@ class UI:
         self.status.bg = self.animationColor
 
         statusPadding = Box(contents, width="fill", height=30, align="top")
-        
+
         # Creates a textbox to type into
         self.inputTextBox = TextBox(contents, width=30)
         self.inputTextBox.text_color = self.color
