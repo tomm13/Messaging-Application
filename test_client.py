@@ -1,8 +1,16 @@
-# 14/3/2023
+# 16/3/2023
 # V13.3
 
 import client
 from time import localtime, strftime
+
+
+def test_instantiation():
+    # Instantiate objects from client
+    client.connectionInstance = client.Connection()
+    client.animationInstance = client.Animation()
+    client.communicationInstance = client.Communication()
+    client.uiInstance = client.UI()
 
 
 def test_initialise_inputs():

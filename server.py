@@ -1,4 +1,4 @@
-# 25/1/2023
+# 16/3/2023
 # V13.3
 
 from math import sqrt, gcd
@@ -9,7 +9,7 @@ from threading import Thread
 
 
 class Security:
-    # Handles all the algorithms around ecnrypting, decrypting, and the generation 
+    # Handles all the algorithms around ecnrypting, decrypting, and the generation
     # of keys
     def __init__(self):
         self.d = None
@@ -70,7 +70,7 @@ class Security:
                 if (k * phiN + 1) // self.e != self.e and len(str((k * phiN + 1) // self.e)) == 6:
                     self.d = (k * phiN + 1) // self.e
                     break
-        
+
         # Generates a cipher key between 1-26, then encrypt it
         self.cipherKey = randint(1, 26)
         self.encryptedCipherKey = self.getrsaEncryptedMessage(self.cipherKey, self.e, self.N)
@@ -143,7 +143,7 @@ class Security:
 
 
 class Send:
-    # Handles all the different ways a message can be send, such as if the message is sent 
+    # Handles all the different ways a message can be send, such as if the message is sent
     # publicly, privately, and if the message should be displayed as an animated banner
     # Also handles commands sent by the user, using the prefix /
     @staticmethod
@@ -160,7 +160,8 @@ class Send:
         print(f"[PublicDisplay] {message}")
 
         for client in connectionInstance.clients:
-            client.send(securityInstance.getcaesarEncryptedMessage(f"/display {message}", securityInstance.cipherKey).encode())
+            client.send(
+                securityInstance.getcaesarEncryptedMessage(f"/display {message}", securityInstance.cipherKey).encode())
 
     @staticmethod
     def privateBroadcast(message, clientSocket):
@@ -176,8 +177,9 @@ class Send:
         if clientSocket in connectionInstance.clients:
             print(f"[PrivateDisplay] {message}")
 
-            clientSocket.send(securityInstance.getcaesarEncryptedMessage(f"/display {message}", securityInstance.cipherKey).
-                              encode())
+            clientSocket.send(
+                securityInstance.getcaesarEncryptedMessage(f"/display {message}", securityInstance.cipherKey).
+                encode())
 
     @staticmethod
     def command(message, username, clientSocket):
@@ -242,7 +244,8 @@ class Connection:
 
             self.clients.append(clientSocket)
 
-            username = securityInstance.getcaesarDecryptedMessage(clientSocket.recv(1024).decode(), securityInstance.cipherKey)
+            username = securityInstance.getcaesarDecryptedMessage(clientSocket.recv(1024).decode(),
+                                                                  securityInstance.cipherKey)
 
             # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
             if self.validateUsername(username) is True:
@@ -267,7 +270,7 @@ class Connection:
             while hasValidUsername is False and clientSocket in self.clients:
                 try:
                     signal = securityInstance.getcaesarDecryptedMessage(clientSocket.recv(1024).decode(),
-                                                            securityInstance.cipherKey)
+                                                                        securityInstance.cipherKey)
 
                     if signal:
                         if signal == "/leave":
@@ -296,7 +299,8 @@ class Connection:
         while hasValidUsername is True and clientSocket in self.clients:
             # After having a valid username, the client can now receive and send messages
             try:
-                signal = securityInstance.getcaesarDecryptedMessage(clientSocket.recv(1024).decode(), securityInstance.cipherKey)
+                signal = securityInstance.getcaesarDecryptedMessage(clientSocket.recv(1024).decode(),
+                                                                    securityInstance.cipherKey)
                 unifiedmessage = f"{username}: {signal}"
 
                 if signal:
@@ -386,9 +390,9 @@ class Connection:
             return True
 
 
-connectionInstance = Connection()
-securityInstance = Security()
-sendInstance = Send()
-
 if __name__ == '__main__':
+    connectionInstance = Connection()
+    securityInstance = Security()
+    sendInstance = Send()
+
     connectionInstance.connect()
