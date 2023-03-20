@@ -773,9 +773,9 @@ class Communication:
     @staticmethod
     def getrsaEncryptedMessage(key, e, N):
         # Used to encrypt the keys
-        rsaKey = pow(key, e, N)
+        newKey = pow(key, e, N)
 
-        return rsaKey
+        return newKey
 
     @staticmethod
     def getrsaDecryptedMessage(key, d, N):

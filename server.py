@@ -86,9 +86,9 @@ class Security:
 
     @staticmethod
     def getrsaEncryptedMessage(key, e, N):
-        rsaKey = pow(key, e, N)
+        newKey = pow(key, e, N)
 
-        return rsaKey
+        return newKey
 
     @staticmethod
     def getrsaDecryptedMessage(key, d, N):
