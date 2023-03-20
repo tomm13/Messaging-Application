@@ -14,6 +14,8 @@ class Security:
     def __init__(self):
         self.d = None
         self.e = None
+        self.P = None
+        self.Q = None
         self.N = None
         self.cipherKey = None
         self.encryptedCipherKey = None
@@ -48,6 +50,9 @@ class Security:
             # Generate 2 primes P and Q where the product N is 6 digits
             P = primes[randint(0, len(primes) - 1)]
             Q = primes[randint(0, len(primes) - 1)]
+            
+            self.P = P
+            self.Q = Q
 
             # N is the 7-12th digits of either the public or private key
             self.N = P * Q
