@@ -178,6 +178,18 @@ def test_string_retrieval():
     for key in range(1, 26):
         assert message == client.communicationInstance.getCaesarDecryptedMessage(
             client.communicationInstance.getCaesarEncryptedMessage(message, key), key)
+    
+    # Test that characters outside the alphabet are not encrypted
+    message = "12345"
+
+    for key in range(1, 26):
+        assert message == client.communicationInstance.getcaesarEncryptedMessage(message, key)
+
+    # Test that only characters in the alphabet are encrypted
+    message = "abcde"
+
+    for key in range(1, 26):
+        assert message != client.communicationInstance.getcaesarEncryptedMessage(message, key)
 
 
 def test_reset_inputs():
