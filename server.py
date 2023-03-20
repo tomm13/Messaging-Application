@@ -97,7 +97,7 @@ class Security:
         return newKey
 
     @staticmethod
-    def getcaesarEncryptedMessage(message, cipherKey):
+    def getCaesarEncryptedMessage(message, cipherKey):
         newMessage = ""
         for letter in message:
 
@@ -122,7 +122,7 @@ class Security:
         return newMessage
 
     @staticmethod
-    def getcaesarDecryptedMessage(message, cipherKey):
+    def getCaesarDecryptedMessage(message, cipherKey):
         newMessage = ""
         for letter in message:
 

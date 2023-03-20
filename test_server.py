@@ -46,13 +46,25 @@ def test_string_retrieval():
     # Test that the messages are the same after encrypting and decrypting
     message = "my name is tomm 12345"
     for key in range(1, 26):
-        assert message == server.securityInstance.getcaesarDecryptedMessage(
-            server.securityInstance.getcaesarEncryptedMessage(message, key), key)
+        assert message == server.securityInstance.getCaesarDecryptedMessage(
+            server.securityInstance.getCaesarEncryptedMessage(message, key), key)
 
     message = "😁😛😋🤣"
     for key in range(1, 26):
-        assert message == server.securityInstance.getcaesarDecryptedMessage(
-            server.securityInstance.getcaesarEncryptedMessage(message, key), key)
+        assert message == server.securityInstance.getCaesarDecryptedMessage(
+            server.securityInstance.getCaesarEncryptedMessage(message, key), key)
+        
+    # Test that characters outside the alphabet are not encrypted
+    message = "12345"
+    
+    for key in range(1, 26):
+        assert message == server.securityInstance.getCaesarEncryptedMessage(message, key)
+    
+    # Test that only characters in the alphabet are encrypted
+    message = "abcde"
+    
+    for key in range(1, 26):
+        assert message != server.securityInstance.getCaesarEncryptedMessage(message, key)
 
 
 def test_username_validation():
