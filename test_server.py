@@ -54,14 +54,17 @@ def test_string_retrieval():
         assert message == server.securityInstance.getcaesarDecryptedMessage(
             server.securityInstance.getcaesarEncryptedMessage(message, key), key)
         
-    # Test that only characters in the alphabet are encrypted
+    # Test that characters outside the alphabet are not encrypted
     message = "12345"
     
-    assert message == server.securityInstance.getcaesarEncryptedMessage(message)
+    for key in range(1, 26):
+        assert message == server.securityInstance.getcaesarEncryptedMessage(message, key)
     
+    # Test that only characters in the alphabet are encrypted
     message = "abcde"
     
-    assert message != server.securityInstance.getcaesarEncryptedMessage(message)
+    for key in range(1, 26):
+        assert message != server.securityInstance.getcaesarEncryptedMessage(message, key)
 
 
 def test_username_validation():
