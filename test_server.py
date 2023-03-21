@@ -20,7 +20,7 @@ def test_binding_to_socket():
 
 
 def test_key_generation():
-    # Test that the key generation is valid (keys are 6 digit, cipherkey is between 1 and 26)
+    # Test that the keys are 6 digit
     server.securityInstance.getKeys()
     
     # Test that N is generated from 2 primes
@@ -32,6 +32,7 @@ def test_key_generation():
     for key in [server.securityInstance.e, server.securityInstance.d, server.securityInstance.N]:
         assert len(str(key)) == 6
     
+    # Test that the cipherkey is between 1 and 26
     assert 1 <= server.securityInstance.cipherKey <= 26
 
 
