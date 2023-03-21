@@ -187,7 +187,7 @@ class Send:
                 encode())
 
     @staticmethod
-    def command(message, username, clientSocket):
+    def getCommand(message, username, clientSocket):
         # Commands called by the prefix /
         if message == "/leave":
             connectionInstance.removeUser(username, clientSocket)
@@ -310,7 +310,7 @@ class Connection:
 
                 if signal:
                     if signal[0] == "/":
-                        sendInstance.command(signal, username, clientSocket)
+                        sendInstance.getCommand(signal, username, clientSocket)
 
                     else:
                         if detectSpam is True:
