@@ -253,7 +253,7 @@ class Connection:
                                                                   securityInstance.cipherKey)
 
             # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
-            if self.validateUsername(username) is True:
+            if self.getUsernameValidity(username) is True:
                 # Allows the user to join the chatroom, send and receive messages
                 self.addUser(username)
 
@@ -274,7 +274,7 @@ class Connection:
             # If the username is not valid, wait in this thread until it is
             while hasValidUsername is False and clientSocket in self.clients:
                 try:
-                    signal = securityInstance.getcaesarDecryptedMessage(clientSocket.recv(1024).decode(),
+                    signal = securityInstance.getCaesarDecryptedMessage(clientSocket.recv(1024).decode(),
                                                                         securityInstance.cipherKey)
 
                     if signal:
@@ -282,7 +282,7 @@ class Connection:
                             # If the user quits after failing to input a valid username, remove them
                             self.setRemovedUser(None, clientSocket)
 
-                        if self.validateUsername(signal) is True:
+                        if self.getUsernameValidity(signal) is True:
                             # Allow the client to receive and accept messages
                             self.addUser(signal)
 
@@ -304,7 +304,7 @@ class Connection:
         while hasValidUsername is True and clientSocket in self.clients:
             # After having a valid username, the client can now receive and send messages
             try:
-                signal = securityInstance.getcaesarDecryptedMessage(clientSocket.recv(1024).decode(),
+                signal = securityInstance.getCaesarDecryptedMessage(clientSocket.recv(1024).decode(),
                                                                     securityInstance.cipherKey)
                 unifiedmessage = f"{username}: {signal}"
 
@@ -325,7 +325,7 @@ class Connection:
                                     warnUser = False
 
                             else:
-                                if self.validateMessageLength(unifiedmessage) is False:
+                                if self.getMessageLengthValidity(unifiedmessage) is False:
                                     sendInstance.privateBroadcast("/timeout Your message is too long", clientSocket)
 
                                 else:
@@ -340,7 +340,7 @@ class Connection:
                                 lastMessageSentTime = time()
 
                         else:
-                            if self.validateMessageLength(unifiedmessage) is False:
+                            if self.getMessageLengthValidity(unifiedmessage) is False:
                                 sendInstance.privateBroadcast("/timeout Your meessage is too long", clientSocket)
 
                             else:
@@ -377,7 +377,7 @@ class Connection:
 
         sendInstance.broadcast(f"/remove {username}")
 
-    def validateUsername(self, username):
+    def getUsernameValidity(self, username):
         # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
         if username in self.users or " " in username or len(username) > 7 or len(username) < 1 or username == "None":
             return False
@@ -386,7 +386,7 @@ class Connection:
             return True
 
     @staticmethod
-    def validateMessageLength(message):
+    def getMessageLengthValidity(message):
         # Prevent messages of length 50 or greater being sent
         if len(message) > 50:
             return False
