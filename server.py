@@ -187,10 +187,10 @@ class Send:
                 encode())
 
     @staticmethod
-    def command(message, username, clientSocket):
+    def getCommand(message, username, clientSocket):
         # Commands called by the prefix /
         if message == "/leave":
-            connectionInstance.removeUser(username, clientSocket)
+            connectionInstance.setRemovedUser(username, clientSocket)
         elif message[0:6] == "/color" or message[0:7] == "/border" or message[0:9] == "/savechat":
             sendInstance.privateBroadcast(message, clientSocket)
         elif message in ["/theme", "/ldm", "/previous", "/next"]:
@@ -253,7 +253,7 @@ class Connection:
                                                                   securityInstance.cipherKey)
 
             # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
-            if self.validateUsername(username) is True:
+            if self.getUsernameValidity(username) is True:
                 # Allows the user to join the chatroom, send and receive messages
                 self.addUser(username)
 
@@ -274,15 +274,15 @@ class Connection:
             # If the username is not valid, wait in this thread until it is
             while hasValidUsername is False and clientSocket in self.clients:
                 try:
-                    signal = securityInstance.getcaesarDecryptedMessage(clientSocket.recv(1024).decode(),
+                    signal = securityInstance.getCaesarDecryptedMessage(clientSocket.recv(1024).decode(),
                                                                         securityInstance.cipherKey)
 
                     if signal:
                         if signal == "/leave":
                             # If the user quits after failing to input a valid username, remove them
-                            self.removeUser(None, clientSocket)
+                            self.setRemovedUser(None, clientSocket)
 
-                        if self.validateUsername(signal) is True:
+                        if self.getUsernameValidity(signal) is True:
                             # Allow the client to receive and accept messages
                             self.addUser(signal)
 
@@ -294,7 +294,7 @@ class Connection:
 
                 except (ConnectionResetError, OSError) as e:
                     print(f"[Thread] An error occured in {username}'s update thread before validtion completed. {e}")
-                    self.removeUser(None, clientSocket)
+                    self.setRemovedUser(None, clientSocket)
 
         messagesSentRecently = 0
         lastMessageSentTime = 0
@@ -304,13 +304,13 @@ class Connection:
         while hasValidUsername is True and clientSocket in self.clients:
             # After having a valid username, the client can now receive and send messages
             try:
-                signal = securityInstance.getcaesarDecryptedMessage(clientSocket.recv(1024).decode(),
+                signal = securityInstance.getCaesarDecryptedMessage(clientSocket.recv(1024).decode(),
                                                                     securityInstance.cipherKey)
                 unifiedmessage = f"{username}: {signal}"
 
                 if signal:
                     if signal[0] == "/":
-                        sendInstance.command(signal, username, clientSocket)
+                        sendInstance.getCommand(signal, username, clientSocket)
 
                     else:
                         if detectSpam is True:
@@ -325,7 +325,7 @@ class Connection:
                                     warnUser = False
 
                             else:
-                                if self.validateMessageLength(unifiedmessage) is False:
+                                if self.getMessageLengthValidity(unifiedmessage) is False:
                                     sendInstance.privateBroadcast("/timeout Your message is too long", clientSocket)
 
                                 else:
@@ -340,7 +340,7 @@ class Connection:
                                 lastMessageSentTime = time()
 
                         else:
-                            if self.validateMessageLength(unifiedmessage) is False:
+                            if self.getMessageLengthValidity(unifiedmessage) is False:
                                 sendInstance.privateBroadcast("/timeout Your meessage is too long", clientSocket)
 
                             else:
@@ -348,7 +348,7 @@ class Connection:
 
             except (ConnectionResetError, OSError) as e:
                 print(f"[Thread] An error occured in {username}'s update thread after validation completed. {e}")
-                self.removeUser(username, clientSocket)
+                self.setRemoveUser(username, clientSocket)
 
         print(f"[Thread] Closed {username}'s update thread")
 
@@ -364,7 +364,7 @@ class Connection:
 
         sendInstance.broadcast(message)
 
-    def removeUser(self, username, clientSocket):
+    def setRemovedUser(self, username, clientSocket):
         # Called when a user has a duplicate username or leaves
         clientSocket.close()
 
@@ -377,7 +377,7 @@ class Connection:
 
         sendInstance.broadcast(f"/remove {username}")
 
-    def validateUsername(self, username):
+    def getUsernameValidity(self, username):
         # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
         if username in self.users or " " in username or len(username) > 7 or len(username) < 1 or username == "None":
             return False
@@ -386,7 +386,7 @@ class Connection:
             return True
 
     @staticmethod
-    def validateMessageLength(message):
+    def getMessageLengthValidity(message):
         # Prevent messages of length 50 or greater being sent
         if len(message) > 50:
             return False
