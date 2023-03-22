@@ -29,10 +29,10 @@ def test_getting_inputs():
         # Invalid test
         if test == 1:
             # If testing colours, a specfic set of values have to be tested
-            testValues = invalidTests[0][1]
+            testValues = invalidTests[1]
             
         else:
-            testValues = invalidTests[0][0]
+            testValues = invalidTests[0]
             
         for val in testValues:
             # Invalid test
