@@ -40,7 +40,7 @@ def test_getting_username():
 
 def test_getting_color():
     # Invalid strings, white and red are all rejected
-    for color in ["invalidcolor", "white", "red"]:
+    for color in [None, "invalidcolor", "white", "red"]:
         client.uiInstance.setInputGetter(True, color)
 
         assert client.connectionInstance.inputs[1] is None
