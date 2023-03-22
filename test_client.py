@@ -21,126 +21,34 @@ def test_initialise_inputs():
     assert client.connectionInstance.inputRequest == 0
 
 
-def test_getting_username():
-    # Invalid username test
-    for input in [None, "", 0]:
-        client.uiInstance.setInputGetter(True, input)
+def test_getting_inputs():
+    invalidTests = [[None, "", 0], [None, "invalidcolor", "white", "red"]]
+    validTests = ["Username", "blue", "127.0.0.1", "12345", "244177280043", "257713280043", "1144"]
+    
+    for test in range(7):
+        # Invalid test
+        if test == 1:
+            testValues = invalidTests[0][1]
+            
+        else:
+            testValues = invalidTests[0][0]
+            
+        for val in testValues:
+            # Invalid test
+            client.uiInstance.setInputGetter(True, val)
 
-        assert client.connectionInstance.inputs[0] is None
-        assert client.connectionInstance.inputRequest == 0
-        assert all(item is None for item in client.connectionInstance.inputs) is True
+            assert client.connectionInstance.inputs[test] is None
+            assert client.connectionInstance.inputRequest == test
+            assert all(item is None for item in client.connectionInstance.inputs) is True
 
-    # Valid username test
-    client.uiInstance.setInputGetter(True, "Username")
+            # Valid test
+            client.uiInstance.setInputGetter(True, val)
 
-    assert client.connectionInstance.inputs[0] == "Username"
-    assert client.connectionInstance.inputRequest == 1
-    assert all(item is None for item in client.connectionInstance.inputs[1:6]) is True
+            assert client.connectionInstance.inputs[test] == "Username"
+            assert client.connectionInstance.inputRequest == test + 1
+            assert all(item is None for item in client.connectionInstance.inputs[test + 1:6]) is True
 
-
-def test_getting_color():
-    # Invalid strings, white and red are all rejected
-    for color in [None, "invalidcolor", "white", "red"]:
-        client.uiInstance.setInputGetter(True, color)
-
-        assert client.connectionInstance.inputs[1] is None
-        assert client.connectionInstance.inputRequest == 1
-
-    # Valid color test
-
-    client.uiInstance.setInputGetter(True, "blue")
-
-    assert client.connectionInstance.inputs[1] == (0, 0, 255)
-    assert client.connectionInstance.inputRequest == 2
-    assert all(item is None for item in client.connectionInstance.inputs[2:6]) is True
-
-
-def test_getting_host():
-    # Invalid host test
-    for input in [None, "", 0]:
-        client.uiInstance.setInputGetter(True, input)
-
-        assert client.connectionInstance.inputs[2] is None
-        assert client.connectionInstance.inputRequest == 2
-        assert all(item is None for item in client.connectionInstance.inputs[2:6]) is True
-
-    # Valid host test
-    client.uiInstance.setInputGetter(True, "127.0.0.1")
-
-    assert client.connectionInstance.inputs[2] == "127.0.0.1"
-    assert client.connectionInstance.inputRequest == 3
-    assert all(item is None for item in client.connectionInstance.inputs[3:6]) is True
-
-
-def test_getting_port():
-    # Invalid port test
-    for input in [None, "", 0]:
-        client.uiInstance.setInputGetter(True, input)
-
-        assert client.connectionInstance.inputs[3] is None
-        assert client.connectionInstance.inputRequest == 3
-        assert all(item is None for item in client.connectionInstance.inputs[3:6]) is True
-
-    # Valid port test
-    client.uiInstance.setInputGetter(True, "12345")
-
-    assert client.connectionInstance.inputs[3] == "12345"
-    assert client.connectionInstance.inputRequest == 4
-    assert all(item is None for item in client.connectionInstance.inputs[4:6]) is True
-
-
-def test_getting_publicKey():
-    # Invalid publicKey test
-    for input in [None, "", 0]:
-        client.uiInstance.setInputGetter(True, input)
-
-        assert client.connectionInstance.inputs[4] is None
-        assert client.connectionInstance.inputRequest == 4
-        assert all(item is None for item in client.connectionInstance.inputs[4:6]) is True
-
-    # Valid publicKey test
-    client.uiInstance.setInputGetter(True, "244177280043")
-
-    assert client.connectionInstance.inputs[4] == "244177280043"
-    assert client.connectionInstance.inputRequest == 5
-    assert all(item is None for item in client.connectionInstance.inputs[5:6]) is True
-
-
-def test_getting_privateKey():
-    # Invalid privateKey test
-    for input in [None, "", 0]:
-        client.uiInstance.setInputGetter(True, input)
-
-        assert client.connectionInstance.inputs[5] is None
-        assert client.connectionInstance.inputRequest == 5
-        assert all(item is None for item in client.connectionInstance.inputs[5:6]) is True
-
-    # Valid privateKey test
-    client.uiInstance.setInputGetter(True, "257713280043")
-
-    assert client.connectionInstance.inputs[5] == "257713280043"
-    assert client.connectionInstance.inputs[4][6:12] == client.connectionInstance.inputs[5][6:12]
-    assert client.connectionInstance.inputRequest == 6
-    assert all(item is None for item in client.connectionInstance.inputs[6:6]) is True
-
-
-def test_getting_cipherKey():
-    # Invalid cipherKey test
-    for input in [None, "", 0]:
-        client.uiInstance.setInputGetter(True, input)
-
-        assert client.connectionInstance.inputs[6] is None
-        assert client.connectionInstance.inputRequest == 6
-        assert all(item is None for item in client.connectionInstance.inputs[6:6]) is True
-
-    # Valid cipherKey test
-    client.uiInstance.setInputGetter(True, "1144")
-
-    assert client.connectionInstance.inputs[6] == "1144"
-    assert client.connectionInstance.inputRequest == 0
-    assert all(item is not None for item in client.connectionInstance.inputs) is True
-
-
+            
 def test_arrow_keys_in_input():
     # Simulate an arrow key being pressed
     for value in [None, "random string"]:
