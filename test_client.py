@@ -28,6 +28,7 @@ def test_getting_inputs():
     for test in range(7):
         # Invalid test
         if test == 1:
+            # If testing colours, a specfic set of values have to be tested
             testValues = invalidTests[0][1]
             
         else:
@@ -43,8 +44,8 @@ def test_getting_inputs():
 
             # Valid test
             client.uiInstance.setInputGetter(True, val)
-
-            assert client.connectionInstance.inputs[test] == "Username"
+            
+            assert client.connectionInstance.inputs[test] == validTests[test]
             assert client.connectionInstance.inputRequest == test + 1
             assert all(item is None for item in client.connectionInstance.inputs[test + 1:6]) is True
 
