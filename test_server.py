@@ -17,6 +17,7 @@ def test_binding_to_socket():
 
     assert len(str(server.connectionInstance.port)) == 5
     assert server.connectionInstance.host is not None
+    assert "." in server.connectionInstance.host
 
 
 def test_key_generation():
