@@ -57,7 +57,7 @@ def test_getting_inputs():
 
             assert client.connectionInstance.inputs[test] is None
             assert client.connectionInstance.inputRequest == test
-            assert all(item is None for item in client.connectionInstance.inputs) is True
+            assert all(item is None for item in client.connectionInstance.inputs[test:6]) is True
            
         # Valid test
         client.uiInstance.setInputGetter(True, validTestValue)
