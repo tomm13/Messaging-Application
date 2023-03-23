@@ -27,7 +27,7 @@ def test_getting_inputs():
     invalidTests = [[None, "", 0], [None, "invalidcolor", "white", "red"]]
     validTests = ["Username", ["blue", (0, 0, 255)], "127.0.0.1", "12345", "244177280043", "257713280043", "1144"]
     
-    for test in range(7):
+    for test in range(6):
         # Invalid test
         # Every item in invalidTestValues are tested and tested to be invalid
         # Then validTestValue is tested once and compared with expectedValue, expected to pass
@@ -36,11 +36,20 @@ def test_getting_inputs():
             invalidTestValues = invalidTests[1]
             validTestValue = validTests[test][0]
             expectedValue = validTests[test][1]
+            nextStep = test + 1
+            
+        elif test == 6:
+            # For the final test, inputRequest has to cycle back to 0
+            invalidTestValues = invalidTests[0]
+            validTestValue = validTests[test][0]
+            expectedValue = validTestValue
+            nextStep = 0
             
         else:
             invalidTestValues = invalidTests[0]
             validTestValue = validTests[test][0]
             expectedValue = validTestValue
+            nextStep = test + 1
             
         for val in invalidTestValues:
             # Invalid tests
@@ -54,8 +63,8 @@ def test_getting_inputs():
         client.uiInstance.setInputGetter(True, validTestValue)
 
         assert client.connectionInstance.inputs[test] == expectedValue
-        assert client.connectionInstance.inputRequest == test + 1
-        assert all(item is None for item in client.connectionInstance.inputs[test + 1:6]) is True
+        assert client.connectionInstance.inputRequest == nextStep
+        assert all(item is None for item in client.connectionInstance.inputs[nextStep:6]) is True
 
             
 def test_arrow_keys_in_input():
