@@ -40,6 +40,7 @@ def test_getting_inputs():
         else:
             invalidTestValues = invalidTests[0]
             validTestValue = validTests[test][0]
+            expectedValue = validTestValue
             
         for val in invalidTestValues:
             # Invalid tests
