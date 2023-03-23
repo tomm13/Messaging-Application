@@ -29,25 +29,27 @@ def test_getting_inputs():
         # Invalid test
         if test == 1:
             # If testing colours, a specfic set of values have to be tested
+            # testValues is a list of invalid test values that will be iterated 
+            # Then test the valid value once per test
             testValues = invalidTests[1]
             
         else:
             testValues = invalidTests[0]
             
         for val in testValues:
-            # Invalid test
+            # Invalid tests
             client.uiInstance.setInputGetter(True, val)
 
             assert client.connectionInstance.inputs[test] is None
             assert client.connectionInstance.inputRequest == test
             assert all(item is None for item in client.connectionInstance.inputs) is True
 
-            # Valid test
-            client.uiInstance.setInputGetter(True, val)
-            
-            assert client.connectionInstance.inputs[test] == validTests[test]
-            assert client.connectionInstance.inputRequest == test + 1
-            assert all(item is None for item in client.connectionInstance.inputs[test + 1:6]) is True
+        # Valid test
+        client.uiInstance.setInputGetter(True, validTests[test])
+
+        assert client.connectionInstance.inputs[test] == validTests[test]
+        assert client.connectionInstance.inputRequest == test + 1
+        assert all(item is None for item in client.connectionInstance.inputs[test + 1:6]) is True
 
             
 def test_arrow_keys_in_input():
