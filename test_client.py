@@ -53,6 +53,7 @@ def test_getting_inputs():
             
         for val in invalidTestValues:
             # Invalid tests
+            # Test that inputRequest does not increment after receiving an invalid input
             client.uiInstance.setInputGetter(True, val)
 
             assert client.connectionInstance.inputs[test] is None
@@ -60,6 +61,7 @@ def test_getting_inputs():
             assert all(item is None for item in client.connectionInstance.inputs[test:6]) is True
            
         # Valid test
+        # Test that inputRequest only increments after receiving a valid input
         client.uiInstance.setInputGetter(True, validTestValue)
 
         assert client.connectionInstance.inputs[test] == expectedValue
