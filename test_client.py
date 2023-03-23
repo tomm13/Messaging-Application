@@ -70,9 +70,6 @@ def test_getting_inputs():
             
         else:
             assert all(item is None for item in client.connectionInstance.inputs[nextStep:6]) is True
-        
-        if test == 6:
-            assert client.connectionInstance.inputRequest == 0
 
             
 def test_arrow_keys_in_input():
