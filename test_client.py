@@ -1,4 +1,4 @@
-# 16/3/2023
+# 23/3/2023
 # V13.3
 
 import client
@@ -22,32 +22,37 @@ def test_initialise_inputs():
 
 
 def test_getting_inputs():
+    # Invalid tests are invalid values to be tested
+    # Valid tests are the values to test, with color having a different output than input
     invalidTests = [[None, "", 0], [None, "invalidcolor", "white", "red"]]
-    validTests = ["Username", "blue", "127.0.0.1", "12345", "244177280043", "257713280043", "1144"]
+    validTests = ["Username", ["blue", (0, 0, 255)], "127.0.0.1", "12345", "244177280043", "257713280043", "1144"]
     
     for test in range(7):
         # Invalid test
+        # Every item in invalidTestValues are tested and tested to be invalid
+        # Then validTestValue is tested once and compared with expectedValue, expected to pass
         if test == 1:
-            # If testing colours, a specfic set of values have to be tested
-            # testValues is a list of invalid test values that will be iterated 
-            # Then test the valid value once per test
-            testValues = invalidTests[1]
+            # If testing colors, a specfic set of values have to be tested
+            invalidTestValues = invalidTests[1]
+            validTestValue = validTests[test][0]
+            expectedValue = validTests[test][1]
             
         else:
-            testValues = invalidTests[0]
+            invalidTestValues = invalidTests[0]
+            validTestValue = validTests[test][0]
             
-        for val in testValues:
+        for val in invalidTestValues:
             # Invalid tests
             client.uiInstance.setInputGetter(True, val)
 
             assert client.connectionInstance.inputs[test] is None
             assert client.connectionInstance.inputRequest == test
             assert all(item is None for item in client.connectionInstance.inputs) is True
-
+           
         # Valid test
-        client.uiInstance.setInputGetter(True, validTests[test])
+        client.uiInstance.setInputGetter(True, validTestValue)
 
-        assert client.connectionInstance.inputs[test] == validTests[test]
+        assert client.connectionInstance.inputs[test] == expectedValue
         assert client.connectionInstance.inputRequest == test + 1
         assert all(item is None for item in client.connectionInstance.inputs[test + 1:6]) is True
 
