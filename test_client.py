@@ -27,7 +27,7 @@ def test_getting_inputs():
     invalidTests = [[None, "", 0], [None, "invalidcolor", "white", "red"]]
     validTests = ["Username", ["blue", (0, 0, 255)], "127.0.0.1", "12345", "244177280043", "257713280043", "1144"]
     
-    for test in range(6):
+    for test in range(7):
         # Invalid test
         # Every item in invalidTestValues are tested and tested to be invalid
         # Then validTestValue is tested once and compared with expectedValue, expected to pass
@@ -41,13 +41,13 @@ def test_getting_inputs():
         elif test == 6:
             # For the final test, inputRequest has to cycle back to 0
             invalidTestValues = invalidTests[0]
-            validTestValue = validTests[test][0]
+            validTestValue = validTests[test]
             expectedValue = validTestValue
             nextStep = 0
             
         else:
             invalidTestValues = invalidTests[0]
-            validTestValue = validTests[test][0]
+            validTestValue = validTests[test]
             expectedValue = validTestValue
             nextStep = test + 1
             
