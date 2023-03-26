@@ -1,4 +1,4 @@
-# 16/3/2023
+# 26/3/2023
 # V13.3
 
 from math import sqrt, gcd
@@ -50,7 +50,7 @@ class Security:
             # Generate 2 primes P and Q where the product N is 6 digits
             P = primes[randint(0, len(primes) - 1)]
             Q = primes[randint(0, len(primes) - 1)]
-            
+
             self.P = P
             self.Q = Q
 
@@ -157,7 +157,7 @@ class Send:
         print(f"[Public] {message}")
 
         for client in connectionInstance.clients:
-            client.send(securityInstance.getcaesarEncryptedMessage(message, securityInstance.cipherKey).encode())
+            client.send(securityInstance.getCaesarEncryptedMessage(message, securityInstance.cipherKey).encode())
 
     @staticmethod
     def broadcastDisplay(message):
@@ -166,7 +166,7 @@ class Send:
 
         for client in connectionInstance.clients:
             client.send(
-                securityInstance.getcaesarEncryptedMessage(f"/display {message}", securityInstance.cipherKey).encode())
+                securityInstance.getCaesarEncryptedMessage(f"/display {message}", securityInstance.cipherKey).encode())
 
     @staticmethod
     def privateBroadcast(message, clientSocket):
@@ -174,7 +174,7 @@ class Send:
         if clientSocket in connectionInstance.clients:
             print(f"[Private] {message}")
 
-            clientSocket.send(securityInstance.getcaesarEncryptedMessage(message, securityInstance.cipherKey).encode())
+            clientSocket.send(securityInstance.getCaesarEncryptedMessage(message, securityInstance.cipherKey).encode())
 
     @staticmethod
     def privateBroadcastDisplay(message, clientSocket):
@@ -183,7 +183,7 @@ class Send:
             print(f"[PrivateDisplay] {message}")
 
             clientSocket.send(
-                securityInstance.getcaesarEncryptedMessage(f"/display {message}", securityInstance.cipherKey).
+                securityInstance.getCaesarEncryptedMessage(f"/display {message}", securityInstance.cipherKey).
                 encode())
 
     @staticmethod
@@ -249,7 +249,7 @@ class Connection:
 
             self.clients.append(clientSocket)
 
-            username = securityInstance.getcaesarDecryptedMessage(clientSocket.recv(1024).decode(),
+            username = securityInstance.getCaesarDecryptedMessage(clientSocket.recv(1024).decode(),
                                                                   securityInstance.cipherKey)
 
             # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
@@ -348,7 +348,7 @@ class Connection:
 
             except (ConnectionResetError, OSError) as e:
                 print(f"[Thread] An error occured in {username}'s update thread after validation completed. {e}")
-                self.setRemoveUser(username, clientSocket)
+                self.setRemovedUser(username, clientSocket)
 
         print(f"[Thread] Closed {username}'s update thread")
 
