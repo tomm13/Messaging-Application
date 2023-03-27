@@ -29,7 +29,7 @@ def test_getting_inputs():
     
     for test in range(7):
         # Invalid test
-        # Every item in invalidTestValues are tested and tested to be invalid
+        # Every item in invalidTestValues are tested to be invalid
         # Then validTestValue is tested once and compared with expectedValue, expected to pass
         if test == 1:
             # If testing colors, a specfic set of values have to be tested
