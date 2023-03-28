@@ -1,4 +1,4 @@
-# 23/3/2023
+# 28/3/2023
 # V13.3
 
 import client
@@ -7,18 +7,18 @@ from time import localtime, strftime
 
 def test_instantiation():
     # Instantiate objects from client
-    client.connectionInstance = client.Connection()
-    client.animationInstance = client.Animation()
-    client.communicationInstance = client.Communication()
-    client.uiInstance = client.UI()
+    client.connection = client.Connection()
+    client.animation = client.Animation()
+    client.communication = client.Communication()
+    client.ui = client.UI()
 
 
 def test_initialise_inputs():
     # Simulate nothing showing up until the first enter key is presssed
-    client.uiInstance.setInputGetter(True, None)
+    client.ui.setInputGetter(True, None)
 
-    assert all(item is None for item in client.connectionInstance.inputs) is True
-    assert client.connectionInstance.inputRequest == 0
+    assert all(item is None for item in client.connection.inputs) is True
+    assert client.connection.inputRequest == 0
 
 
 def test_getting_inputs():
@@ -26,10 +26,10 @@ def test_getting_inputs():
     # Valid tests are the values to test, with color having a different output than input
     invalidTests = [[None, "", 0], [None, "invalidcolor", "white", "red"]]
     validTests = ["Username", ["blue", (0, 0, 255)], "127.0.0.1", "12345", "244177280043", "257713280043", "1144"]
-    
+
     for test in range(7):
         # Invalid test
-        # Every item in invalidTestValues are tested to be invalid
+        # Every item in invalidTestValues are tested and tested to be invalid
         # Then validTestValue is tested once and compared with expectedValue, expected to pass
         if test == 1:
             # If testing colors, a specfic set of values have to be tested
@@ -37,114 +37,114 @@ def test_getting_inputs():
             validTestValue = validTests[test][0]
             expectedValue = validTests[test][1]
             nextStep = test + 1
-            
+
         elif test == 6:
             # For the final test, inputRequest has to cycle back to 0
             invalidTestValues = invalidTests[0]
             validTestValue = validTests[test]
             expectedValue = validTestValue
             nextStep = 0
-            
+
         else:
             invalidTestValues = invalidTests[0]
             validTestValue = validTests[test]
             expectedValue = validTestValue
             nextStep = test + 1
-            
+
         for val in invalidTestValues:
             # Invalid tests
             # Test that inputRequest does not increment after receiving an invalid input
-            client.uiInstance.setInputGetter(True, val)
+            client.ui.setInputGetter(True, val)
 
-            assert client.connectionInstance.inputs[test] is None
-            assert client.connectionInstance.inputRequest == test
-            assert all(item is None for item in client.connectionInstance.inputs[test:6]) is True
-           
+            assert client.connection.inputs[test] is None
+            assert client.connection.inputRequest == test
+            assert all(item is None for item in client.connection.inputs[test:6]) is True
+
         # Valid test
         # Test that inputRequest only increments after receiving a valid input
-        client.uiInstance.setInputGetter(True, validTestValue)
+        client.ui.setInputGetter(True, validTestValue)
 
-        assert client.connectionInstance.inputs[test] == expectedValue
-        assert client.connectionInstance.inputRequest == nextStep
-        
+        assert client.connection.inputs[test] == expectedValue
+        assert client.connection.inputRequest == nextStep
+
         if test == 6:
-            assert all(item is not None for item in client.connectionInstance.inputs) is True
-            
-        else:
-            assert all(item is None for item in client.connectionInstance.inputs[nextStep:6]) is True
+            assert all(item is not None for item in client.connection.inputs) is True
 
-            
+        else:
+            assert all(item is None for item in client.connection.inputs[nextStep:6]) is True
+
+
 def test_arrow_keys_in_input():
     # Simulate an arrow key being pressed
     for value in [None, "random string"]:
-        client.uiInstance.setInputGetter(False, value)
+        client.ui.setInputGetter(False, value)
 
-        assert client.connectionInstance.inputRequest == 0
-        assert all(item is not None for item in client.connectionInstance.inputs) is True
+        assert client.connection.inputRequest == 0
+        assert all(item is not None for item in client.connection.inputs) is True
 
 
 def test_key_separation():
     # Test proper indexing and separation of keys
-    client.connectionInstance.setConnection()
+    client.connection.setConnection()
 
-    assert client.connectionInstance.e == 244177
-    assert client.connectionInstance.d == 257713
-    assert client.connectionInstance.N == 280043
-    assert client.connectionInstance.cipherKey == 14
+    assert client.connection.e == 244177
+    assert client.connection.d == 257713
+    assert client.connection.N == 280043
+    assert client.connection.cipherKey == 14
 
 
 def test_key_retrieval():
     # Test that the keys are the same after encrypting and decrypting
     for key in range(1, 26):
-        assert key == client.communicationInstance.getrsaDecryptedMessage(
-            client.communicationInstance.getrsaEncryptedMessage(key, 244177, 280043), 257713, 280043)
+        assert key == client.communication.getrsaDecryptedMessage(
+            client.communication.getrsaEncryptedMessage(key, 244177, 280043), 257713, 280043)
 
 
 def test_string_retrieval():
     # Test that the messages are the same after encrypting and decrypting
     message = "my name is tomm 12345"
     for key in range(1, 26):
-        assert message == client.communicationInstance.getCaesarDecryptedMessage(
-            client.communicationInstance.getCaesarEncryptedMessage(message, key), key)
+        assert message == client.communication.getCaesarDecryptedMessage(
+            client.communication.getCaesarEncryptedMessage(message, key), key)
 
     message = "😁😛😋🤣"
     for key in range(1, 26):
-        assert message == client.communicationInstance.getCaesarDecryptedMessage(
-            client.communicationInstance.getCaesarEncryptedMessage(message, key), key)
-    
+        assert message == client.communication.getCaesarDecryptedMessage(
+            client.communication.getCaesarEncryptedMessage(message, key), key)
+
     # Test that characters outside the alphabet are not encrypted
     message = "12345"
 
     for key in range(1, 26):
-        assert message == client.communicationInstance.getCaesarEncryptedMessage(message, key)
+        assert message == client.communication.getCaesarEncryptedMessage(message, key)
 
     # Test that only characters in the alphabet are encrypted
     message = "abcde"
 
     for key in range(1, 26):
-        assert message != client.communicationInstance.getCaesarEncryptedMessage(message, key)
+        assert message != client.communication.getCaesarEncryptedMessage(message, key)
 
 
 def test_reset_inputs():
     # Should probably run last
     # Test that when a user provides an invalid inputs, every input so far is reset
     # First generate 7 values and test they are not none
-    client.connectionInstance.inputs = [True for i in range(7)]
+    client.connection.inputs = [True for i in range(7)]
 
-    assert all(item is not None for item in client.connectionInstance.inputs) is True
+    assert all(item is not None for item in client.connection.inputs) is True
 
     # Reset every value
-    client.connectionInstance.setInputsAsNone(None)
+    client.connection.setInputsAsNone(None)
 
-    assert all(item is None for item in client.connectionInstance.inputs) is True
+    assert all(item is None for item in client.connection.inputs) is True
 
 
 def test_chat_history_retrieval():
     # Create a list of messages, save it into a file and test if it matches
 
     for message in ["my name is tomm 12345", "😁😛😋🤣"]:
-        client.communicationInstance.setMessage(message)
-        client.communicationInstance.setChatHistoryFile("test.txt")
+        client.communication.setMessage(message)
+        client.communication.setChatHistoryFile("test.txt")
 
         with open("test.txt", "r") as file:
             line = file.readline()
