@@ -1,4 +1,4 @@
-# 26/3/2023
+# 28/3/2023
 # V13.3
 
 from math import sqrt, gcd
@@ -156,47 +156,47 @@ class Send:
         # Send a public message to every client
         print(f"[Public] {message}")
 
-        for client in connectionInstance.clients:
-            client.send(securityInstance.getCaesarEncryptedMessage(message, securityInstance.cipherKey).encode())
+        for client in connection.clients:
+            client.send(security.getCaesarEncryptedMessage(message, security.cipherKey).encode())
 
     @staticmethod
     def broadcastDisplay(message):
         # Sends a public animated banner with {message} parameter
         print(f"[PublicDisplay] {message}")
 
-        for client in connectionInstance.clients:
+        for client in connection.clients:
             client.send(
-                securityInstance.getCaesarEncryptedMessage(f"/display {message}", securityInstance.cipherKey).encode())
+                security.getCaesarEncryptedMessage(f"/display {message}", security.cipherKey).encode())
 
     @staticmethod
     def privateBroadcast(message, clientSocket):
         # Send a private message to 1 specific client
-        if clientSocket in connectionInstance.clients:
+        if clientSocket in connection.clients:
             print(f"[Private] {message}")
 
-            clientSocket.send(securityInstance.getCaesarEncryptedMessage(message, securityInstance.cipherKey).encode())
+            clientSocket.send(security.getCaesarEncryptedMessage(message, security.cipherKey).encode())
 
     @staticmethod
     def privateBroadcastDisplay(message, clientSocket):
         # Sends a private animted banner with {message} parameter
-        if clientSocket in connectionInstance.clients:
+        if clientSocket in connection.clients:
             print(f"[PrivateDisplay] {message}")
 
             clientSocket.send(
-                securityInstance.getCaesarEncryptedMessage(f"/display {message}", securityInstance.cipherKey).
+                security.getCaesarEncryptedMessage(f"/display {message}", security.cipherKey).
                 encode())
 
     @staticmethod
     def getCommand(message, username, clientSocket):
         # Commands called by the prefix /
         if message == "/leave":
-            connectionInstance.setRemovedUser(username, clientSocket)
+            connection.setRemovedUser(username, clientSocket)
         elif message[0:6] == "/color" or message[0:7] == "/border" or message[0:9] == "/savechat":
-            sendInstance.privateBroadcast(message, clientSocket)
+            send.privateBroadcast(message, clientSocket)
         elif message in ["/theme", "/ldm", "/previous", "/next"]:
-            sendInstance.privateBroadcast(message, clientSocket)
+            send.privateBroadcast(message, clientSocket)
         else:
-            sendInstance.privateBroadcastDisplay("Your command is unknown", clientSocket)
+            send.privateBroadcastDisplay("Your command is unknown", clientSocket)
 
 
 class Connection:
@@ -239,7 +239,7 @@ class Connection:
         self.bindToSocket()
         self.socket.listen()
 
-        securityInstance.getKeys()
+        security.getKeys()
 
         while True:
             # The main thread listens for incoming connections and accepts it
@@ -249,8 +249,8 @@ class Connection:
 
             self.clients.append(clientSocket)
 
-            username = securityInstance.getCaesarDecryptedMessage(clientSocket.recv(1024).decode(),
-                                                                  securityInstance.cipherKey)
+            username = security.getCaesarDecryptedMessage(clientSocket.recv(1024).decode(),
+                                                                  security.cipherKey)
 
             # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
             if self.getUsernameValidity(username) is True:
@@ -262,7 +262,7 @@ class Connection:
                 print(f"[Thread] Started {username}'s update thread. Username is valid")
 
             else:
-                sendInstance.privateBroadcast("/reject", clientSocket)
+                send.privateBroadcast("/reject", clientSocket)
 
                 # Initialise an update thread given the username is invalid
                 Thread(target=self.listen, args=[username, clientSocket, False]).start()
@@ -274,8 +274,8 @@ class Connection:
             # If the username is not valid, wait in this thread until it is
             while hasValidUsername is False and clientSocket in self.clients:
                 try:
-                    signal = securityInstance.getCaesarDecryptedMessage(clientSocket.recv(1024).decode(),
-                                                                        securityInstance.cipherKey)
+                    signal = security.getCaesarDecryptedMessage(clientSocket.recv(1024).decode(),
+                                                                        security.cipherKey)
 
                     if signal:
                         if signal == "/leave":
@@ -290,7 +290,7 @@ class Connection:
                             hasValidUsername = True
 
                         else:
-                            sendInstance.privateBroadcast("/reject", clientSocket)
+                            send.privateBroadcast("/reject", clientSocket)
 
                 except (ConnectionResetError, OSError) as e:
                     print(f"[Thread] An error occured in {username}'s update thread before validtion completed. {e}")
@@ -304,19 +304,19 @@ class Connection:
         while hasValidUsername is True and clientSocket in self.clients:
             # After having a valid username, the client can now receive and send messages
             try:
-                signal = securityInstance.getCaesarDecryptedMessage(clientSocket.recv(1024).decode(),
-                                                                    securityInstance.cipherKey)
+                signal = security.getCaesarDecryptedMessage(clientSocket.recv(1024).decode(),
+                                                                    security.cipherKey)
                 unifiedmessage = f"{username}: {signal}"
 
                 if signal:
                     if signal[0] == "/":
-                        sendInstance.getCommand(signal, username, clientSocket)
+                        send.getCommand(signal, username, clientSocket)
 
                     else:
                         if detectSpam is True:
                             if messagesSentRecently >= 3:
                                 if warnUser is False:
-                                    sendInstance.privateBroadcast("/timeout You are sending messages too quickly",
+                                    send.privateBroadcast("/timeout You are sending messages too quickly",
                                                                   clientSocket)
                                     warnUser = True
 
@@ -326,10 +326,10 @@ class Connection:
 
                             else:
                                 if self.getMessageLengthValidity(unifiedmessage) is False:
-                                    sendInstance.privateBroadcast("/timeout Your message is too long", clientSocket)
+                                    send.privateBroadcast("/timeout Your message is too long", clientSocket)
 
                                 else:
-                                    sendInstance.broadcast(unifiedmessage)
+                                    send.broadcast(unifiedmessage)
 
                                 if lastMessageSentTime + 1 > time():
                                     messagesSentRecently += 1
@@ -341,10 +341,10 @@ class Connection:
 
                         else:
                             if self.getMessageLengthValidity(unifiedmessage) is False:
-                                sendInstance.privateBroadcast("/timeout Your meessage is too long", clientSocket)
+                                send.privateBroadcast("/timeout Your meessage is too long", clientSocket)
 
                             else:
-                                sendInstance.broadcast(unifiedmessage)
+                                send.broadcast(unifiedmessage)
 
             except (ConnectionResetError, OSError) as e:
                 print(f"[Thread] An error occured in {username}'s update thread after validation completed. {e}")
@@ -362,7 +362,7 @@ class Connection:
         for user in self.users:
             message += f"{user} "
 
-        sendInstance.broadcast(message)
+        send.broadcast(message)
 
     def setRemovedUser(self, username, clientSocket):
         # Called when a user has a duplicate username or leaves
@@ -375,7 +375,7 @@ class Connection:
             self.users.remove(username)
             self.userOnline -= 1
 
-        sendInstance.broadcast(f"/remove {username}")
+        send.broadcast(f"/remove {username}")
 
     def getUsernameValidity(self, username):
         # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
@@ -396,8 +396,8 @@ class Connection:
 
 
 if __name__ == '__main__':
-    connectionInstance = Connection()
-    securityInstance = Security()
-    sendInstance = Send()
+    connection = Connection()
+    security = Security()
+    send = Send()
 
-    connectionInstance.connect()
+    connection.connect()
