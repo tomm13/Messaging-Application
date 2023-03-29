@@ -1,4 +1,4 @@
-# 28/3/2023
+# 29/3/2023
 # V13.3
 
 import server
@@ -83,6 +83,6 @@ def test_message_length_validation():
     # Length 51 or above is rejected
     assert server.connection.getMessageLengthValidity(
         "123456789012345678901234567890123456789012345678901") is False
-    assert server.connection.getMessageLengthValidity(
-        "12345678901234567890123456789012345678901234567890") is True
-    assert server.connection.getMessageLengthValidity("a") is True
+
+    for message in ["12345678901234567890123456789012345678901234567890", "a", " "]:
+        assert server.connection.getMessageLengthValidity(message) is True
