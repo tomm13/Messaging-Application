@@ -1,4 +1,4 @@
-# 28/3/2023
+# 29/3/2023
 # V13.3
 
 
@@ -916,8 +916,8 @@ class Communication:
         if self.page < ui.page:
             self.page += 1
 
-            # Tell the UI to display the previous page
-            ui.getPreviousPage(self.transcript[self.page])
+            # Tell the UI to display the next page
+            ui.getNextPage(self.transcript[self.page])
 
         else:
             animation.queue.append([1, "You are at the highest page"])
@@ -1270,7 +1270,7 @@ class UI:
         # Called by /next. Clears the page, then set the first message as "value"
         if self.enableUI is True:
             self.chatHistory.clear()
-            self.chatHistory.value = transcript[self.page][0]
+            self.chatHistory.value = transcript[0]
 
             for line in transcript[1:]:
                 self.chatHistory.append(line)
@@ -1280,7 +1280,7 @@ class UI:
                 [1, f"You are on page {str(communication.page + 1)} of {str(self.page + 1)}"])
 
     def getNewPage(self, message):
-        # Called when the messages on 1 page excees the lineslimit
+        # Called when the messages on 1 page exceeds the lineslimit
         if self.enableUI is True:
             self.chatHistory.clear()
             self.chatHistory.value = message
@@ -1645,4 +1645,3 @@ if __name__ == '__main__':
     ui = UI()
 
     ui.openSetup()
-    
