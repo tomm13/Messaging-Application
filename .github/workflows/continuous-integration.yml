@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   job1:
-    name: Serverside Testing (Windows-latest)
+    name: Server-side Testing (Windows-latest)
     runs-on: windows-latest
 
     steps:
@@ -31,7 +31,7 @@ jobs:
       run: |
         pytest test_server.py
   job2:
-    name: Clientside Testing (Windows-latest)
+    name: Client-side Testing (Windows-latest)
     runs-on: windows-latest
 
     steps:
@@ -48,7 +48,7 @@ jobs:
       run: |
         pytest test_client.py
   job3:
-    name: Serverside Testing (macOS-latest)
+    name: Server-side Testing (macOS-latest)
     runs-on: macOS-latest
 
     steps:
@@ -65,7 +65,7 @@ jobs:
       run: |
         pytest test_server.py
   job4:
-    name: Clientside Testing (macOS-latest)
+    name: Client-side Testing (macOS-latest)
     runs-on: windows-latest
 
     steps:
@@ -82,7 +82,7 @@ jobs:
       run: |
         pytest test_client.py
   job5:
-    name: Serverside Testing (ubuntu-latest)
+    name: Server-side Testing (ubuntu-latest)
     runs-on: ubuntu-latest
 
     steps:
@@ -100,7 +100,7 @@ jobs:
       run: |
         pytest test_server.py
   job6:
-    name: Clientside Testing (ubuntu-latest)
+    name: Client-side Testing (ubuntu-latest)
     runs-on: ubuntu-latest
 
     steps:
