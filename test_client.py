@@ -1,4 +1,4 @@
-# 28/3/2023
+# 29/3/2023
 # V13.3
 
 import client
@@ -150,3 +150,39 @@ def test_chat_history_retrieval():
             line = file.readline()
 
         assert line == strftime("%H:%M:%S", localtime()) + " {message}\n"
+
+
+def test_cycling_through_pages():
+    # Test that pages are moving properly
+
+    assert client.communication.page == 0
+
+    # Test that it's not possible to go below page 0
+    client.communication.getPreviousPage()
+
+    assert client.communication.page == 0
+
+    # Test that it's not possible to go to a page that hasn't been created
+    client.communication.getNextPage()
+
+    assert client.communication.page == 0
+
+    # Create a new page and that the client is on that page
+    client.communication.getNewPage(None)
+    assert client.communication.page == 1
+
+    # Test that the client is on page 0
+    client.communication.getPreviousPage()
+
+    assert client.communication.page == 0
+
+    # Test that the client is on page 1
+    client.communication.getNextPage()
+
+    assert client.communication.page == 1
+
+    # Test that it's not possible to go to a page that hasn't been created
+    client.communication.getNextPage()
+
+    assert client.communication.page == 1
+
