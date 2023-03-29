@@ -15,7 +15,7 @@ permissions:
 jobs:
   job1:
     name: Serverside Testing
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -33,7 +33,7 @@ jobs:
         pytest test_server.py
   job2:
     name: Clientside Testing
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v3
