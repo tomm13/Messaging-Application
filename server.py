@@ -86,18 +86,21 @@ class Security:
 
     @staticmethod
     def getrsaEncryptedMessage(key, e, N):
+        # Used to encrypt the keys
         newKey = pow(key, e, N)
 
         return newKey
 
     @staticmethod
     def getrsaDecryptedMessage(key, d, N):
+        # Used to decrypt the keys
         newKey = pow(key, d, N)
 
         return newKey
 
     @staticmethod
     def getCaesarEncryptedMessage(message, cipherKey):
+        # Used to encrypt messages
         newMessage = ""
         for letter in message:
 
@@ -123,6 +126,7 @@ class Security:
 
     @staticmethod
     def getCaesarDecryptedMessage(message, cipherKey):
+        # Used to decrypt messages
         newMessage = ""
         for letter in message:
 
