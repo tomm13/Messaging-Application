@@ -786,7 +786,7 @@ class Communication:
 
     @staticmethod
     def getCaesarEncryptedMessage(message, cipherKey):
-        # Used to decrypt message
+        # Used to encrypt messages
         newMessage = ""
         for letter in message:
 
@@ -812,7 +812,7 @@ class Communication:
 
     @staticmethod
     def getCaesarDecryptedMessage(message, cipherKey):
-        # Used to encrypt messages
+        # Used to decrypt messages
         newMessage = ""
         for letter in message:
 
