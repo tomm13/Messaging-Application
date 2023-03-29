@@ -3,6 +3,7 @@
 
 import client
 from time import localtime, strftime
+from platform import system
 
 
 def test_instantiation():
@@ -154,35 +155,78 @@ def test_chat_history_retrieval():
 
 def test_cycling_through_pages():
     # Test that pages are moving properly
+    # communication.page refers to the current page whereas ui.page refers to the maximum page
 
     assert client.communication.page == 0
+    assert client.ui.page == 0
 
     # Test that it's not possible to go below page 0
     client.communication.getPreviousPage()
 
     assert client.communication.page == 0
+    assert client.ui.page == 0
 
     # Test that it's not possible to go to a page that hasn't been created
     client.communication.getNextPage()
 
     assert client.communication.page == 0
+    assert client.ui.page == 0
 
     # Create a new page and that the client is on that page
     client.communication.getNewPage(None)
     assert client.communication.page == 1
+    assert client.ui.page == 1
+    assert client.ui.linesSent == 1
 
     # Test that the client is on page 0
     client.communication.getPreviousPage()
 
     assert client.communication.page == 0
+    assert client.ui.page == 1
 
     # Test that the client is on page 1
     client.communication.getNextPage()
 
     assert client.communication.page == 1
+    assert client.ui.page == 1
 
     # Test that it's not possible to go to a page that hasn't been created
     client.communication.getNextPage()
 
     assert client.communication.page == 1
+    assert client.ui.page == 1
 
+
+def test_message_counter_increments():
+    # Test that for every message received by the server are counted properly
+
+    assert client.ui.linesSent == 1
+
+    client.ui.setFirstMessage(None)
+
+    assert client.ui.linesSent == 2
+
+    client.ui.setSubsequentMessage(None)
+
+    assert client.ui.linesSent == 3
+
+    # Get lineslimit by platform
+    if system() == "Darwin":
+        val = 19
+
+    else:
+        val = 18
+
+    for i in range(3, val + 1):
+        # Repeatedly add messages until the line limit is met, ensuring in each iteration that
+        # linesSent is incremented properly
+        client.communication.setMessage(None)
+
+        if val < i:
+            # Test increment is working properly unless a new page is being created
+            assert client.ui.linesSent == i + 1
+
+    # If a new page is created, all page values should increment and linesSent should return to 1
+    assert client.communication.page == 2
+    assert client.ui.page == 2
+    assert client.ui.linesSent == 1
