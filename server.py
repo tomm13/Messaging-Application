@@ -1,4 +1,4 @@
-# 28/3/2023
+# 30/3/2023
 # V13.3
 
 from math import sqrt, gcd
@@ -9,8 +9,7 @@ from threading import Thread
 
 
 class Security:
-    # Handles all the algorithms around ecnrypting, decrypting, and the generation
-    # of keys
+    # Handles all the algorithms around ecnrypting, decrypting, and the generation of keys
     def __init__(self):
         self.d = None
         self.e = None
