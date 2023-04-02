@@ -230,3 +230,12 @@ def test_message_counter_increments():
     assert client.communication.page == 2
     assert client.ui.page == 2
     assert client.ui.linesSent == 1
+
+
+def test_lineslimit():
+    # To ensure the consistency in UI elements
+    if system() == "Darwin":
+        assert client.ui.linesLimit == 19
+
+    else:
+        assert client.ui.linesLimit == 18
