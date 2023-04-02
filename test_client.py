@@ -233,6 +233,7 @@ def test_message_counter_increments():
 
 
 def test_lineslimit():
+    # To ensure the consistency in UI elements
     if system() == "Darwin":
         assert client.ui.linesLimit == 19
 
