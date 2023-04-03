@@ -14,15 +14,18 @@ permissions:
 
 jobs:
   job1:
-    name: Server-side Testing (Windows-latest on Python 3.11.2)
+    name: Server-side Testing (Windows-latest on Python 3.x)
     runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11", "3.11.2"]
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.11.2
+      - name: Set up Python 3.x
         uses: actions/setup-python@v3
         with:
-          python-version: "3.11.2"
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -31,15 +34,18 @@ jobs:
         run: |
           pytest test_server.py
   job2:
-    name: Client-side Testing (Windows-latest on Python 3.11.2)
+    name: Client-side Testing (Windows-latest on Python 3.x)
     runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11", "3.11.2" ]
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.11.2
+      - name: Set up Python 3.x
         uses: actions/setup-python@v3
         with:
-          python-version: "3.11.2"
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -48,15 +54,18 @@ jobs:
         run: |
           pytest test_client.py
   job3:
-    name: Server-side Testing (macOS-latest on Python 3.11.2)
+    name: Server-side Testing (macOS-latest on Python 3.x)
     runs-on: macOS-latest
+    strategy:
+      matrix:
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11", "3.11.2" ]
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.11.2
+      - name: Set up Python 3.x
         uses: actions/setup-python@v3
         with:
-          python-version: "3.11.2"
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -65,15 +74,18 @@ jobs:
         run: |
           pytest test_server.py
   job4:
-    name: Client-side Testing (macOS-latest on Python 3.11.2)
+    name: Client-side Testing (macOS-latest on Python 3.x)
     runs-on: macOS-latest
+    strategy:
+      matrix:
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11", "3.11.2" ]
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.11.2
+      - name: Set up Python 3.x
         uses: actions/setup-python@v3
         with:
-          python-version: "3.11.2"
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -82,15 +94,18 @@ jobs:
         run: |
           pytest test_client.py
   job5:
-    name: Server-side Testing (ubuntu-latest on Python 3.11.2)
+    name: Server-side Testing (ubuntu-latest on Python 3.x)
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11", "3.11.2" ]
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.11.2
+      - name: Set up Python 3.x
         uses: actions/setup-python@v3
         with:
-          python-version: "3.11.2"
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -100,15 +115,18 @@ jobs:
         run: |
           pytest test_server.py
   job6:
-    name: Client-side Testing (ubuntu-latest on Python 3.11.2)
+    name: Client-side Testing (ubuntu-latest on Python 3.x)
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11", "3.11.2" ]
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+      - name: Set up Python 3.x
         uses: actions/setup-python@v3
         with:
-          python-version: "3.11.2"
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -117,107 +135,4 @@ jobs:
       - name: Execute pytest
         run: |
           pytest test_client.py
-  job7:
-    name: Server-side Testing (Windows-latest on Python 3.10)
-    runs-on: windows-latest
 
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.10"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest colorutils guizero
-    - name: Execute pytest
-      run: |
-        pytest test_server.py
-  job8:
-    name: Client-side Testing (Windows-latest on Python 3.10)
-    runs-on: windows-latest
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.10"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest colorutils guizero
-    - name: Execute pytest
-      run: |
-        pytest test_client.py
-  job9:
-    name: Server-side Testing (macOS-latest on Python 3.10)
-    runs-on: macOS-latest
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.10"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest colorutils guizero
-    - name: Execute pytest
-      run: |
-        pytest test_server.py
-  job10:
-    name: Client-side Testing (macOS-latest on Python 3.10)
-    runs-on: macOS-latest
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.10"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest colorutils guizero
-    - name: Execute pytest
-      run: |
-        pytest test_client.py
-  job11:
-    name: Server-side Testing (ubuntu-latest on Python 3.10)
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.10"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest colorutils guizero
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Execute pytest
-      run: |
-        pytest test_server.py
-  job12:
-    name: Client-side Testing (ubuntu-latest on Python 3.10)
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.10"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest colorutils guizero
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Execute pytest
-      run: |
-        pytest test_client.py
