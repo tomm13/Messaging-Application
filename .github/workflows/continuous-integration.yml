@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  setup:
+  common:
     name: Set up Runners
     runs-on: ${{ matrix.os }}
     strategy:
@@ -32,7 +32,7 @@ jobs:
 
   server:
     name: Server-side Testing (On 3 Operating systems)
-    needs: setup
+    needs: common
     runs-on: ${{ matrix.os }}
     steps:
       - name: Execute pytest
