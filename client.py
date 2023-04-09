@@ -1,7 +1,6 @@
 # 2/4/2023
 # V13.3.2
 
-
 from socket import socket
 from colorutils import web_to_rgb
 from platform import system
