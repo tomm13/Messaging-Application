@@ -34,6 +34,9 @@ jobs:
     name: Server-side Testing (On 3 Operating systems)
     needs: common
     runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ Windows-latest, macOS-latest, ubuntu-latest ]
     steps:
       - name: Execute pytest
         run: |
@@ -43,6 +46,9 @@ jobs:
     name: Client-side Testing (On 3 Operating systems)
     needs: common
     runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ Windows-latest, macOS-latest, ubuntu-latest ]
     steps:
       - name: Execute pytest
         run: |
