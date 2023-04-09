@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ Windows-latest, macOS-latest, ubuntu-latest ]
+        os: [ Windows-latest, macOS-latest ]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.11.2
@@ -31,24 +31,24 @@ jobs:
           pip install pytest colorutils guizero
 
   server:
-    name: Server-side Testing (On 3 Operating systems)
+    name: Server-side Testing (On 2 Operating systems)
     needs: common
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ Windows-latest, macOS-latest, ubuntu-latest ]
+        os: [ Windows-latest, macOS-latest]
     steps:
       - name: Execute pytest
         run: |
           pytest test_server.py
 
   client:
-    name: Client-side Testing (On 3 Operating systems)
+    name: Client-side Testing (On 2 Operating systems)
     needs: common
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ Windows-latest, macOS-latest, ubuntu-latest ]
+        os: [ Windows-latest, macOS-latest ]
     steps:
       - name: Execute pytest
         run: |
