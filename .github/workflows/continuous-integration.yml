@@ -33,7 +33,7 @@ jobs:
   server:
     name: Server-side Testing (On 3 Operating systems)
     needs: setup
-    runs- on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Execute pytest
         run: |
@@ -42,7 +42,7 @@ jobs:
   client:
     name: Client-side Testing (On 3 Operating systems)
     needs: setup
-    runs- on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Execute pytest
         run: |
