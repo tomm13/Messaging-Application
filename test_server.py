@@ -87,4 +87,3 @@ def test_message_length_validation():
     # Length 50 or below is accepted
     assert server.connection.getMessageLengthValidity(
         "12345678901234567890123456789012345678901234567890") is True
-    
