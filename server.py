@@ -86,16 +86,12 @@ class Security:
     @staticmethod
     def getrsaEncryptedMessage(key, e, N):
         # Used to encrypt the keys
-        newKey = pow(key, e, N)
-
-        return newKey
+        return pow(key, e, N)
 
     @staticmethod
     def getrsaDecryptedMessage(key, d, N):
         # Used to decrypt the keys
-        newKey = pow(key, d, N)
-
-        return newKey
+        return pow(key, d, N)
 
     @staticmethod
     def getCaesarEncryptedMessage(message, cipherKey):
@@ -382,20 +378,13 @@ class Connection:
 
     def getUsernameValidity(self, username):
         # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
-        if username in self.users or " " in username or len(username) > 7 or len(username) < 1 or username == "None":
-            return False
-
-        else:
-            return True
+        return False if username in self.users or " " in username or len(username) > 7 or len(username) < 1 or username \
+                        == "None" else True
 
     @staticmethod
     def getMessageLengthValidity(message):
         # Prevent messages of length 50 or greater being sent
-        if len(message) > 50:
-            return False
-
-        else:
-            return True
+        return False if len(message) > 50 else True
 
 
 if __name__ == '__main__':
