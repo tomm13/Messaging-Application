@@ -378,11 +378,8 @@ class Connection:
 
     def getUsernameValidity(self, username):
         # Criteria for a valid username: doesn't already exist, has no spaces, and is under 11 characters
-        if username in self.users or " " in username or len(username) > 7 or len(username) < 1 or username == "None":
-            return False
-
-        else:
-            return True
+        return False if username in self.users or " " in username or len(username) > 7 or len(username) < 1 or username \
+                        == "None" else True
 
     @staticmethod
     def getMessageLengthValidity(message):
