@@ -387,11 +387,7 @@ class Connection:
     @staticmethod
     def getMessageLengthValidity(message):
         # Prevent messages of length 50 or greater being sent
-        if len(message) > 50:
-            return False
-
-        else:
-            return True
+        return False if len(message) > 50 else True
 
 
 if __name__ == '__main__':
