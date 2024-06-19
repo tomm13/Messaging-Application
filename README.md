@@ -1,4 +1,6 @@
 # Messaging-Application
+Disclaimer: the code quality can be improved upon as the project was slightly rushed
+
 A messaging application made in python using guizero, sockets, threading and hybrid encyrption. Uses RSA-Caesar Cipher as proof of concept, a full-duplex communication system done via threading and sockets, and a minimal and simplistic user-interface with animations made fully in guizero.
 
 Uses Github Actions to automatically test both the server and client files on the latest versions of Windows, macOS, and ubuntu. Every test is required to pass to merge.
