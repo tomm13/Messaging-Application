@@ -1,5 +1,5 @@
 # Messaging-Application
-Disclaimer: the code quality can be improved upon as the project was slightly rushed
+This was my A-level Computer science project. The code quality is quite low here, however this was a fun project nonetheless.
 
 A messaging application made in python using guizero, sockets, threading and hybrid encyrption. Uses RSA-Caesar Cipher as proof of concept, a full-duplex communication system done via threading and sockets, and a minimal and simplistic user-interface with animations made fully in guizero.
 
